@@ -10,6 +10,10 @@ import {
   HardDrive,
   ArrowRight,
   ShieldCheck,
+  Minimize2,
+  Layers,
+  FileImage,
+  Image as ImageIcon,
 } from "lucide-react";
 
 export function HeroSection() {
@@ -43,7 +47,7 @@ export function HeroSection() {
 
           {/* Subtitle */}
           <p className="max-w-2xl mx-auto text-base sm:text-lg text-slate-400 leading-relaxed">
-            Merge, split, redact, sign, Bates stamp, crop, compare, and compress to exact KB targets right in your browser.
+            Compress to exact target KB sizes, merge documents with scan interleaving, and convert between PDF, images, and text right in your browser.
             Powered by WebAssembly, Web Workers and Canvas — zero server uploads, zero file limits, 100% private.
           </p>
 
@@ -70,8 +74,51 @@ export function HeroSection() {
             </button>
           </div>
 
+          {/* Priority Quick Launchers */}
+          <div className="pt-3 flex flex-wrap items-center justify-center gap-2">
+            <span className="text-xs font-semibold text-slate-400 mr-1 flex items-center gap-1.5">
+              <Zap className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Priority Tools:</span>
+            </span>
+            <Link
+              href="/tools/compress-pdf"
+              className="px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 text-xs font-medium transition-all flex items-center gap-1.5 shadow-sm hover:scale-105"
+            >
+              <Minimize2 className="w-3.5 h-3.5" />
+              <span>Exact Compress</span>
+            </Link>
+            <Link
+              href="/tools/merge-pdf"
+              className="px-3 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-300 text-xs font-medium transition-all flex items-center gap-1.5 shadow-sm hover:scale-105"
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>Merge PDFs</span>
+            </Link>
+            <Link
+              href="/tools/image-to-pdf"
+              className="px-3 py-1.5 rounded-xl bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/30 text-violet-300 text-xs font-medium transition-all flex items-center gap-1.5 shadow-sm hover:scale-105"
+            >
+              <FileImage className="w-3.5 h-3.5" />
+              <span>Images &rarr; PDF</span>
+            </Link>
+            <Link
+              href="/tools/pdf-to-image"
+              className="px-3 py-1.5 rounded-xl bg-pink-500/10 hover:bg-pink-500/20 border border-pink-500/30 text-pink-300 text-xs font-medium transition-all flex items-center gap-1.5 shadow-sm hover:scale-105"
+            >
+              <ImageIcon className="w-3.5 h-3.5" />
+              <span>PDF &rarr; Images</span>
+            </Link>
+            <Link
+              href="/tools/image-studio"
+              className="px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-medium transition-all flex items-center gap-1.5 shadow-sm hover:scale-105"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Passport KB Studio</span>
+            </Link>
+          </div>
+
           {/* Value Props Pills */}
-          <div className="pt-8 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-400">
+          <div className="pt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-400">
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/[0.02] border border-white/5">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
               <span>100% In-Memory Processing</span>

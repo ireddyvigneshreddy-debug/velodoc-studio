@@ -69,6 +69,28 @@ export function Navbar() {
 
           {/* Right: Actions (Search, History, Palette, Theme Toggle) */}
           <div className="flex items-center gap-2.5">
+            {/* Priority tools quick links */}
+            <nav className="hidden xl:flex items-center gap-1 border-r border-white/10 pr-2 mr-1 text-xs">
+              <Link
+                href="/tools/compress-pdf"
+                className="px-2.5 py-1 rounded-lg text-slate-300 hover:text-cyan-300 hover:bg-white/5 transition-colors font-medium"
+              >
+                Compress
+              </Link>
+              <Link
+                href="/tools/merge-pdf"
+                className="px-2.5 py-1 rounded-lg text-slate-300 hover:text-indigo-300 hover:bg-white/5 transition-colors font-medium"
+              >
+                Merge
+              </Link>
+              <Link
+                href="/tools/image-to-pdf"
+                className="px-2.5 py-1 rounded-lg text-slate-300 hover:text-violet-300 hover:bg-white/5 transition-colors font-medium"
+              >
+                Convert
+              </Link>
+            </nav>
+
             {/* Quick Command Palette Button */}
             <button
               onClick={() => setPaletteOpen(true)}
