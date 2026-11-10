@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { TOOL_CATEGORIES, TOOLS } from "@/lib/constants";
 import { ToolCategory } from "@/types";
-import * as Icons from "lucide-react";
+import { ToolIcon } from "@/components/common/ToolIcon";
 import { ArrowUpRight, Zap, Sparkles } from "lucide-react";
 
 const PRIORITY_TOOLS = new Set([
@@ -60,8 +60,6 @@ export function BentoGrid() {
       {/* Bento Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {filteredTools.map((tool, index) => {
-          // @ts-expect-error Lucide dynamic icon lookup
-          const IconComponent = Icons[tool.icon] || Icons.FileText;
           const isPriority = PRIORITY_TOOLS.has(tool.id);
           const isTopFeatured = index === 0 && selectedCategory === "All Tools";
 
@@ -94,7 +92,7 @@ export function BentoGrid() {
                   <div
                     className={`p-3.5 rounded-xl bg-gradient-to-br ${tool.color} text-white shadow-md group-hover:scale-105 transition-transform duration-200`}
                   >
-                    <IconComponent className="w-5 h-5" />
+                    <ToolIcon name={tool.icon} className="w-5 h-5" />
                   </div>
 
                   <div className="flex items-center gap-2">

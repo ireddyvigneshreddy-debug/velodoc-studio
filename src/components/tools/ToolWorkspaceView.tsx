@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ToolDefinition } from "@/types";
 import { TOOLS } from "@/lib/constants";
-import * as Icons from "lucide-react";
+import { ToolIcon } from "@/components/common/ToolIcon";
 import {
   ChevronRight,
   ShieldCheck,
@@ -41,9 +41,6 @@ interface ToolWorkspaceViewProps {
 export function ToolWorkspaceView({ tool }: ToolWorkspaceViewProps) {
   const router = useRouter();
   const [switcherOpen, setSwitcherOpen] = useState(false);
-
-  // @ts-expect-error Dynamic icon lookup
-  const ToolIcon = Icons[tool.icon] || Icons.FileText;
 
   const renderToolComponent = () => {
     switch (tool.id) {
@@ -144,8 +141,6 @@ export function ToolWorkspaceView({ tool }: ToolWorkspaceViewProps) {
                   </div>
                   <div className="space-y-1 pt-1">
                     {TOOLS.map((t) => {
-                      // @ts-expect-error Dynamic icon lookup
-                      const Icon = Icons[t.icon] || Icons.FileText;
                       const isCurrent = t.id === tool.id;
                       return (
                         <button
@@ -163,7 +158,7 @@ export function ToolWorkspaceView({ tool }: ToolWorkspaceViewProps) {
                           <div
                             className={`p-1.5 rounded-lg bg-gradient-to-br ${t.color} text-white shrink-0`}
                           >
-                            <Icon className="w-3.5 h-3.5" />
+                            <ToolIcon name={t.icon} className="w-3.5 h-3.5" />
                           </div>
                           <span className="truncate">{t.name}</span>
                         </button>
@@ -182,7 +177,7 @@ export function ToolWorkspaceView({ tool }: ToolWorkspaceViewProps) {
             <div
               className={`p-4 rounded-2xl bg-gradient-to-br ${tool.color} text-white shadow-xl shrink-0`}
             >
-              <ToolIcon className="w-7 h-7" />
+              <ToolIcon name={tool.icon} className="w-7 h-7" />
             </div>
 
             <div>

@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Search, X, CornerDownLeft, Sparkles } from "lucide-react";
 import { TOOLS } from "@/lib/constants";
-import * as Icons from "lucide-react";
+import { ToolIcon } from "@/components/common/ToolIcon";
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -128,8 +128,6 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
             </div>
           ) : (
             filteredTools.map((tool, idx) => {
-              // @ts-expect-error Lucide dynamic icon rendering
-              const IconComponent = Icons[tool.icon] || Icons.FileText;
               const isSelected = idx === selectedIndex;
 
               return (
@@ -147,7 +145,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                     <div
                       className={`p-2.5 rounded-lg bg-gradient-to-br ${tool.color} text-white shadow-md`}
                     >
-                      <IconComponent className="w-4 h-4" />
+                      <ToolIcon name={tool.icon} className="w-4 h-4" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
