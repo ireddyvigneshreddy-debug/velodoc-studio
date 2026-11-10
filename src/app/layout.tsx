@@ -31,6 +31,9 @@ export const metadata: Metadata = {
     "zero upload PDF",
   ],
   authors: [{ name: "VeloDoc Studio Team" }],
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export const viewport: Viewport = {
