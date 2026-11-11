@@ -1,5 +1,7 @@
 import { PDFDocument } from "pdf-lib";
 import { getPdfJs } from "@/lib/pdf-engine";
+import { yieldToMain, processBatchQueue } from "@/lib/batch-queue-engine";
+import { BatchProcessingSummary } from "@/types";
 
 export interface CompressionProgressCallback {
   (message: string, percent: number, currentBytes?: number): void;
@@ -53,144 +55,155 @@ export async function executeExactCompression(
   const pdfDoc = await loadingTask.promise;
   const totalPages = pdfDoc.numPages;
 
-  // If manual mode, run a single direct pass
-  if (options.mode === "manual") {
-    onProgress?.("Applying manual Pro compression parameters...", 40);
-    const dpi = options.manualDpi || 150;
-    const quality = options.manualQuality || 0.7;
-    const scale = dpi / 72; // 72 DPI is 1x scale
+  try {
+    // If manual mode, run a single direct pass
+    if (options.mode === "manual") {
+      onProgress?.("Applying manual Pro compression parameters...", 40);
+      const dpi = options.manualDpi || 150;
+      const quality = options.manualQuality || 0.7;
+      const scale = dpi / 72; // 72 DPI is 1x scale
 
-    const compressedBytes = await renderPdfPagesToCompressedDocument(
-      pdfDoc,
-      totalPages,
-      scale,
-      quality,
-      options.colorMode === "grayscale",
-      options.stripMetadata ?? true
-    );
+      const compressedBytes = await renderPdfPagesToCompressedDocument(
+        pdfDoc,
+        totalPages,
+        scale,
+        quality,
+        options.colorMode === "grayscale",
+        options.stripMetadata ?? true
+      );
 
-    const finalSize = compressedBytes.byteLength;
+      const finalSize = compressedBytes.byteLength;
+      const savedBytes = Math.max(0, originalSize - finalSize);
+      const savedPercentage = Math.round((savedBytes / originalSize) * 100);
+
+      return {
+        pdfBytes: compressedBytes,
+        originalSize,
+        finalSize,
+        savedBytes,
+        savedPercentage,
+        iterationsRun: 1,
+        targetAccuracy: "Manual Pro Execution",
+      };
+    }
+
+    // Check physical minimum floor (e.g. 5 KB per page)
+    const minimumFloorBytes = totalPages * 5120;
+    if (targetBytes < minimumFloorBytes) {
+      onProgress?.(
+        `Target size is below minimum physical floor (${Math.round(minimumFloorBytes / 1024)} KB). Converging to maximum compression...`,
+        10
+      );
+    }
+
+    // Binary search over composite quality factor q in [0.05, 0.98]
+    let lowQ = 0.05;
+    let highQ = 0.98;
+    let bestBytes: Uint8Array | null = null;
+    let bestSize = Infinity;
+    let iterations = 0;
+    const maxIterations = 6;
+
+    while (iterations < maxIterations && lowQ <= highQ) {
+      iterations++;
+      const midQ = (lowQ + highQ) / 2;
+
+      // Map q to render scale (0.4 to 1.8) and JPEG quality (0.1 to 0.92)
+      const scale = 0.4 + midQ * 1.4;
+      const quality = Math.max(0.08, Math.min(0.92, 0.1 + midQ * 0.82));
+
+      const progressMsg = `Iteration ${iterations}/${maxIterations}: Testing scale ${scale.toFixed(
+        2
+      )}, quality ${Math.round(quality * 100)}%...`;
+      onProgress?.(progressMsg, Math.round((iterations / maxIterations) * 85));
+
+      const candidateBytes = await renderPdfPagesToCompressedDocument(
+        pdfDoc,
+        totalPages,
+        scale,
+        quality,
+        options.colorMode === "grayscale",
+        true
+      );
+
+      const currentLen = candidateBytes.byteLength;
+
+      if (currentLen <= targetBytes) {
+        // Valid candidate within target budget! Save and try to improve quality (higher q)
+        bestBytes = candidateBytes;
+        bestSize = currentLen;
+        lowQ = midQ + 0.05;
+      } else {
+        // Too large, decrease quality (lower q)
+        highQ = midQ - 0.05;
+        if (!bestBytes) {
+          bestBytes = candidateBytes;
+          bestSize = currentLen;
+        }
+      }
+    }
+
+    // If no run met the target, fallback to the lowest possible quality run
+    if (!bestBytes) {
+      bestBytes = await renderPdfPagesToCompressedDocument(
+        pdfDoc,
+        totalPages,
+        0.4,
+        0.1,
+        true,
+        true
+      );
+      bestSize = bestBytes.byteLength;
+    }
+
+    // Exact Byte Padding Option:
+    // If enabled and bestSize is below targetBytes, append harmless PDF comment bytes (%...)
+    // right before EOF to match the exact target byte count
+    let finalBytes = bestBytes;
+    if (options.exactBytePadding && bestSize < targetBytes) {
+      const bytesNeeded = targetBytes - bestSize;
+      if (bytesNeeded > 10) {
+        const paddingStr = `\n%VELODOC_EXACT_PAD_${"X".repeat(Math.max(0, bytesNeeded - 25))}\n`;
+        const enc = new TextEncoder();
+        const padBytes = enc.encode(paddingStr);
+        const padded = new Uint8Array(finalBytes.length + padBytes.length);
+        padded.set(finalBytes, 0);
+        padded.set(padBytes, finalBytes.length);
+        finalBytes = padded;
+      }
+    }
+
+    const finalSize = finalBytes.byteLength;
     const savedBytes = Math.max(0, originalSize - finalSize);
     const savedPercentage = Math.round((savedBytes / originalSize) * 100);
 
+    const diffFromTarget = Math.abs(finalSize - targetBytes);
+    const accuracyPct = Math.max(
+      0,
+      100 - (diffFromTarget / (targetBytes || 1)) * 100
+    ).toFixed(1);
+
+    onProgress?.("Finalizing optimized PDF stream...", 100, finalSize);
+
     return {
-      pdfBytes: compressedBytes,
+      pdfBytes: finalBytes,
       originalSize,
       finalSize,
       savedBytes,
       savedPercentage,
-      iterationsRun: 1,
-      targetAccuracy: "Manual Pro Execution",
+      iterationsRun: iterations,
+      targetAccuracy: `Exact Target (${accuracyPct}% Match)`,
     };
-  }
-
-  // Check physical minimum floor (e.g. 5 KB per page)
-  const minimumFloorBytes = totalPages * 5120;
-  if (targetBytes < minimumFloorBytes) {
-    onProgress?.(
-      `Target size is below minimum physical floor (${Math.round(minimumFloorBytes / 1024)} KB). Converging to maximum compression...`,
-      10
-    );
-  }
-
-  // Binary search over composite quality factor q in [0.05, 0.98]
-  let lowQ = 0.05;
-  let highQ = 0.98;
-  let bestBytes: Uint8Array | null = null;
-  let bestSize = Infinity;
-  let iterations = 0;
-  const maxIterations = 6;
-
-  while (iterations < maxIterations && lowQ <= highQ) {
-    iterations++;
-    const midQ = (lowQ + highQ) / 2;
-
-    // Map q to render scale (0.4 to 1.8) and JPEG quality (0.1 to 0.92)
-    const scale = 0.4 + midQ * 1.4;
-    const quality = Math.max(0.08, Math.min(0.92, 0.1 + midQ * 0.82));
-
-    const progressMsg = `Iteration ${iterations}/${maxIterations}: Testing scale ${scale.toFixed(
-      2
-    )}, quality ${Math.round(quality * 100)}%...`;
-    onProgress?.(progressMsg, Math.round((iterations / maxIterations) * 85));
-
-    const candidateBytes = await renderPdfPagesToCompressedDocument(
-      pdfDoc,
-      totalPages,
-      scale,
-      quality,
-      options.colorMode === "grayscale",
-      true
-    );
-
-    const currentLen = candidateBytes.byteLength;
-
-    if (currentLen <= targetBytes) {
-      // Valid candidate within target budget! Save and try to improve quality (higher q)
-      bestBytes = candidateBytes;
-      bestSize = currentLen;
-      lowQ = midQ + 0.05;
-    } else {
-      // Too large, decrease quality (lower q)
-      highQ = midQ - 0.05;
-      if (!bestBytes) {
-        bestBytes = candidateBytes;
-        bestSize = currentLen;
-      }
+  } finally {
+    try {
+      await pdfDoc.cleanup?.();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (pdfDoc as any).destroy?.();
+      await loadingTask.destroy?.();
+    } catch {
+      // ignore
     }
   }
-
-  // If no run met the target, fallback to the lowest possible quality run
-  if (!bestBytes) {
-    bestBytes = await renderPdfPagesToCompressedDocument(
-      pdfDoc,
-      totalPages,
-      0.4,
-      0.1,
-      true,
-      true
-    );
-    bestSize = bestBytes.byteLength;
-  }
-
-  // Exact Byte Padding Option:
-  // If enabled and bestSize is below targetBytes, append harmless PDF comment bytes (%...)
-  // right before EOF to match the exact target byte count
-  let finalBytes = bestBytes;
-  if (options.exactBytePadding && bestSize < targetBytes) {
-    const bytesNeeded = targetBytes - bestSize;
-    if (bytesNeeded > 10) {
-      const paddingStr = `\n%VELODOC_EXACT_PAD_${"X".repeat(Math.max(0, bytesNeeded - 25))}\n`;
-      const enc = new TextEncoder();
-      const padBytes = enc.encode(paddingStr);
-      const padded = new Uint8Array(finalBytes.length + padBytes.length);
-      padded.set(finalBytes, 0);
-      padded.set(padBytes, finalBytes.length);
-      finalBytes = padded;
-    }
-  }
-
-  const finalSize = finalBytes.byteLength;
-  const savedBytes = Math.max(0, originalSize - finalSize);
-  const savedPercentage = Math.round((savedBytes / originalSize) * 100);
-
-  const diffFromTarget = Math.abs(finalSize - targetBytes);
-  const accuracyPct = Math.max(
-    0,
-    100 - (diffFromTarget / (targetBytes || 1)) * 100
-  ).toFixed(1);
-
-  onProgress?.("Finalizing optimized PDF stream...", 100, finalSize);
-
-  return {
-    pdfBytes: finalBytes,
-    originalSize,
-    finalSize,
-    savedBytes,
-    savedPercentage,
-    iterationsRun: iterations,
-    targetAccuracy: `Exact Target (${accuracyPct}% Match)`,
-  };
 }
 
 /**
@@ -249,6 +262,10 @@ async function renderPdfPagesToCompressedDocument(
     const jpegBlob: Blob = await new Promise((resolve) =>
       canvas.toBlob((b) => resolve(b!), "image/jpeg", quality)
     );
+    // Explicitly zero canvas backing memory
+    canvas.width = 1;
+    canvas.height = 1;
+
     const jpegBuffer = await jpegBlob.arrayBuffer();
     const embeddedImg = await newDoc.embedJpg(jpegBuffer);
 
@@ -260,7 +277,71 @@ async function renderPdfPagesToCompressedDocument(
       width: origViewport.width,
       height: origViewport.height,
     });
+
+    await yieldToMain(12);
   }
 
   return await newDoc.save({ useObjectStreams: true });
+}
+
+/**
+ * Execute 30-document zero-crash batch compression using the controlled concurrency queue
+ */
+export async function executeExactCompressionBatch(
+  files: { file: File; buffer: ArrayBuffer }[],
+  options: ExactCompressionOptions,
+  onItemProgress?: (index: number, pct: number, msg?: string) => void,
+  onItemComplete?: (index: number, result: CompressionResult) => void
+): Promise<{
+  results: (CompressionResult | null)[];
+  summary: BatchProcessingSummary;
+}> {
+  const startTime = Date.now();
+  let totalOriginal = 0;
+  let totalProcessed = 0;
+
+  files.forEach((f) => (totalOriginal += f.buffer.byteLength));
+
+  const results = await processBatchQueue<
+    { file: File; buffer: ArrayBuffer },
+    CompressionResult
+  >(
+    files,
+    async (item, idx, reportProgress) => {
+      const res = await executeExactCompression(
+        item.buffer,
+        options,
+        (msg, pct) => reportProgress(pct, msg)
+      );
+      return res;
+    },
+    {
+      concurrency: 2,
+      onItemProgress,
+      onItemComplete: (idx, res) => {
+        totalProcessed += res.finalSize;
+        onItemComplete?.(idx, res);
+      },
+    }
+  );
+
+  const durationMs = Date.now() - startTime;
+  const totalSaved = Math.max(0, totalOriginal - totalProcessed);
+  const overallSavedPct = totalOriginal > 0 ? Math.round((totalSaved / totalOriginal) * 100) : 0;
+
+  return {
+    results,
+    summary: {
+      totalFiles: files.length,
+      completedFiles: results.filter(Boolean).length,
+      successfulFiles: results.filter(Boolean).length,
+      failedFiles: results.filter((r) => r === null).length,
+      totalOriginalSize: totalOriginal,
+      totalProcessedSize: totalProcessed,
+      totalSavedBytes: totalSaved,
+      overallSavedPercentage: overallSavedPct,
+      totalDurationMs: durationMs,
+      durationMs,
+    },
+  };
 }

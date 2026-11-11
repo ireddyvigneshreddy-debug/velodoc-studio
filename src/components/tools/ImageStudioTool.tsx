@@ -11,6 +11,7 @@ import {
   ProcessedImageResult,
   ExactImageOptions,
 } from "@/lib/image-engine";
+import { createSafeFile } from "@/lib/utils";
 import {
   Sparkles,
   Download,
@@ -70,9 +71,7 @@ export function ImageStudioTool() {
   useEffect(() => {
     const chained = sessionHistory.consumeChainedFile();
     if (chained) {
-      const file = new File([chained.data.buffer as ArrayBuffer], chained.filename, {
-        type: chained.mimeType,
-      });
+      const file = createSafeFile(chained.data, chained.filename, chained.mimeType);
       handleFilesAdded([file]);
     }
   }, [handleFilesAdded]);

@@ -268,6 +268,8 @@ async function canvasConvertImageWithScale(
 
       canvas.toBlob(
         (blob) => {
+          canvas.width = 1;
+          canvas.height = 1;
           if (blob) resolve(blob);
           else reject(new Error("Blob generation failed"));
         },

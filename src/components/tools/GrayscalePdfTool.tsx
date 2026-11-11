@@ -9,6 +9,7 @@ import {
   getPdfPageCount,
 } from "@/lib/pdf-engine";
 import { sessionHistory } from "@/lib/session-history";
+import { createPdfBlob } from "@/lib/utils";
 import { SunMedium, Loader2, AlertCircle, Sparkles } from "lucide-react";
 
 export function GrayscalePdfTool() {
@@ -30,7 +31,7 @@ export function GrayscalePdfTool() {
   useEffect(() => {
     const chained = sessionHistory.consumeChainedFile();
     if (chained && chained.mimeType === "application/pdf") {
-      const blob = new Blob([chained.data.buffer as ArrayBuffer], { type: "application/pdf" });
+      const blob = createPdfBlob(chained.data);
       const file = new File([blob], chained.filename, { type: "application/pdf" });
       handleFileAdded([file]);
     }
@@ -78,7 +79,7 @@ export function GrayscalePdfTool() {
       const enhancedBytes = await enhancePdfGrayscale(originalBuffer, settings);
       const endTime = performance.now();
 
-      const blob = new Blob([enhancedBytes.buffer as ArrayBuffer], { type: "application/pdf" });
+      const blob = createPdfBlob(enhancedBytes);
       const downloadUrl = URL.createObjectURL(blob);
       const durationMs = endTime - startTime;
 

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { ResultPreviewStudio } from "@/components/ResultPreviewStudio";
 import { ProcessingMetrics } from "@/types";
 import { generatePdfFromMarkdown, getPdfPageCount } from "@/lib/pdf-engine";
+import { createPdfBlob } from "@/lib/utils";
 import {
   FileText,
   Loader2,
@@ -73,10 +74,10 @@ export function MarkdownToPdfTool() {
       });
       const endTime = performance.now();
 
-      const blob = new Blob([pdfBytes.buffer as ArrayBuffer], { type: "application/pdf" });
+      const blob = createPdfBlob(pdfBytes);
       const downloadUrl = URL.createObjectURL(blob);
       const durationMs = endTime - startTime;
-      const count = await getPdfPageCount(pdfBytes.buffer as ArrayBuffer);
+      const count = await getPdfPageCount(pdfBytes);
 
       setOutputBytes(pdfBytes);
       setMetrics({

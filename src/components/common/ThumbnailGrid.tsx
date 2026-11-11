@@ -9,6 +9,7 @@ import {
   Trash2,
   CheckCircle2,
   ArrowLeft,
+  ArrowRight,
   Check,
 } from "lucide-react";
 import { PageThumbnail } from "@/types";
@@ -197,7 +198,7 @@ export function ThumbnailGrid({
 
               {/* Organize Mode Control Bar */}
               {mode === "organize" && onPageAction && (
-                <div className="grid grid-cols-5 p-1 bg-black/60 border-t border-white/5 divide-x divide-white/5 text-slate-400">
+                <div className="grid grid-cols-6 p-1 bg-black/60 border-t border-white/5 divide-x divide-white/5 text-slate-400">
                   <button
                     type="button"
                     disabled={index === 0}
@@ -208,6 +209,18 @@ export function ThumbnailGrid({
                     className="p-1.5 flex justify-center items-center hover:text-white hover:bg-white/10 disabled:opacity-20 transition-colors"
                   >
                     <ArrowLeft className="w-3 h-3" />
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={index === thumbnails.length - 1}
+                    onClick={() =>
+                      onPageAction({ type: "move-right", index })
+                    }
+                    title="Move Right"
+                    className="p-1.5 flex justify-center items-center hover:text-white hover:bg-white/10 disabled:opacity-20 transition-colors"
+                  >
+                    <ArrowRight className="w-3 h-3" />
                   </button>
 
                   <button

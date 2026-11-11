@@ -1,19 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import { CommandPalette } from "@/components/common/CommandPalette";
 import {
   Sparkles,
   Search,
-  Zap,
-  HardDrive,
-  ArrowRight,
   ShieldCheck,
-  Minimize2,
-  Layers,
-  FileImage,
-  Image as ImageIcon,
+  Cpu,
+  Lock,
 } from "lucide-react";
 
 export function HeroSection() {
@@ -21,115 +15,62 @@ export function HeroSection() {
 
   return (
     <>
-      <section className="relative pt-12 pb-16 sm:pt-20 sm:pb-24 text-center overflow-hidden">
-        {/* Subtle radial ambient mesh glows */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[380px] bg-indigo-600/15 rounded-full blur-[130px] pointer-events-none" />
-        <div className="absolute top-1/3 left-1/3 w-[320px] h-[220px] bg-cyan-500/10 rounded-full blur-[100px] pointer-events-none" />
+      <section className="relative pt-6 pb-6 sm:pt-10 sm:pb-8 text-center overflow-hidden">
+        {/* Subtle radial ambient mesh glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[250px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
 
-        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 space-y-6">
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 space-y-3.5">
           {/* Top Pill Announcement */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-xs text-slate-300 shadow-inner backdrop-blur-sm">
-            <span className="p-1 rounded-full bg-indigo-500/20 text-indigo-400">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-xs text-slate-300 shadow-inner backdrop-blur-sm">
+            <span className="p-0.5 rounded-full bg-cyan-500/20 text-cyan-400">
               <Sparkles className="w-3 h-3" />
             </span>
-            <span className="font-medium">
-              VeloDoc Pro v2.0 • 19 Native Client-Side Document Tools
+            <span className="font-medium text-[11px] sm:text-xs">
+              VeloDoc Pro • 30-Document Zero-Crash Batch Studio • 100% Client-Side
             </span>
           </div>
 
           {/* Main Hero Headline */}
-          <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-[1.1]">
-            Next-Gen Client-Side{" "}
-            <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-cyan-400 bg-clip-text text-transparent">
-              Document, PDF &amp; Image Studio
+          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
+            High-Performance Client-Side{" "}
+            <span className="bg-gradient-to-r from-indigo-400 via-cyan-300 to-emerald-400 bg-clip-text text-transparent">
+              PDF &amp; Image Studio
             </span>
           </h1>
 
-          {/* Subtitle */}
-          <p className="max-w-2xl mx-auto text-base sm:text-lg text-slate-400 leading-relaxed">
-            Compress to exact target KB sizes, merge documents with scan interleaving, and convert between PDF, images, and text right in your browser.
-            Powered by WebAssembly, Web Workers and Canvas — zero server uploads, zero file limits, 100% private.
+          {/* Compact Subtitle */}
+          <p className="max-w-2xl mx-auto text-xs sm:text-sm text-slate-400 leading-normal">
+            Precision binary-search KB compression, 30-file batch pipelines, visual diff, and lossless format conversions.
+            Zero cloud uploads • Zero tracking • Runs 100% in local browser memory.
           </p>
 
-          {/* Call to Actions */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-2">
-            <Link
-              href="#tools"
-              className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-cyan-500 hover:from-indigo-600 hover:to-cyan-600 text-white font-semibold text-sm shadow-[0_0_25px_rgba(99,102,241,0.4)] hover:shadow-[0_0_35px_rgba(99,102,241,0.6)] transition-all flex items-center justify-center gap-2 group cursor-pointer"
-            >
-              <span>Explore All 19 Tools</span>
-              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-            </Link>
-
+          {/* Quick Action Buttons */}
+          <div className="flex items-center justify-center gap-3 pt-1">
             <button
               type="button"
               onClick={() => setPaletteOpen(true)}
-              className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/10 text-white font-medium text-sm transition-all flex items-center justify-center gap-2.5 shadow-sm cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-white font-medium text-xs transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
             >
-              <Search className="w-4 h-4 text-indigo-400" />
-              <span>Command Palette</span>
-              <kbd className="px-2 py-0.5 text-xs font-mono bg-white/5 border border-white/10 rounded text-slate-400">
+              <Search className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Instant Search (19 Tools)</span>
+              <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-white/5 border border-white/10 rounded text-slate-400">
                 ⌘K
               </kbd>
             </button>
-          </div>
 
-          {/* Priority Quick Launchers */}
-          <div className="pt-3 flex flex-wrap items-center justify-center gap-2">
-            <span className="text-xs font-semibold text-slate-400 mr-1 flex items-center gap-1.5">
-              <Zap className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Priority Tools:</span>
-            </span>
-            <Link
-              href="/tools/compress-pdf"
-              className="px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 text-xs font-medium transition-all flex items-center gap-1.5 shadow-sm hover:scale-105"
-            >
-              <Minimize2 className="w-3.5 h-3.5" />
-              <span>Exact Compress</span>
-            </Link>
-            <Link
-              href="/tools/merge-pdf"
-              className="px-3 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-300 text-xs font-medium transition-all flex items-center gap-1.5 shadow-sm hover:scale-105"
-            >
-              <Layers className="w-3.5 h-3.5" />
-              <span>Merge PDFs</span>
-            </Link>
-            <Link
-              href="/tools/image-to-pdf"
-              className="px-3 py-1.5 rounded-xl bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/30 text-violet-300 text-xs font-medium transition-all flex items-center gap-1.5 shadow-sm hover:scale-105"
-            >
-              <FileImage className="w-3.5 h-3.5" />
-              <span>Images &rarr; PDF</span>
-            </Link>
-            <Link
-              href="/tools/pdf-to-image"
-              className="px-3 py-1.5 rounded-xl bg-pink-500/10 hover:bg-pink-500/20 border border-pink-500/30 text-pink-300 text-xs font-medium transition-all flex items-center gap-1.5 shadow-sm hover:scale-105"
-            >
-              <ImageIcon className="w-3.5 h-3.5" />
-              <span>PDF &rarr; Images</span>
-            </Link>
-            <Link
-              href="/tools/image-studio"
-              className="px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-medium transition-all flex items-center gap-1.5 shadow-sm hover:scale-105"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Passport KB Studio</span>
-            </Link>
-          </div>
-
-          {/* Value Props Pills */}
-          <div className="pt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-400">
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/[0.02] border border-white/5">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span>100% In-Memory Processing</span>
-            </div>
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/[0.02] border border-white/5">
-              <HardDrive className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Zero File Size Limits</span>
-            </div>
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/[0.02] border border-white/5">
-              <Zap className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Hardware-Accelerated Speed</span>
+            <div className="hidden sm:flex items-center gap-4 text-[11px] text-slate-400">
+              <span className="flex items-center gap-1 text-emerald-400">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                Zero Upload
+              </span>
+              <span className="flex items-center gap-1 text-indigo-400">
+                <Cpu className="w-3.5 h-3.5" />
+                60 FPS Engine
+              </span>
+              <span className="flex items-center gap-1 text-cyan-400">
+                <Lock className="w-3.5 h-3.5" />
+                Air-Gapped Privacy
+              </span>
             </div>
           </div>
         </div>

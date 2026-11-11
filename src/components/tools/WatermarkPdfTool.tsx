@@ -22,7 +22,7 @@ import {
   Upload,
 } from "lucide-react";
 import { sessionHistory } from "@/lib/session-history";
-import { formatFileSize, createPdfBlob } from "@/lib/utils";
+import { formatFileSize, createPdfBlob, createSafeFile } from "@/lib/utils";
 
 const STAMP_PRESETS = [
   { label: "CONFIDENTIAL", color: "#EF4444" },
@@ -109,9 +109,7 @@ export function WatermarkPdfTool() {
   useEffect(() => {
     const chained = sessionHistory.consumeChainedFile();
     if (chained) {
-      const file = new File([chained.data.buffer as ArrayBuffer], chained.filename, {
-        type: chained.mimeType,
-      });
+      const file = createSafeFile(chained.data, chained.filename, chained.mimeType);
       handleFileAdded([file]);
     }
   }, [handleFileAdded]);

@@ -10,6 +10,7 @@ import {
   getPdfPageCount,
 } from "@/lib/pdf-engine";
 import { sessionHistory } from "@/lib/session-history";
+import { createPdfBlob } from "@/lib/utils";
 import { Crop, Loader2, AlertCircle } from "lucide-react";
 
 export function CropPdfTool() {
@@ -36,7 +37,7 @@ export function CropPdfTool() {
   useEffect(() => {
     const chained = sessionHistory.consumeChainedFile();
     if (chained && chained.mimeType === "application/pdf") {
-      const blob = new Blob([chained.data.buffer as ArrayBuffer], { type: "application/pdf" });
+      const blob = createPdfBlob(chained.data);
       const file = new File([blob], chained.filename, { type: "application/pdf" });
       handleFileAdded([file]);
     }
@@ -109,7 +110,7 @@ export function CropPdfTool() {
       const croppedBytes = await cropPdfMargins(originalBuffer, margins);
       const endTime = performance.now();
 
-      const blob = new Blob([croppedBytes.buffer as ArrayBuffer], { type: "application/pdf" });
+      const blob = createPdfBlob(croppedBytes);
       const downloadUrl = URL.createObjectURL(blob);
       const durationMs = endTime - startTime;
 

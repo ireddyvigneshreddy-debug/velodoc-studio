@@ -12,6 +12,7 @@ import {
   OrganizePageItem,
 } from "@/lib/pdf-engine";
 import { sessionHistory } from "@/lib/session-history";
+import { createPdfBlob } from "@/lib/utils";
 import { RotateCw, Loader2, AlertCircle, Undo2 } from "lucide-react";
 
 interface InternalPageItem extends PageThumbnail {
@@ -33,7 +34,7 @@ export function OrganizePdfTool() {
   useEffect(() => {
     const chained = sessionHistory.consumeChainedFile();
     if (chained && chained.mimeType === "application/pdf") {
-      const blob = new Blob([chained.data.buffer as ArrayBuffer], { type: "application/pdf" });
+      const blob = createPdfBlob(chained.data);
       const file = new File([blob], chained.filename, { type: "application/pdf" });
       handleFileAdded([file]);
     }
@@ -152,7 +153,7 @@ export function OrganizePdfTool() {
       const newPdfBytes = await organizePdfPagesExtended(originalBuffer, pageItems);
       const endTime = performance.now();
 
-      const blob = new Blob([newPdfBytes.buffer as ArrayBuffer], { type: "application/pdf" });
+      const blob = createPdfBlob(newPdfBytes);
       const downloadUrl = URL.createObjectURL(blob);
       const durationMs = endTime - startTime;
 

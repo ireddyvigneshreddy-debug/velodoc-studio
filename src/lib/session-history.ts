@@ -1,6 +1,7 @@
 "use client";
 
 import { SessionHistoryItem } from "@/types";
+import { createSafeFile } from "@/lib/utils";
 
 // In-memory session store (persists across page navigations in current browser session)
 class SessionHistoryManager {
@@ -63,8 +64,6 @@ export function setChainedFile(data: Uint8Array, filename: string, mimeType: str
 export function consumeChainedFile(): { file: File; name: string } | null {
   const chained = sessionHistory.consumeChainedFile();
   if (!chained) return null;
-  const file = new File([chained.data.buffer as ArrayBuffer], chained.filename, {
-    type: chained.mimeType,
-  });
+  const file = createSafeFile(chained.data, chained.filename, chained.mimeType);
   return { file, name: chained.filename };
 }

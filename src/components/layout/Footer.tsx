@@ -78,13 +78,13 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Organize PDF Tools */}
+          {/* Merge & Edit */}
           <div>
             <h5 className="text-xs font-semibold text-white uppercase tracking-wider mb-3">
-              Organize PDF
+              Merge &amp; Edit
             </h5>
             <ul className="space-y-2 text-xs">
-              {TOOLS.filter((t) => t.category === "Organize PDF").map((t) => (
+              {TOOLS.filter((t) => t.category === "Merge & Split" || t.category === "Edit Pages").slice(0, 6).map((t) => (
                 <li key={t.id}>
                   <Link
                     href={t.path}
@@ -97,38 +97,13 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Security & Sign Tools */}
+          {/* Shrink & Compress */}
           <div>
             <h5 className="text-xs font-semibold text-white uppercase tracking-wider mb-3">
-              Security &amp; Sign
+              Shrink &amp; Compress
             </h5>
             <ul className="space-y-2 text-xs">
-              {TOOLS.filter((t) => t.category === "Security, Sign & Redact").map(
-                (t) => (
-                  <li key={t.id}>
-                    <Link
-                      href={t.path}
-                      className="hover:text-indigo-400 transition-colors"
-                    >
-                      {t.name}
-                    </Link>
-                  </li>
-                )
-              )}
-            </ul>
-          </div>
-
-          {/* Optimize & Convert Tools */}
-          <div>
-            <h5 className="text-xs font-semibold text-white uppercase tracking-wider mb-3">
-              Optimize &amp; Convert
-            </h5>
-            <ul className="space-y-2 text-xs">
-              {TOOLS.filter(
-                (t) =>
-                  t.category === "Optimize & Compress" ||
-                  t.category === "Convert"
-              ).map((t) => (
+              {TOOLS.filter((t) => t.category === "Shrink & Compress").map((t) => (
                 <li key={t.id}>
                   <Link
                     href={t.path}
@@ -141,24 +116,41 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Document Intelligence */}
+          {/* Convert Formats */}
           <div>
             <h5 className="text-xs font-semibold text-white uppercase tracking-wider mb-3">
-              Doc Intelligence
+              Convert Formats
             </h5>
             <ul className="space-y-2 text-xs">
-              {TOOLS.filter((t) => t.category === "Document Intelligence").map(
-                (t) => (
-                  <li key={t.id}>
-                    <Link
-                      href={t.path}
-                      className="hover:text-indigo-400 transition-colors"
-                    >
-                      {t.name}
-                    </Link>
-                  </li>
-                )
-              )}
+              {TOOLS.filter((t) => t.category === "Convert Formats").map((t) => (
+                <li key={t.id}>
+                  <Link
+                    href={t.path}
+                    className="hover:text-indigo-400 transition-colors"
+                  >
+                    {t.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Sign & Compare */}
+          <div>
+            <h5 className="text-xs font-semibold text-white uppercase tracking-wider mb-3">
+              Sign &amp; Compare
+            </h5>
+            <ul className="space-y-2 text-xs">
+              {TOOLS.filter((t) => t.category === "Sign, Redact & Compare").map((t) => (
+                <li key={t.id}>
+                  <Link
+                    href={t.path}
+                    className="hover:text-indigo-400 transition-colors"
+                  >
+                    {t.name}
+                  </Link>
+                </li>
+              ))}
               <li className="pt-2 text-slate-500">
                 19 Core Native Tools
               </li>

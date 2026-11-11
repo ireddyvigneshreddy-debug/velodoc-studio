@@ -4,8 +4,9 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ToolDefinition } from "@/types";
-import { TOOLS } from "@/lib/constants";
+import { PDF_TOOLS, IMAGE_TOOLS } from "@/lib/constants";
 import { ToolIcon } from "@/components/common/ToolIcon";
+import { ToolErrorBoundary } from "@/components/common/ErrorBoundary";
 import {
   ChevronRight,
   ShieldCheck,
@@ -135,35 +136,77 @@ export function ToolWorkspaceView({ tool }: ToolWorkspaceViewProps) {
                   className="fixed inset-0 z-30"
                   onClick={() => setSwitcherOpen(false)}
                 />
-                <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto rounded-2xl bg-[#12141D] border border-white/10 shadow-2xl z-40 p-2 divide-y divide-white/5 animate-in fade-in zoom-in-95 duration-150">
-                  <div className="px-3 py-1.5 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
-                    Quick Tool Switcher (19 Tools)
-                  </div>
-                  <div className="space-y-1 pt-1">
-                    {TOOLS.map((t) => {
-                      const isCurrent = t.id === tool.id;
-                      return (
-                        <button
-                          key={t.id}
-                          onClick={() => {
-                            setSwitcherOpen(false);
-                            router.push(t.path);
-                          }}
-                          className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-xs transition-all ${
-                            isCurrent
-                              ? "bg-indigo-600/20 text-indigo-300 font-semibold border border-indigo-500/30"
-                              : "text-slate-300 hover:text-white hover:bg-white/5"
-                          }`}
-                        >
-                          <div
-                            className={`p-1.5 rounded-lg bg-gradient-to-br ${t.color} text-white shrink-0`}
+                <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto rounded-2xl bg-[#12141D] border border-white/10 shadow-2xl z-40 p-2 space-y-3 animate-in fade-in zoom-in-95 duration-150">
+                  {/* PDF Tools Section */}
+                  <div>
+                    <div className="px-3 py-1 text-[10px] font-bold text-cyan-400 uppercase tracking-wider flex items-center justify-between">
+                      <span>PDF Tools</span>
+                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-cyan-500/10 text-cyan-300">
+                        {PDF_TOOLS.length}
+                      </span>
+                    </div>
+                    <div className="space-y-0.5 pt-1">
+                      {PDF_TOOLS.map((t) => {
+                        const isCurrent = t.id === tool.id;
+                        return (
+                          <button
+                            key={t.id}
+                            onClick={() => {
+                              setSwitcherOpen(false);
+                              router.push(t.path);
+                            }}
+                            className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-left text-xs transition-all ${
+                              isCurrent
+                                ? "bg-indigo-600/20 text-indigo-300 font-semibold border border-indigo-500/30"
+                                : "text-slate-300 hover:text-white hover:bg-white/5"
+                            }`}
                           >
-                            <ToolIcon name={t.icon} className="w-3.5 h-3.5" />
-                          </div>
-                          <span className="truncate">{t.name}</span>
-                        </button>
-                      );
-                    })}
+                            <div
+                              className={`p-1 rounded-lg bg-gradient-to-br ${t.color} text-white shrink-0`}
+                            >
+                              <ToolIcon name={t.icon} className="w-3 h-3" />
+                            </div>
+                            <span className="truncate">{t.name}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Image Tools Section */}
+                  <div className="border-t border-white/5 pt-2">
+                    <div className="px-3 py-1 text-[10px] font-bold text-pink-400 uppercase tracking-wider flex items-center justify-between">
+                      <span>Image Tools &amp; Converters</span>
+                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-pink-500/10 text-pink-300">
+                        {IMAGE_TOOLS.length}
+                      </span>
+                    </div>
+                    <div className="space-y-0.5 pt-1">
+                      {IMAGE_TOOLS.map((t) => {
+                        const isCurrent = t.id === tool.id;
+                        return (
+                          <button
+                            key={t.id}
+                            onClick={() => {
+                              setSwitcherOpen(false);
+                              router.push(t.path);
+                            }}
+                            className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-left text-xs transition-all ${
+                              isCurrent
+                                ? "bg-pink-600/20 text-pink-300 font-semibold border border-pink-500/30"
+                                : "text-slate-300 hover:text-white hover:bg-white/5"
+                            }`}
+                          >
+                            <div
+                              className={`p-1 rounded-lg bg-gradient-to-br ${t.color} text-white shrink-0`}
+                            >
+                              <ToolIcon name={t.icon} className="w-3 h-3" />
+                            </div>
+                            <span className="truncate">{t.name}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </>
@@ -209,7 +252,11 @@ export function ToolWorkspaceView({ tool }: ToolWorkspaceViewProps) {
         </div>
 
         {/* Dynamic Tool Interactive Workspace */}
-        <div className="pt-2">{renderToolComponent()}</div>
+        <div className="pt-2">
+          <ToolErrorBoundary key={tool.id} fallbackTitle={`${tool.name} Recovered`}>
+            {renderToolComponent()}
+          </ToolErrorBoundary>
+        </div>
       </div>
     </div>
   );

@@ -70,24 +70,32 @@ export function Navbar() {
           {/* Right: Actions (Search, History, Palette, Theme Toggle) */}
           <div className="flex items-center gap-2.5">
             {/* Priority tools quick links */}
-            <nav className="hidden xl:flex items-center gap-1 border-r border-white/10 pr-2 mr-1 text-xs">
+            <nav className="hidden lg:flex items-center gap-1 border-r border-white/10 pr-2 mr-1 text-xs">
+              <Link
+                href="/#pdf-tools"
+                className="px-2.5 py-1 rounded-lg text-slate-300 hover:text-cyan-400 hover:bg-white/5 transition-colors font-medium flex items-center gap-1"
+              >
+                <span>PDF Tools</span>
+                <span className="text-[10px] font-mono px-1 py-0.2 rounded bg-cyan-500/10 text-cyan-300">16</span>
+              </Link>
+              <Link
+                href="/#image-tools"
+                className="px-2.5 py-1 rounded-lg text-slate-300 hover:text-pink-400 hover:bg-white/5 transition-colors font-medium flex items-center gap-1"
+              >
+                <span>Image Tools</span>
+                <span className="text-[10px] font-mono px-1 py-0.2 rounded bg-pink-500/10 text-pink-300">3</span>
+              </Link>
               <Link
                 href="/tools/compress-pdf"
-                className="px-2.5 py-1 rounded-lg text-slate-300 hover:text-cyan-300 hover:bg-white/5 transition-colors font-medium"
+                className="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors font-medium hidden xl:inline"
               >
                 Compress
               </Link>
               <Link
                 href="/tools/merge-pdf"
-                className="px-2.5 py-1 rounded-lg text-slate-300 hover:text-indigo-300 hover:bg-white/5 transition-colors font-medium"
+                className="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors font-medium hidden xl:inline"
               >
                 Merge
-              </Link>
-              <Link
-                href="/tools/image-to-pdf"
-                className="px-2.5 py-1 rounded-lg text-slate-300 hover:text-violet-300 hover:bg-white/5 transition-colors font-medium"
-              >
-                Convert
               </Link>
             </nav>
 

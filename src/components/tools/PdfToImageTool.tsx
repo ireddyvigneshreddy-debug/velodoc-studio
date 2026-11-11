@@ -21,7 +21,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { sessionHistory } from "@/lib/session-history";
-import { formatFileSize } from "@/lib/utils";
+import { formatFileSize, createSafeFile } from "@/lib/utils";
 
 type ImageFormat = "png" | "jpeg" | "webp";
 
@@ -88,9 +88,7 @@ export function PdfToImageTool() {
   useEffect(() => {
     const chained = sessionHistory.consumeChainedFile();
     if (chained) {
-      const file = new File([chained.data.buffer as ArrayBuffer], chained.filename, {
-        type: chained.mimeType,
-      });
+      const file = createSafeFile(chained.data, chained.filename, chained.mimeType);
       handleFileAdded([file]);
     }
   }, [handleFileAdded]);

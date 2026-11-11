@@ -10,6 +10,8 @@ import {
   GrayscaleSettings,
   PdfMetadataInfo,
 } from "@/types";
+import { yieldToMain } from "@/lib/batch-queue-engine";
+import { toSafeArrayBuffer } from "@/lib/utils";
 
 // Cached dynamic PDF.js instance
 let pdfjsPromise: Promise<typeof import("pdfjs-dist")> | null = null;
@@ -47,53 +49,155 @@ export function hexToPdfRgb(hex: string) {
 }
 
 /**
+ * Universal safe image embedder for PDF documents (handles JPEG, PNG, WebP)
+ */
+export async function embedImageSafely(
+  pdfDoc: PDFDocument,
+  imageSource: ArrayBuffer | Uint8Array | string
+): Promise<PDFImage> {
+  let bytes: Uint8Array;
+  if (typeof imageSource === "string") {
+    const res = await fetch(imageSource);
+    const blob = await res.blob();
+    const ab = await blob.arrayBuffer();
+    bytes = new Uint8Array(ab);
+  } else if (imageSource instanceof ArrayBuffer) {
+    bytes = new Uint8Array(imageSource);
+  } else {
+    bytes = imageSource;
+  }
+
+  // Detect JPEG magic numbers: 0xFF, 0xD8, 0xFF
+  const isJpg = bytes.length > 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+  if (isJpg) {
+    try {
+      return await pdfDoc.embedJpg(bytes);
+    } catch {
+      // Fallback
+    }
+  }
+
+  // Detect PNG magic numbers: 0x89, 0x50, 0x4E, 0x47
+  const isPng = bytes.length > 4 && bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47;
+  if (isPng) {
+    try {
+      return await pdfDoc.embedPng(bytes);
+    } catch {
+      // Fallback
+    }
+  }
+
+  // WebP or fallback: rasterize through an offscreen HTML Image & Canvas to PNG
+  if (typeof window !== "undefined") {
+    const blob = new Blob([bytes as unknown as BlobPart]);
+    const url = URL.createObjectURL(blob);
+    try {
+      const img = new Image();
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = reject;
+        img.src = url;
+      });
+      const canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth || 400;
+      canvas.height = img.naturalHeight || 400;
+      const ctx = canvas.getContext("2d");
+      ctx?.drawImage(img, 0, 0);
+      const pngBlob: Blob = await new Promise((resolve) =>
+        canvas.toBlob((b) => resolve(b!), "image/png")
+      );
+      const ab = await pngBlob.arrayBuffer();
+      canvas.width = 1;
+      canvas.height = 1;
+      return await pdfDoc.embedPng(new Uint8Array(ab));
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  return await pdfDoc.embedPng(bytes);
+}
+
+/**
  * Render a single page of a PDF onto an HTML5 Canvas using PDF.js
  */
 export async function renderPdfPageToCanvas(
-  pdfBuffer: ArrayBuffer,
+  pdfBuffer: ArrayBuffer | Uint8Array,
   pageNumber: number,
   scale: number = 1.0
 ): Promise<HTMLCanvasElement> {
   const pdfjs = await getPdfJs();
   if (!pdfjs) throw new Error("PDF.js can only be loaded in a browser environment.");
 
-  const dataCopy = pdfBuffer.slice(0);
-  const loadingTask = pdfjs.getDocument({ data: dataCopy });
+  const safeBuf = toSafeArrayBuffer(pdfBuffer);
+  const loadingTask = pdfjs.getDocument({ data: safeBuf.slice(0) });
   const pdfDoc = await loadingTask.promise;
 
-  const page = await pdfDoc.getPage(pageNumber);
-  const viewport = page.getViewport({ scale });
+  try {
+    const page = await pdfDoc.getPage(pageNumber);
+    const viewport = page.getViewport({ scale });
 
-  const canvas = document.createElement("canvas");
-  const context = canvas.getContext("2d", { willReadFrequently: true });
-  if (!context) throw new Error("Could not get 2D canvas context.");
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    if (!context) throw new Error("Could not get 2D canvas context.");
 
-  canvas.width = Math.floor(viewport.width);
-  canvas.height = Math.floor(viewport.height);
+    canvas.width = Math.floor(viewport.width);
+    canvas.height = Math.floor(viewport.height);
 
-  // Fill white background
-  context.fillStyle = "#FFFFFF";
-  context.fillRect(0, 0, canvas.width, canvas.height);
+    // Fill white background
+    context.fillStyle = "#FFFFFF";
+    context.fillRect(0, 0, canvas.width, canvas.height);
 
-  const renderContext = {
-    canvasContext: context,
-    viewport: viewport,
-  };
+    const renderContext = {
+      canvasContext: context,
+      viewport: viewport,
+    };
 
-  // @ts-expect-error PDF.js typing variations
-  await page.render(renderContext).promise;
-  return canvas;
+    // @ts-expect-error PDF.js typing variations
+    await page.render(renderContext).promise;
+    return canvas;
+  } finally {
+    try {
+      await pdfDoc.cleanup?.();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (pdfDoc as any).destroy?.();
+      await loadingTask.destroy?.();
+    } catch {
+      // ignore
+    }
+  }
 }
 
 /**
- * Get total page count of a PDF using pdf-lib
+ * Get total page count of a PDF using dual-engine fallback (pdf-lib -> pdfjs)
  */
-export async function getPdfPageCount(pdfBuffer: ArrayBuffer): Promise<number> {
+export async function getPdfPageCount(pdfBuffer: ArrayBuffer | Uint8Array): Promise<number> {
+  const safeBuf = toSafeArrayBuffer(pdfBuffer);
   try {
-    const doc = await PDFDocument.load(pdfBuffer, { ignoreEncryption: true });
+    const doc = await PDFDocument.load(safeBuf, { ignoreEncryption: true });
     return doc.getPageCount();
-  } catch (err: unknown) {
-    console.error("Failed to load PDF page count:", err);
+  } catch (pdfLibErr: unknown) {
+    // Graceful fallback to PDF.js
+    try {
+      const pdfjs = await getPdfJs();
+      if (pdfjs) {
+        const loadingTask = pdfjs.getDocument({ data: safeBuf.slice(0) });
+        const doc = await loadingTask.promise;
+        const count = doc.numPages;
+        try {
+          await doc.cleanup?.();
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await (doc as any).destroy?.();
+          await loadingTask.destroy?.();
+        } catch {
+          // ignore
+        }
+        return count;
+      }
+    } catch {
+      // ignore fallback error
+    }
+    console.error("Failed to load PDF page count:", pdfLibErr);
     throw new Error(
       "Could not read PDF. The file may be password protected or corrupted."
     );
@@ -101,50 +205,84 @@ export async function getPdfPageCount(pdfBuffer: ArrayBuffer): Promise<number> {
 }
 
 /**
- * Render thumbnails for all pages of a PDF
+ * Render thumbnails for all pages of a PDF with single-page fault isolation,
+ * zero-memory canvas pooling, and cooperative event-loop yielding.
  */
 export async function renderAllPagesThumbnails(
-  pdfBuffer: ArrayBuffer,
+  pdfBuffer: ArrayBuffer | Uint8Array,
   scale: number = 0.35,
   onProgress?: (current: number, total: number) => void
 ): Promise<PageThumbnail[]> {
   const pdfjs = await getPdfJs();
   if (!pdfjs) throw new Error("PDF.js browser environment required.");
 
-  const dataCopy = pdfBuffer.slice(0);
-  const loadingTask = pdfjs.getDocument({ data: dataCopy });
+  const safeBuf = toSafeArrayBuffer(pdfBuffer);
+  const loadingTask = pdfjs.getDocument({ data: safeBuf.slice(0) });
   const pdfDoc = await loadingTask.promise;
   const numPages = pdfDoc.numPages;
 
   const thumbnails: PageThumbnail[] = [];
 
-  for (let i = 1; i <= numPages; i++) {
-    const page = await pdfDoc.getPage(i);
-    const viewport = page.getViewport({ scale });
+  try {
+    for (let i = 1; i <= numPages; i++) {
+      try {
+        const page = await pdfDoc.getPage(i);
+        const viewport = page.getViewport({ scale });
 
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d", { willReadFrequently: true });
-    if (context) {
-      canvas.width = Math.floor(viewport.width);
-      canvas.height = Math.floor(viewport.height);
-      context.fillStyle = "#FFFFFF";
-      context.fillRect(0, 0, canvas.width, canvas.height);
-      // @ts-expect-error PDF.js typing variations
-      await page.render({ canvasContext: context, viewport }).promise;
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d", { willReadFrequently: true });
+        if (context) {
+          canvas.width = Math.floor(viewport.width);
+          canvas.height = Math.floor(viewport.height);
+          context.fillStyle = "#FFFFFF";
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          // @ts-expect-error PDF.js typing variations
+          await page.render({ canvasContext: context, viewport }).promise;
 
-      thumbnails.push({
-        pageIndex: i - 1,
-        pageNumber: i,
-        dataUrl: canvas.toDataURL("image/jpeg", 0.8),
-        width: viewport.width,
-        height: viewport.height,
-        rotation: page.rotate || 0,
-        selected: false,
-      });
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+          // Zero canvas memory immediately
+          canvas.width = 1;
+          canvas.height = 1;
+
+          thumbnails.push({
+            pageIndex: i - 1,
+            pageNumber: i,
+            dataUrl,
+            width: viewport.width,
+            height: viewport.height,
+            rotation: page.rotate || 0,
+            selected: false,
+          });
+        }
+      } catch (pageErr) {
+        console.warn(`[VeloDoc] Fallback for page ${i} rendering:`, pageErr);
+        // Isolate single-page error: provide fallback thumbnail instead of failing the whole document
+        thumbnails.push({
+          pageIndex: i - 1,
+          pageNumber: i,
+          dataUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='140' viewBox='0 0 100 140'><rect width='100' height='140' fill='%231E202E'/><text x='50' y='70' fill='%2394A3B8' font-size='10' text-anchor='middle'>Page " + i + "</text></svg>",
+          width: 100,
+          height: 140,
+          rotation: 0,
+          selected: false,
+        });
+      }
+
+      if (onProgress) {
+        onProgress(i, numPages);
+      }
+
+      // Cooperative multitasking: yield to browser event loop every page
+      await yieldToMain(8);
     }
-
-    if (onProgress) {
-      onProgress(i, numPages);
+  } finally {
+    try {
+      await pdfDoc.cleanup?.();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (pdfDoc as any).destroy?.();
+      await loadingTask.destroy?.();
+    } catch {
+      // ignore
     }
   }
 
@@ -209,10 +347,11 @@ export async function mergePdfsPro(
 
 export function parsePageRanges(rangeStr: string, totalPages: number): number[] {
   const result: Set<number> = new Set();
-  const parts = rangeStr.split(",");
+  const parts = rangeStr.split(/[,;]/);
 
   for (const part of parts) {
     const trimmed = part.trim();
+    if (!trimmed) continue;
     if (trimmed.includes("-")) {
       const [startStr, endStr] = trimmed.split("-");
       const start = parseInt(startStr, 10);
@@ -385,7 +524,7 @@ export async function splitPdfBurst(
     const copied = await newDoc.copyPages(srcDoc, indices);
     copied.forEach((p) => newDoc.addPage(p));
     const bytes = await newDoc.save({ useObjectStreams: true });
-    const blob = new Blob([bytes.buffer as ArrayBuffer], { type: "application/pdf" });
+    const blob = new Blob([bytes as unknown as BlobPart], { type: "application/pdf" });
     return { blob, filename: "extracted_pages.pdf", mimeType: "application/pdf" };
   }
 
@@ -395,7 +534,7 @@ export async function splitPdfBurst(
     const copied = await newDoc.copyPages(srcDoc, indices);
     copied.forEach((p) => newDoc.addPage(p));
     const bytes = await newDoc.save({ useObjectStreams: true });
-    const blob = new Blob([bytes.buffer as ArrayBuffer], { type: "application/pdf" });
+    const blob = new Blob([bytes as unknown as BlobPart], { type: "application/pdf" });
     return { blob, filename: "ranges_merged.pdf", mimeType: "application/pdf" };
   }
 
@@ -481,7 +620,6 @@ export async function signAndAnnotatePdf(
   annotations: SignatureAnnotation[]
 ): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.load(pdfBuffer, { ignoreEncryption: true });
-  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
   for (const ann of annotations) {
@@ -495,11 +633,9 @@ export async function signAndAnnotatePdf(
     const h = (ann.heightPercent / 100) * pH;
 
     if (ann.type === "signature") {
-      // Signature image data URL
-      const pngBlob: Blob = await (await fetch(ann.content)).blob();
-      const pngBuffer = await pngBlob.arrayBuffer();
-      const pngImage = await pdfDoc.embedPng(pngBuffer);
-      page.drawImage(pngImage, { x, y, width: w, height: h });
+      // Signature image data URL or external asset (handles JPEG, PNG, WebP)
+      const embeddedImg = await embedImageSafely(pdfDoc, ann.content);
+      page.drawImage(embeddedImg, { x, y, width: w, height: h });
     } else if (ann.type === "text" || ann.type === "date") {
       const fontSize = ann.fontSize || 14;
       page.drawText(ann.content, {
@@ -510,12 +646,20 @@ export async function signAndAnnotatePdf(
         color: hexToPdfRgb(ann.color || "#000000"),
       });
     } else if (ann.type === "checkmark") {
-      page.drawText("✓", {
-        x,
-        y: y + h / 4,
-        size: Math.max(16, h),
-        font: fontBold,
-        color: hexToPdfRgb(ann.color || "#16A34A"),
+      // Draw standard vector checkmark lines to eliminate WinAnsi checkmark encoding failures
+      const checkColor = hexToPdfRgb(ann.color || "#16A34A");
+      const thickness = Math.max(2, Math.min(w, h) * 0.12);
+      page.drawLine({
+        start: { x: x + w * 0.15, y: y + h * 0.45 },
+        end: { x: x + w * 0.4, y: y + h * 0.18 },
+        thickness,
+        color: checkColor,
+      });
+      page.drawLine({
+        start: { x: x + w * 0.4, y: y + h * 0.18 },
+        end: { x: x + w * 0.85, y: y + h * 0.82 },
+        thickness,
+        color: checkColor,
       });
     }
   }
@@ -607,9 +751,7 @@ export async function addWatermarkPro(
 
   let embeddedLogo: PDFImage | null = null;
   if (options.type === "image" && options.imageDataUrl) {
-    const pngBlob = await (await fetch(options.imageDataUrl)).blob();
-    const pngBuffer = await pngBlob.arrayBuffer();
-    embeddedLogo = await pdfDoc.embedPng(pngBuffer);
+    embeddedLogo = await embedImageSafely(pdfDoc, options.imageDataUrl);
   }
 
   for (let i = 0; i < totalPages; i++) {
@@ -1094,6 +1236,10 @@ export async function updatePdfMetadata(
     if (metadata.title !== undefined) doc.setTitle(metadata.title);
     if (metadata.author !== undefined) doc.setAuthor(metadata.author);
     if (metadata.subject !== undefined) doc.setSubject(metadata.subject);
+    if (metadata.keywords !== undefined) {
+      const kwList = metadata.keywords.split(/[,;]/).map((k) => k.trim()).filter(Boolean);
+      doc.setKeywords(kwList);
+    }
     if (metadata.creator !== undefined) doc.setCreator(metadata.creator);
     if (metadata.producer !== undefined) doc.setProducer(metadata.producer);
   }
@@ -1102,11 +1248,11 @@ export async function updatePdfMetadata(
 }
 
 /**
- * Tool 18: Compare Two PDFs (Neon Pixel Diff Highlight)
+ * Tool 18: Compare Two PDFs (Neon Pixel Diff Highlight with bounds safety)
  */
 export async function comparePdfPages(
-  bufferA: ArrayBuffer,
-  bufferB: ArrayBuffer,
+  bufferA: ArrayBuffer | Uint8Array,
+  bufferB: ArrayBuffer | Uint8Array,
   pageNumber: number
 ): Promise<{
   canvasA: HTMLCanvasElement;
@@ -1115,8 +1261,41 @@ export async function comparePdfPages(
   differentPixelsCount: number;
   differencePercentage: number;
 }> {
-  const canvasA = await renderPdfPageToCanvas(bufferA, pageNumber, 1.2);
-  const canvasB = await renderPdfPageToCanvas(bufferB, pageNumber, 1.2);
+  const countA = await getPdfPageCount(bufferA);
+  const countB = await getPdfPageCount(bufferB);
+
+  let canvasA: HTMLCanvasElement;
+  let canvasB: HTMLCanvasElement;
+
+  if (pageNumber <= countA) {
+    canvasA = await renderPdfPageToCanvas(bufferA, pageNumber, 1.2);
+  } else {
+    canvasA = document.createElement("canvas");
+    canvasA.width = 600;
+    canvasA.height = 800;
+    const ctxA = canvasA.getContext("2d")!;
+    ctxA.fillStyle = "#F8FAFC";
+    ctxA.fillRect(0, 0, 600, 800);
+    ctxA.fillStyle = "#94A3B8";
+    ctxA.font = "bold 16px sans-serif";
+    ctxA.textAlign = "center";
+    ctxA.fillText(`Page ${pageNumber} does not exist in Base PDF`, 300, 400);
+  }
+
+  if (pageNumber <= countB) {
+    canvasB = await renderPdfPageToCanvas(bufferB, pageNumber, 1.2);
+  } else {
+    canvasB = document.createElement("canvas");
+    canvasB.width = 600;
+    canvasB.height = 800;
+    const ctxB = canvasB.getContext("2d")!;
+    ctxB.fillStyle = "#F8FAFC";
+    ctxB.fillRect(0, 0, 600, 800);
+    ctxB.fillStyle = "#94A3B8";
+    ctxB.font = "bold 16px sans-serif";
+    ctxB.textAlign = "center";
+    ctxB.fillText(`Page ${pageNumber} does not exist in Comparison PDF`, 300, 400);
+  }
 
   const width = Math.min(canvasA.width, canvasB.width);
   const height = Math.min(canvasA.height, canvasB.height);
@@ -1178,7 +1357,7 @@ export async function comparePdfPages(
  * Tool 13: PDF to Images
  */
 export async function convertPdfToImages(
-  pdfBuffer: ArrayBuffer,
+  pdfBuffer: ArrayBuffer | Uint8Array,
   options: {
     format: "png" | "jpeg" | "webp";
     scale: number;
@@ -1189,8 +1368,8 @@ export async function convertPdfToImages(
   const pdfjs = await getPdfJs();
   if (!pdfjs) throw new Error("Browser canvas environment required.");
 
-  const dataCopy = pdfBuffer.slice(0);
-  const loadingTask = pdfjs.getDocument({ data: dataCopy });
+  const safeBuf = toSafeArrayBuffer(pdfBuffer);
+  const loadingTask = pdfjs.getDocument({ data: safeBuf.slice(0) });
   const pdfDoc = await loadingTask.promise;
   const totalPages = pdfDoc.numPages;
 
@@ -1204,32 +1383,50 @@ export async function convertPdfToImages(
 
   const results: { pageNumber: number; blob: Blob; dataUrl: string }[] = [];
 
-  for (let idx = 0; idx < indices.length; idx++) {
-    const pageNum = indices[idx] + 1;
-    const page = await pdfDoc.getPage(pageNum);
-    const viewport = page.getViewport({ scale: options.scale });
+  try {
+    for (let idx = 0; idx < indices.length; idx++) {
+      const pageNum = indices[idx] + 1;
+      const page = await pdfDoc.getPage(pageNum);
+      const viewport = page.getViewport({ scale: options.scale });
 
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.floor(viewport.width);
-    canvas.height = Math.floor(viewport.height);
-    const context = canvas.getContext("2d", { willReadFrequently: true });
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.floor(viewport.width);
+      canvas.height = Math.floor(viewport.height);
+      const context = canvas.getContext("2d", { willReadFrequently: true });
 
-    if (context) {
-      context.fillStyle = "#FFFFFF";
-      context.fillRect(0, 0, canvas.width, canvas.height);
-      // @ts-expect-error PDF.js typing variations
-      await page.render({ canvasContext: context, viewport }).promise;
+      if (context) {
+        context.fillStyle = "#FFFFFF";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        // @ts-expect-error PDF.js typing variations
+        await page.render({ canvasContext: context, viewport }).promise;
 
-      const blob: Blob = await new Promise((resolve) =>
-        canvas.toBlob((b) => resolve(b!), mimeType, 0.92)
-      );
-      const dataUrl = canvas.toDataURL(mimeType, 0.92);
+        const blob: Blob = await new Promise((resolve) =>
+          canvas.toBlob((b) => resolve(b!), mimeType, 0.92)
+        );
 
-      results.push({ pageNumber: pageNum, blob, dataUrl });
+        // Zero canvas memory immediately
+        canvas.width = 1;
+        canvas.height = 1;
+
+        const dataUrl = URL.createObjectURL(blob);
+        results.push({ pageNumber: pageNum, blob, dataUrl });
+      }
+
+      if (onProgress) {
+        onProgress(idx + 1, indices.length);
+      }
+
+      // Keep UI at 60 FPS
+      await yieldToMain(8);
     }
-
-    if (onProgress) {
-      onProgress(idx + 1, indices.length);
+  } finally {
+    try {
+      await pdfDoc.cleanup?.();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (pdfDoc as any).destroy?.();
+      await loadingTask.destroy?.();
+    } catch {
+      // ignore
     }
   }
 
@@ -1266,7 +1463,7 @@ export async function convertImagesToPdf(
     } else if (img.type === "image/png" || img.file.name.match(/\.png$/i)) {
       embeddedImage = await pdfDoc.embedPng(img.buffer);
     } else {
-      const blob = new Blob([img.buffer as ArrayBuffer], { type: img.type });
+      const blob = new Blob([img.buffer], { type: img.type });
       const imgUrl = URL.createObjectURL(blob);
       const htmlImg = new Image();
       await new Promise((resolve, reject) => {
@@ -1285,6 +1482,8 @@ export async function convertImagesToPdf(
       const pngBlob: Blob = await new Promise((resolve) =>
         canvas.toBlob((b) => resolve(b!), "image/png")
       );
+      canvas.width = 1;
+      canvas.height = 1;
       const pngBuffer = await pngBlob.arrayBuffer();
       embeddedImage = await pdfDoc.embedPng(pngBuffer);
     }

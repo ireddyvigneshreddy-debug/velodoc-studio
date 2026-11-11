@@ -9,6 +9,7 @@ import {
   updatePdfMetadata,
 } from "@/lib/pdf-engine";
 import { sessionHistory } from "@/lib/session-history";
+import { createPdfBlob } from "@/lib/utils";
 import {
   FileSearch,
   ShieldCheck,
@@ -30,7 +31,7 @@ export function MetadataPdfTool() {
   useEffect(() => {
     const chained = sessionHistory.consumeChainedFile();
     if (chained && chained.mimeType === "application/pdf") {
-      const blob = new Blob([chained.data.buffer as ArrayBuffer], { type: "application/pdf" });
+      const blob = createPdfBlob(chained.data);
       const file = new File([blob], chained.filename, { type: "application/pdf" });
       handleFileAdded([file]);
     }
@@ -83,7 +84,7 @@ export function MetadataPdfTool() {
       );
       const endTime = performance.now();
 
-      const blob = new Blob([updatedBytes.buffer as ArrayBuffer], { type: "application/pdf" });
+      const blob = createPdfBlob(updatedBytes);
       const downloadUrl = URL.createObjectURL(blob);
       const durationMs = endTime - startTime;
 

@@ -1,16 +1,21 @@
 export type ToolCategory =
-  | "All Tools"
-  | "Organize PDF"
-  | "Optimize & Compress"
-  | "Security, Sign & Redact"
-  | "Convert"
-  | "Document Intelligence";
+  | "All Tools (19)"
+  | "Shrink & Compress"
+  | "Merge & Split"
+  | "Edit Pages"
+  | "Convert Formats"
+  | "Sign, Redact & Compare";
+
+export type ToolDomain = "all" | "pdf" | "image";
 
 export interface ToolDefinition {
   id: string;
   name: string;
   category: ToolCategory;
+  toolType: "pdf" | "image";
   description: string;
+  shortDesc: string; // Plain-English ~6-word explanation
+  inputOutputBadge: string; // e.g. "PDF → Exact KB", "Batch 30x"
   icon: string;
   color: string;
   badge?: string;
@@ -29,6 +34,15 @@ export interface PageThumbnail {
   selected?: boolean;
 }
 
+export type BatchItemStatus =
+  | "idle"
+  | "queued"
+  | "loading"
+  | "processing"
+  | "ready"
+  | "done"
+  | "error";
+
 export interface UploadedFileItem {
   id: string;
   file: File;
@@ -36,9 +50,17 @@ export interface UploadedFileItem {
   size: number;
   pageCount?: number;
   thumbnails?: PageThumbnail[];
-  status: "idle" | "loading" | "ready" | "error";
+  status: BatchItemStatus;
+  progress?: number;
+  progressMsg?: string;
   error?: string;
-  customPageRange?: string; // e.g. "1-3, 5" for merge
+  customPageRange?: string; // e.g. "1-3, 5" for merge/split
+  processedBlob?: Blob;
+  processedBytes?: Uint8Array;
+  processedSize?: number;
+  processedName?: string;
+  previewUrl?: string;
+  metrics?: ProcessingMetrics;
 }
 
 export interface ProcessingMetrics {
@@ -50,7 +72,23 @@ export interface ProcessingMetrics {
   downloadUrl: string;
   downloadFilename: string;
   pageCount?: number;
-  targetAccuracy?: string; // e.g. "Exact (100.0% match)"
+  targetAccuracy?: string; // e.g. "Exact (99.8% match)"
+}
+
+export interface BatchProcessingSummary {
+  totalFiles: number;
+  completedFiles: number;
+  successfulFiles?: number;
+  failedFiles?: number;
+  totalOriginalSize: number;
+  totalProcessedSize: number;
+  totalSavedBytes: number;
+  overallSavedPercentage?: number;
+  totalDurationMs: number;
+  durationMs?: number;
+  zipBlob?: Blob;
+  zipFilename?: string;
+  items?: UploadedFileItem[];
 }
 
 export interface SessionHistoryItem {

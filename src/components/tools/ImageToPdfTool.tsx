@@ -17,7 +17,7 @@ import {
   Layers,
 } from "lucide-react";
 import { sessionHistory } from "@/lib/session-history";
-import { createPdfBlob } from "@/lib/utils";
+import { createPdfBlob, createSafeFile } from "@/lib/utils";
 
 interface ImagePreviewItem extends UploadedFileItem {
   previewUrl: string;
@@ -57,9 +57,7 @@ export function ImageToPdfTool() {
   useEffect(() => {
     const chained = sessionHistory.consumeChainedFile();
     if (chained) {
-      const file = new File([chained.data.buffer as ArrayBuffer], chained.filename, {
-        type: chained.mimeType,
-      });
+      const file = createSafeFile(chained.data, chained.filename, chained.mimeType);
       handleFilesAdded([file]);
     }
   }, [handleFilesAdded]);

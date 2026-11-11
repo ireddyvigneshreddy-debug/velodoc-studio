@@ -152,6 +152,15 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                         <span className="font-medium text-sm text-white">
                           {tool.name}
                         </span>
+                        <span
+                          className={`text-[9px] font-bold px-1.5 py-0.2 rounded uppercase tracking-wider ${
+                            tool.toolType === "image"
+                              ? "bg-pink-500/10 text-pink-300 border border-pink-500/20"
+                              : "bg-cyan-500/10 text-cyan-300 border border-cyan-500/20"
+                          }`}
+                        >
+                          {tool.toolType === "image" ? "IMG" : "PDF"}
+                        </span>
                         <span className="text-[10px] uppercase font-semibold tracking-wider px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-400">
                           {tool.category}
                         </span>

@@ -12,6 +12,7 @@ import {
   InsertPagesOptions,
 } from "@/lib/pdf-engine";
 import { sessionHistory } from "@/lib/session-history";
+import { createPdfBlob } from "@/lib/utils";
 import {
   FilePlus,
   Loader2,
@@ -45,7 +46,7 @@ export function AddPagesTool() {
   useEffect(() => {
     const chained = sessionHistory.consumeChainedFile();
     if (chained && chained.mimeType === "application/pdf") {
-      const blob = new Blob([chained.data.buffer as ArrayBuffer], { type: "application/pdf" });
+      const blob = createPdfBlob(chained.data);
       const file = new File([blob], chained.filename, { type: "application/pdf" });
       handleBaseFileAdded([file]);
     }
@@ -152,7 +153,7 @@ export function AddPagesTool() {
       );
       const endTime = performance.now();
 
-      const blob = new Blob([newPdfBytes.buffer as ArrayBuffer], { type: "application/pdf" });
+      const blob = createPdfBlob(newPdfBytes);
       const downloadUrl = URL.createObjectURL(blob);
       const durationMs = endTime - startTime;
 
@@ -160,7 +161,7 @@ export function AddPagesTool() {
         baseFile.name.substring(0, baseFile.name.lastIndexOf(".")) ||
         baseFile.name;
 
-      const pageCount = await getPdfPageCount(newPdfBytes.buffer as ArrayBuffer);
+      const pageCount = await getPdfPageCount(newPdfBytes);
 
       setOutputBytes(newPdfBytes);
       setMetrics({
