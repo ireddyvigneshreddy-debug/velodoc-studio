@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { DropZone } from "@/components/common/DropZone";
 import { ResultPreviewStudio } from "@/components/ResultPreviewStudio";
+import { CameraScannerModal } from "@/components/CameraScannerModal";
 import { UploadedFileItem, ProcessingMetrics } from "@/types";
 import { convertImagesToPdf, ImagesToPdfOptions } from "@/lib/pdf-engine";
 import {
@@ -15,6 +16,7 @@ import {
   Trash2,
   Maximize2,
   Layers,
+  Camera,
 } from "lucide-react";
 import { sessionHistory } from "@/lib/session-history";
 import { createPdfBlob, createSafeFile } from "@/lib/utils";
@@ -37,6 +39,9 @@ export function ImageToPdfTool() {
   const [originalBytes, setOriginalBytes] = useState<ArrayBuffer | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Pro Camera Scanner Studio State
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+
   const handleFilesAdded = useCallback((newFiles: File[]) => {
     setErrorMessage(null);
     setMetrics(null);
@@ -53,12 +58,19 @@ export function ImageToPdfTool() {
     setImages((prev) => [...prev, ...newItems]);
   }, []);
 
-  // Check for chained file on mount
+  // Check for chained file or URL query param on mount
   useEffect(() => {
     const chained = sessionHistory.consumeChainedFile();
     if (chained) {
       const file = createSafeFile(chained.data, chained.filename, chained.mimeType);
       handleFilesAdded([file]);
+    }
+
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("scan") === "true" || params.get("camera") === "true") {
+        setIsScannerOpen(true);
+      }
     }
   }, [handleFilesAdded]);
 
@@ -85,7 +97,7 @@ export function ImageToPdfTool() {
 
   const handleConvert = async () => {
     if (images.length === 0) {
-      setErrorMessage("Please upload at least one image.");
+      setErrorMessage("Please upload or scan at least one image.");
       return;
     }
 
@@ -148,8 +160,78 @@ export function ImageToPdfTool() {
     }
   };
 
+  // Instant 1-Click PDF generation directly from Camera Scanner Studio
+  const handleInstantGeneratePdf = async (scannedFiles: File[]) => {
+    if (scannedFiles.length === 0) return;
+
+    setIsProcessing(true);
+    setErrorMessage(null);
+    const startTime = performance.now();
+
+    try {
+      const imageInputs = [];
+      let totalOriginalSize = 0;
+
+      for (const file of scannedFiles) {
+        totalOriginalSize += file.size;
+        const buf = await file.arrayBuffer();
+        imageInputs.push({
+          file,
+          buffer: buf,
+          type: file.type || "image/jpeg",
+        });
+      }
+
+      const options: ImagesToPdfOptions = {
+        pageSize,
+        orientation,
+        margin,
+      };
+
+      const pdfBytes = await convertImagesToPdf(imageInputs, options);
+      const endTime = performance.now();
+      const durationMs = endTime - startTime;
+
+      const blob = createPdfBlob(pdfBytes);
+      const downloadUrl = URL.createObjectURL(blob);
+      const filename = `VeloDoc_CameraScan_${new Date().toISOString().slice(0, 10)}.pdf`;
+
+      setOutputBytes(pdfBytes);
+      if (imageInputs.length > 0) {
+        setOriginalBytes(imageInputs[0].buffer);
+      }
+
+      setMetrics({
+        originalSize: totalOriginalSize,
+        processedSize: pdfBytes.byteLength,
+        savedBytes: 0,
+        savedPercentage: 0,
+        durationMs,
+        downloadUrl,
+        downloadFilename: filename,
+        pageCount: scannedFiles.length,
+        targetAccuracy: "Pro Camera Lossless PDF",
+      });
+    } catch (err: unknown) {
+      console.error("Instant PDF generation error:", err);
+      setErrorMessage(
+        err instanceof Error ? err.message : "Failed to generate PDF from camera scans."
+      );
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6">
+      {/* Active Camera Scanner Studio Modal */}
+      <CameraScannerModal
+        isOpen={isScannerOpen}
+        onClose={() => setIsScannerOpen(false)}
+        onAddScansToQueue={handleFilesAdded}
+        onInstantGeneratePdf={handleInstantGeneratePdf}
+      />
+
       {metrics ? (
         <ResultPreviewStudio
           metrics={metrics}
@@ -160,12 +242,49 @@ export function ImageToPdfTool() {
         />
       ) : (
         <>
+          {/* Prominent Pro Camera Studio Hero Banner */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-indigo-950/70 via-[#12141D] to-[#12141D] border border-cyan-500/30 shadow-2xl relative overflow-hidden">
+            <div className="flex items-center gap-3.5 relative z-10">
+              <div className="p-3 rounded-2xl bg-gradient-to-br from-indigo-500 via-cyan-500 to-emerald-500 text-white shadow-lg shadow-cyan-500/20 shrink-0">
+                <Camera className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <h3 className="text-sm sm:text-base font-bold text-white tracking-tight">
+                    Pro Camera &amp; Document Scanner
+                  </h3>
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 uppercase">
+                    4K Studio
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 max-w-md">
+                  Snap documents, receipts, and book pages with hands-free auto-shutter, high-contrast B&amp;W xerox filters, and instant PDF compilation.
+                </p>
+              </div>
+            </div>
+
+            <div className="relative z-10 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsScannerOpen(true)}
+                className="w-full sm:w-auto px-5 py-3 rounded-xl bg-gradient-to-r from-indigo-600 via-cyan-500 to-emerald-500 hover:from-indigo-500 hover:to-emerald-400 text-white font-bold text-xs sm:text-sm shadow-xl shadow-cyan-500/25 flex items-center justify-center gap-2.5 transition-all transform hover:-translate-y-0.5 cursor-pointer"
+              >
+                <Camera className="w-4 h-4 text-white" />
+                <span>Scan with Camera</span>
+                <span className="px-1.5 py-0.5 rounded bg-black/30 text-[10px] font-mono text-cyan-200">
+                  Rapid Batch
+                </span>
+              </button>
+            </div>
+          </div>
+
           <DropZone
             files={images}
             onFilesAdded={handleFilesAdded}
             onRemoveFile={handleRemove}
             onMoveFile={handleMove}
             onClearAll={() => setImages([])}
+            onOpenScanner={() => setIsScannerOpen(true)}
             acceptedFileTypes={{
               "image/jpeg": [".jpg", ".jpeg"],
               "image/png": [".png"],
@@ -173,7 +292,7 @@ export function ImageToPdfTool() {
             }}
             multiple={true}
             title="Drop JPG, PNG, or WebP Images"
-            subtitle="Arrange photos and convert into a beautifully styled multi-page PDF document"
+            subtitle="or click to browse from your device, or use the Pro Camera Scanner above"
           />
 
           {images.length > 0 && (
@@ -244,7 +363,17 @@ export function ImageToPdfTool() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs text-slate-400 px-1">
                   <span>Image Sequence ({images.length} images)</span>
-                  <span>Drag or use arrows to adjust order</span>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setIsScannerOpen(true)}
+                      className="text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-semibold transition-colors cursor-pointer"
+                    >
+                      <Camera className="w-3.5 h-3.5" />
+                      <span>Scan More Pages</span>
+                    </button>
+                    <span>Drag or use arrows to adjust order</span>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -311,7 +440,7 @@ export function ImageToPdfTool() {
               )}
 
               {/* Action Trigger */}
-              <div className="flex justify-end">
+              <div className="flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={handleConvert}

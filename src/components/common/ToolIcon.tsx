@@ -19,6 +19,7 @@ import {
   SunMedium,
   GitCompare,
   FileSearch,
+  Camera,
   LucideProps,
 } from "lucide-react";
 
@@ -42,6 +43,7 @@ export const TOOL_ICON_MAP: Record<string, React.ComponentType<LucideProps>> = {
   SunMedium,
   GitCompare,
   FileSearch,
+  Camera,
 };
 
 interface ToolIconProps {

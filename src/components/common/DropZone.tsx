@@ -14,6 +14,7 @@ import {
   Loader2,
   Layers,
   Image as ImageIcon,
+  Camera,
 } from "lucide-react";
 import { UploadedFileItem } from "@/types";
 import { formatFileSize } from "@/lib/utils";
@@ -31,6 +32,7 @@ interface DropZoneProps {
   subtitle?: string;
   maxFiles?: number;
   showSampleButton?: boolean;
+  onOpenScanner?: () => void;
 }
 
 export function DropZone({
@@ -45,6 +47,7 @@ export function DropZone({
   subtitle = "or click to browse from your device (accepts up to 30+ files)",
   maxFiles = 35,
   showSampleButton = true,
+  onOpenScanner,
 }: DropZoneProps) {
   const [isGeneratingSample, setIsGeneratingSample] = useState(false);
   const [isGeneratingBatch, setIsGeneratingBatch] = useState(false);
@@ -170,10 +173,24 @@ export function DropZone({
             </span>
           </div>
 
-          {/* 1-Click Test Buttons */}
-          {showSampleButton && (
+          {/* 1-Click Test & Camera Buttons */}
+          {(showSampleButton || onOpenScanner) && (
             <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
-              {isPdfTool && (
+              {onOpenScanner && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenScanner();
+                  }}
+                  className="px-3.5 py-1.5 rounded-full bg-gradient-to-r from-cyan-500/20 via-indigo-500/20 to-emerald-500/20 hover:from-cyan-500/30 hover:to-emerald-500/30 border border-cyan-500/40 text-cyan-200 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                >
+                  <Camera className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Scan with Camera (Pro Studio)</span>
+                </button>
+              )}
+
+              {showSampleButton && isPdfTool && (
                 <button
                   type="button"
                   onClick={handleLoadSingleSample}
@@ -226,15 +243,27 @@ export function DropZone({
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Document Queue ({files.length} {files.length === 1 ? "file" : "files"})
             </span>
-            {onClearAll && files.length > 1 && (
-              <button
-                type="button"
-                onClick={onClearAll}
-                className="text-xs text-rose-400 hover:text-rose-300 transition-colors"
-              >
-                Clear all
-              </button>
-            )}
+            <div className="flex items-center gap-3">
+              {onOpenScanner && (
+                <button
+                  type="button"
+                  onClick={onOpenScanner}
+                  className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-medium transition-colors cursor-pointer"
+                >
+                  <Camera className="w-3 h-3" />
+                  <span>+ Scan More</span>
+                </button>
+              )}
+              {onClearAll && files.length > 1 && (
+                <button
+                  type="button"
+                  onClick={onClearAll}
+                  className="text-xs text-rose-400 hover:text-rose-300 transition-colors"
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="space-y-1.5 max-h-72 overflow-y-auto pr-1">

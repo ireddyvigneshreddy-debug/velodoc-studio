@@ -19,6 +19,13 @@ export const TOOL_CATEGORIES: ToolCategory[] = [
 
 export const QUICK_INTENT_PRESETS: QuickIntentPreset[] = [
   {
+    id: "camera-scan",
+    label: "Camera to PDF Scanner",
+    toolId: "image-to-pdf",
+    path: "/tools/image-to-pdf?scan=true",
+    description: "4K camera document scanner with auto-shutter and adaptive B&W filters",
+  },
+  {
     id: "under-200kb",
     label: "Need PDF under 200 KB?",
     toolId: "compress-pdf",
@@ -234,15 +241,15 @@ export const TOOLS: ToolDefinition[] = [
   // ==========================================
   {
     id: "image-to-pdf",
-    name: "Images to PDF Builder",
+    name: "Images & Camera to PDF",
     category: "Convert Formats",
     toolType: "image",
-    description: "Transform multi-image collections into formatted PDFs with custom A4/Letter sizing, orientations, and margins.",
-    shortDesc: "Compile photos into clean PDF documents",
-    inputOutputBadge: "Images → 1 PDF",
-    icon: "FileImage",
+    description: "Scan documents with 4K camera studio or compile multi-image collections into formatted PDFs with custom A4/Letter sizing and scanner filters.",
+    shortDesc: "4K Camera scanner & photo to PDF compiler",
+    inputOutputBadge: "Camera & Img → PDF",
+    icon: "Camera",
     color: "from-violet-500 to-purple-600",
-    badge: "Multi-Image Layout",
+    badge: "4K Camera Studio",
     path: "/tools/image-to-pdf",
     acceptedFileTypes: {
       "image/jpeg": [".jpg", ".jpeg"],
