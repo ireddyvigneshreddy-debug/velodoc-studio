@@ -282,6 +282,28 @@ export function PdfToTextTool() {
               <span>{errorMessage}</span>
             </div>
           )}
+
+          {/* Mobile Sticky Thumb-Zone Action Bar */}
+          {extractedData && (
+            <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-safe bg-[#05060B]/90 backdrop-blur-xl border-t border-white/10 md:hidden flex items-center justify-between gap-3 shadow-2xl">
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="flex-1 py-3 px-3 rounded-xl bg-white/10 active:bg-white/20 text-white font-semibold text-xs flex items-center justify-center gap-1.5"
+              >
+                {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copied ? "Copied!" : "Copy Text"}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDownload("txt")}
+                className="flex-1 py-3 px-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 active:from-emerald-600 active:to-teal-700 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-lg"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Save .TXT</span>
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

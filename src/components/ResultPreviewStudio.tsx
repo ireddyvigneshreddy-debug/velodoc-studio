@@ -21,6 +21,7 @@ import {
   Sparkles,
   Archive,
   FileText,
+  Share2,
 } from "lucide-react";
 import { ProcessingMetrics } from "@/types";
 import { formatFileSize, formatTimeMs } from "@/lib/utils";
@@ -103,6 +104,13 @@ export function ResultPreviewStudio({
   const [isEditingName, setIsEditingName] = useState(false);
   const [showChainMenu, setShowChainMenu] = useState(false);
   const [isZipping, setIsZipping] = useState(false);
+  const [canShare, setCanShare] = useState(false);
+
+  useEffect(() => {
+    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+      setCanShare(true);
+    }
+  }, []);
 
   // Sync filename when switching items
   useEffect(() => {
@@ -202,6 +210,35 @@ export function ResultPreviewStudio({
       activeItem?.outputBlob ||
       new Blob([currentOutputBytes! as unknown as BlobPart], { type: outputMimeType });
     triggerFileDownload(blob, filename);
+  };
+
+  const handleNativeShare = async () => {
+    if (!currentOutputBytes && !activeItem?.outputBlob) return;
+    try {
+      const blob =
+        activeItem?.outputBlob ||
+        new Blob([currentOutputBytes! as unknown as BlobPart], { type: outputMimeType });
+      const file = new File([blob], filename, { type: outputMimeType });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: filename,
+          text: `Processed document with VeloDoc Pro: ${filename}`,
+        });
+      } else {
+        await navigator.share({
+          title: filename,
+          text: `Processed document with VeloDoc Pro: ${filename}`,
+          url: window.location.href,
+        });
+      }
+    } catch (err) {
+      if ((err as Error)?.name !== "AbortError") {
+        console.warn("Share failed:", err);
+        handleDownloadSingle();
+      }
+    }
   };
 
   const handleDownloadAllZip = async () => {
@@ -639,6 +676,19 @@ export function ResultPreviewStudio({
             </button>
           )}
 
+          {/* Native Web Share API Button (Mobile & Desktop supported) */}
+          {canShare && (
+            <button
+              type="button"
+              onClick={handleNativeShare}
+              className="w-full sm:w-auto px-4 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all border border-white/[0.1] cursor-pointer"
+              title="Share file directly via AirDrop, WhatsApp, Mail or save to device"
+            >
+              <Share2 className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Share</span>
+            </button>
+          )}
+
           {/* Primary Download Current File Button */}
           <button
             type="button"
@@ -649,6 +699,39 @@ export function ResultPreviewStudio({
             <span>Download {filename}</span>
           </button>
         </div>
+      </div>
+
+      {/* Mobile Sticky Thumb-Zone Action Bar for Result Preview */}
+      <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-safe bg-[#05060B]/90 backdrop-blur-xl border-t border-white/10 md:hidden flex items-center justify-between gap-2.5 shadow-2xl">
+        {canShare && (
+          <button
+            type="button"
+            onClick={handleNativeShare}
+            className="p-3 rounded-xl glass-pill text-white flex items-center justify-center shrink-0 border border-white/15 active:scale-95"
+            title="Share Document"
+          >
+            <Share2 className="w-4 h-4 text-cyan-400" />
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={handleDownloadSingle}
+          className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-cyan-500 active:from-indigo-600 active:to-cyan-600 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg"
+        >
+          <Download className="w-4 h-4" />
+          <span className="truncate">Download {filename}</span>
+        </button>
+        {hasMultipleBatch && (
+          <button
+            type="button"
+            onClick={handleDownloadAllZip}
+            disabled={isZipping}
+            className="p-3 rounded-xl bg-white/[0.08] text-white flex items-center justify-center shrink-0 border border-white/10"
+            title="Download All ZIP"
+          >
+            <Archive className="w-4 h-4 text-cyan-400" />
+          </button>
+        )}
       </div>
     </div>
   );

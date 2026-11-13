@@ -515,6 +515,33 @@ export function AddPagesTool() {
               </div>
             </div>
           )}
+
+          {/* Mobile Sticky Thumb-Zone Action Bar */}
+          {baseFile && !metrics && (
+            <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-safe bg-[#05060B]/90 backdrop-blur-xl border-t border-white/10 md:hidden flex items-center justify-between gap-3 shadow-2xl">
+              <div className="text-xs text-zinc-300 font-mono truncate max-w-[120px]">
+                {insertPosition === 0 ? "At start" : `After p.${insertPosition}`}
+              </div>
+              <button
+                type="button"
+                disabled={isProcessing || (insertType === "pdf" && !auxFile)}
+                onClick={handleInsert}
+                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 active:from-emerald-600 active:to-teal-700 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg disabled:opacity-40"
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Inserting...</span>
+                  </>
+                ) : (
+                  <>
+                    <PlusCircle className="w-3.5 h-3.5" />
+                    <span>Insert &amp; Preview PDF</span>
+                  </>
+                )}
+              </button>
+            </div>
+          )}
         </>
       )}
     </div>

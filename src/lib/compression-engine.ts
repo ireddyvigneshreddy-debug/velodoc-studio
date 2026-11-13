@@ -232,7 +232,14 @@ async function renderPdfPagesToCompressedDocument(
 
   for (let i = 1; i <= totalPages; i++) {
     const page = await pdfDoc.getPage(i);
-    const viewport = page.getViewport({ scale });
+    let effectiveScale = scale;
+    // Cap canvas rendering dimensions at 2048px on mobile devices to prevent iOS Safari memory exhaustion
+    const rawViewport = page.getViewport({ scale: effectiveScale });
+    const maxDim = Math.max(rawViewport.width, rawViewport.height);
+    if (maxDim > 2048) {
+      effectiveScale = effectiveScale * (2048 / maxDim);
+    }
+    const viewport = page.getViewport({ scale: effectiveScale });
 
     const canvas = document.createElement("canvas");
     canvas.width = Math.floor(viewport.width);

@@ -277,6 +277,33 @@ export function OrganizePdfTool() {
               />
             </div>
           )}
+
+          {/* Mobile Sticky Thumb-Zone Action Bar */}
+          {fileItem && !metrics && (
+            <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-safe bg-[#05060B]/90 backdrop-blur-xl border-t border-white/10 md:hidden flex items-center justify-between gap-3 shadow-2xl">
+              <div className="text-xs text-zinc-300 font-mono">
+                <span className="font-semibold text-purple-400">{pages.length}</span> pages
+              </div>
+              <button
+                type="button"
+                disabled={isProcessing || pages.length === 0}
+                onClick={handleSave}
+                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 active:from-purple-600 active:to-indigo-700 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg disabled:opacity-40"
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <RotateCw className="w-3.5 h-3.5" />
+                    <span>Save &amp; Preview PDF</span>
+                  </>
+                )}
+              </button>
+            </div>
+          )}
         </>
       )}
     </div>

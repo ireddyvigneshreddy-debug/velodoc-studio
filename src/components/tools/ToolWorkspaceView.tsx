@@ -250,6 +250,27 @@ export function ToolWorkspaceView({ tool }: ToolWorkspaceViewProps) {
           </div>
         </div>
 
+        {/* Visual 1 -> 2 -> 3 Step Guide Bar */}
+        <div className="flex items-center justify-between max-w-xl mx-auto px-4 py-2 rounded-2xl glass-pill text-xs shadow-inner">
+          <div className="flex items-center gap-1.5 font-semibold text-emerald-400">
+            <span className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-[10px] font-bold font-mono">1</span>
+            <span className="hidden sm:inline">Select or Scan Files</span>
+            <span className="sm:hidden">1. Select</span>
+          </div>
+          <ChevronRight className="w-3.5 h-3.5 text-zinc-600" />
+          <div className="flex items-center gap-1.5 font-semibold text-indigo-300">
+            <span className="w-5 h-5 rounded-full bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-[10px] font-bold font-mono">2</span>
+            <span className="hidden sm:inline">Pick Your Option</span>
+            <span className="sm:hidden">2. Options</span>
+          </div>
+          <ChevronRight className="w-3.5 h-3.5 text-zinc-600" />
+          <div className="flex items-center gap-1.5 font-semibold text-cyan-300">
+            <span className="w-5 h-5 rounded-full bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-[10px] font-bold font-mono">3</span>
+            <span className="hidden sm:inline">Preview &amp; Save</span>
+            <span className="sm:hidden">3. Save</span>
+          </div>
+        </div>
+
         {/* Dynamic Tool Interactive Workspace */}
         <div className="pt-1">
           <ToolErrorBoundary key={tool.id} fallbackTitle={`${tool.name} Recovered`}>

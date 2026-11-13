@@ -134,8 +134,8 @@ export function SignPdfTool() {
     };
   }, [originalBuffer, currentPage]);
 
-  // Drawing Pad Handlers
-  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  // Drawing Pad Handlers (Pointer Events with Touch-Action: None)
+  const startDrawing = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const canvas = drawCanvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -154,7 +154,7 @@ export function SignPdfTool() {
     setIsDrawing(true);
   };
 
-  const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const draw = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!isDrawing) return;
     const canvas = drawCanvasRef.current;
     if (!canvas) return;
@@ -298,9 +298,9 @@ export function SignPdfTool() {
     setSelectedAnnotationId(newAnn.id);
   };
 
-  // Interactive Drag & Drop Handlers on Canvas Overlays
-  const handleAnnotationMouseDown = (
-    e: React.MouseEvent<HTMLDivElement>,
+  // Interactive Drag & Drop Handlers on Canvas Overlays (Unified Pointer & Touch)
+  const handleAnnotationPointerDown = (
+    e: React.PointerEvent<HTMLDivElement>,
     annId: string
   ) => {
     e.stopPropagation();
@@ -318,8 +318,8 @@ export function SignPdfTool() {
     };
   };
 
-  const handleStageMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleStagePointerMove = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
       if (!draggingId || !dragStartRef.current || !stageRef.current) return;
 
       const rect = stageRef.current.getBoundingClientRect();
@@ -353,7 +353,7 @@ export function SignPdfTool() {
     [draggingId]
   );
 
-  const handleStageMouseUp = useCallback(() => {
+  const handleStagePointerUp = useCallback(() => {
     setDraggingId(null);
     dragStartRef.current = null;
   }, []);
@@ -493,11 +493,11 @@ export function SignPdfTool() {
                           ref={drawCanvasRef}
                           width={340}
                           height={120}
-                          onMouseDown={startDrawing}
-                          onMouseMove={draw}
-                          onMouseUp={stopDrawing}
-                          onMouseLeave={stopDrawing}
-                          className="w-full h-28 cursor-crosshair block"
+                          onPointerDown={startDrawing}
+                          onPointerMove={draw}
+                          onPointerUp={stopDrawing}
+                          onPointerLeave={stopDrawing}
+                          className="w-full h-28 cursor-crosshair block touch-none"
                         />
                       </div>
 
@@ -749,9 +749,9 @@ export function SignPdfTool() {
                 {/* Document Placement Stage */}
                 <div
                   ref={stageRef}
-                  onMouseMove={handleStageMouseMove}
-                  onMouseUp={handleStageMouseUp}
-                  className="relative border border-white/15 rounded-2xl overflow-hidden bg-black/60 shadow-2xl max-w-full select-none"
+                  onPointerMove={handleStagePointerMove}
+                  onPointerUp={handleStagePointerUp}
+                  className="relative border border-white/15 rounded-2xl overflow-hidden bg-black/60 shadow-2xl max-w-full select-none touch-none"
                 >
                   <canvas ref={pageCanvasRef} className="max-w-full h-auto block" />
 
@@ -761,7 +761,7 @@ export function SignPdfTool() {
                     return (
                       <div
                         key={ann.id}
-                        onMouseDown={(e) => handleAnnotationMouseDown(e, ann.id)}
+                        onPointerDown={(e) => handleAnnotationPointerDown(e, ann.id)}
                         style={{
                           position: "absolute",
                           left: `${ann.xPercent}%`,
@@ -806,7 +806,7 @@ export function SignPdfTool() {
                               setSelectedAnnotationId(null);
                             }
                           }}
-                          className="absolute -top-2.5 -right-2.5 p-1 rounded-full bg-rose-600 text-white opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-rose-500 cursor-pointer"
+                          className="absolute -top-2.5 -right-2.5 p-1 rounded-full bg-rose-600 text-white opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity shadow-md hover:bg-rose-500 cursor-pointer"
                           title="Delete"
                         >
                           <Trash2 className="w-3 h-3" />
@@ -820,6 +820,33 @@ export function SignPdfTool() {
                   Click and drag annotations anywhere across the page. Use the controls on the left to scale.
                 </span>
               </div>
+            </div>
+          )}
+
+          {/* Mobile Sticky Thumb-Zone Action Bar */}
+          {annotations.length > 0 && !metrics && (
+            <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-safe bg-[#05060B]/90 backdrop-blur-xl border-t border-white/10 md:hidden flex items-center justify-between gap-3 shadow-2xl">
+              <div className="text-xs text-zinc-300 font-mono">
+                <span className="font-semibold text-white">{annotations.length}</span> annotation{annotations.length > 1 ? "s" : ""}
+              </div>
+              <button
+                type="button"
+                disabled={isProcessing}
+                onClick={handleSaveDocument}
+                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 active:from-indigo-600 active:to-violet-700 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg disabled:opacity-40"
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Baking...</span>
+                  </>
+                ) : (
+                  <>
+                    <PenTool className="w-3.5 h-3.5" />
+                    <span>Bake & Preview Signed PDF</span>
+                  </>
+                )}
+              </button>
             </div>
           )}
         </>

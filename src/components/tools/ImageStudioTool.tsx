@@ -481,6 +481,28 @@ export function ImageStudioTool() {
                   )}
                 </button>
               </div>
+
+              {/* Mobile Thumb-Zone Sticky Action Bar */}
+              <div className="fixed bottom-0 inset-x-0 z-40 pb-safe md:hidden p-3 bg-[#05060B]/95 backdrop-blur-2xl border-t border-white/15 shadow-[0_-8px_30px_rgba(0,0,0,0.8)]">
+                <button
+                  type="button"
+                  onClick={handleProcess}
+                  disabled={isProcessing || images.length === 0}
+                  className="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(99,102,241,0.5)] active:scale-[0.98] transition-all cursor-pointer"
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Compressing ({progressPercent}%)...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4" />
+                      <span>Compress {images.length} Image{images.length > 1 ? "s" : ""}</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           )}
         </>

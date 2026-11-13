@@ -101,8 +101,8 @@ export function HeroSection() {
             Zero cloud uploads • Zero tracking • Runs 100% in local browser memory.
           </p>
 
-          {/* 1-Click Everyday Intent Chips */}
-          <div className="pt-1.5 flex flex-wrap items-center justify-center gap-2 max-w-4xl mx-auto">
+          {/* 1-Click Everyday Intent Chips (Swipeable on Mobile) */}
+          <div className="pt-1.5 flex items-center sm:justify-center overflow-x-auto no-scrollbar snap-x snap-mandatory gap-2 max-w-4xl mx-auto px-1 sm:flex-wrap pb-1">
             {EVERYDAY_INTENT_CHIPS.map((chip) => {
               const Icon = chip.icon;
               if (chip.isCameraModal) {
@@ -111,7 +111,7 @@ export function HeroSection() {
                     key={chip.id}
                     type="button"
                     onClick={() => setCameraModalOpen(true)}
-                    className={`group inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 shadow-sm cursor-pointer hover:scale-[1.03] active:scale-[0.98] ${chip.color}`}
+                    className={`group shrink-0 snap-start inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 shadow-sm cursor-pointer hover:scale-[1.03] active:scale-[0.98] ${chip.color}`}
                   >
                     <Icon className="w-3.5 h-3.5 shrink-0" />
                     <span>{chip.label}</span>
@@ -124,7 +124,7 @@ export function HeroSection() {
                 <Link
                   key={chip.id}
                   href={chip.href}
-                  className={`group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-200 shadow-sm cursor-pointer hover:scale-[1.03] active:scale-[0.98] ${chip.color}`}
+                  className={`group shrink-0 snap-start inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-200 shadow-sm cursor-pointer hover:scale-[1.03] active:scale-[0.98] ${chip.color}`}
                 >
                   <Icon className="w-3.5 h-3.5 shrink-0" />
                   <span>{chip.label}</span>

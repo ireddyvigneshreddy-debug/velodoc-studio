@@ -39,6 +39,10 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: "#05060B",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -47,9 +51,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark scroll-smooth">
+    <html lang="en" className="dark scroll-smooth overflow-x-hidden">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#05060B] text-[#F8FAFC] flex flex-col min-h-screen selection:bg-indigo-500/30 selection:text-white relative`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#05060B] text-[#F8FAFC] flex flex-col min-h-dvh overflow-x-hidden selection:bg-indigo-500/30 selection:text-white relative`}
       >
         {/* Layer 1: Tactile Film-Grain Noise Texture Overlay */}
         <div
@@ -82,7 +86,7 @@ export default function RootLayout({
         />
 
         {/* App Content */}
-        <div className="relative z-10 flex flex-col min-h-screen">
+        <div className="relative z-10 flex flex-col min-h-dvh flex-1 overflow-x-hidden">
           <Navbar />
           <main className="flex-1">{children}</main>
           <Footer />

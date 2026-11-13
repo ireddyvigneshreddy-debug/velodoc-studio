@@ -189,29 +189,109 @@ export function PageNumbersTool() {
                     </select>
                   </div>
 
-                  {/* Position */}
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block">
-                      Position Alignment
-                    </label>
-                    <select
-                      value={settings.position}
-                      onChange={(e) =>
-                        setSettings({
-                          ...settings,
-                          position: e.target.value as PageNumberSettings["position"],
-                        })
-                      }
-                      className="w-full px-3 py-2.5 rounded-xl bg-black/40 border border-white/10 text-white text-xs focus:outline-none focus:border-indigo-500"
-                    >
-                      <option value="bottom-center">Bottom Center (Standard)</option>
-                      <option value="bottom-right">Bottom Right</option>
-                      <option value="bottom-left">Bottom Left</option>
-                      <option value="top-center">Top Center (Header)</option>
-                      <option value="top-right">Top Right (Header)</option>
-                      <option value="top-left">Top Left (Header)</option>
-                      <option value="alternating-margins">Alternating Book Margins (Odd Right, Even Left)</option>
-                    </select>
+                  {/* Position Alignment & Visual 9-Box Selector */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block font-mono">
+                        Position Alignment
+                      </label>
+                      <span className="text-[11px] text-cyan-400 font-mono capitalize">
+                        {settings.position.replace("-", " ")}
+                      </span>
+                    </div>
+
+                    {/* Visual 9-Box Page Simulator Grid */}
+                    <div className="p-3 rounded-2xl bg-black/40 border border-white/10 space-y-2.5">
+                      <div className="grid grid-cols-3 gap-1.5 aspect-[1.4/1] max-w-[220px] mx-auto p-2 bg-[#05060B] rounded-xl border border-white/10">
+                        {/* Top row */}
+                        <button
+                          type="button"
+                          onClick={() => setSettings({ ...settings, position: "top-left" })}
+                          className={`rounded-lg text-[10px] font-mono transition-all flex items-center justify-center cursor-pointer ${
+                            settings.position === "top-left"
+                              ? "bg-blue-600 text-white font-bold shadow-md ring-2 ring-blue-400"
+                              : "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
+                          }`}
+                        >
+                          TL
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSettings({ ...settings, position: "top-center" })}
+                          className={`rounded-lg text-[10px] font-mono transition-all flex items-center justify-center cursor-pointer ${
+                            settings.position === "top-center"
+                              ? "bg-blue-600 text-white font-bold shadow-md ring-2 ring-blue-400"
+                              : "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
+                          }`}
+                        >
+                          Top
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSettings({ ...settings, position: "top-right" })}
+                          className={`rounded-lg text-[10px] font-mono transition-all flex items-center justify-center cursor-pointer ${
+                            settings.position === "top-right"
+                              ? "bg-blue-600 text-white font-bold shadow-md ring-2 ring-blue-400"
+                              : "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
+                          }`}
+                        >
+                          TR
+                        </button>
+
+                        {/* Middle row (Page Body Placeholder) */}
+                        <div className="rounded-lg bg-white/[0.02] border border-dashed border-white/5 flex items-center justify-center text-[9px] text-zinc-600 font-mono col-span-3">
+                          Document Page Area
+                        </div>
+
+                        {/* Bottom row */}
+                        <button
+                          type="button"
+                          onClick={() => setSettings({ ...settings, position: "bottom-left" })}
+                          className={`rounded-lg text-[10px] font-mono transition-all flex items-center justify-center cursor-pointer ${
+                            settings.position === "bottom-left"
+                              ? "bg-blue-600 text-white font-bold shadow-md ring-2 ring-blue-400"
+                              : "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
+                          }`}
+                        >
+                          BL
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSettings({ ...settings, position: "bottom-center" })}
+                          className={`rounded-lg text-[10px] font-mono transition-all flex items-center justify-center cursor-pointer ${
+                            settings.position === "bottom-center"
+                              ? "bg-blue-600 text-white font-bold shadow-md ring-2 ring-blue-400"
+                              : "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
+                          }`}
+                        >
+                          Bottom
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSettings({ ...settings, position: "bottom-right" })}
+                          className={`rounded-lg text-[10px] font-mono transition-all flex items-center justify-center cursor-pointer ${
+                            settings.position === "bottom-right"
+                              ? "bg-blue-600 text-white font-bold shadow-md ring-2 ring-blue-400"
+                              : "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
+                          }`}
+                        >
+                          BR
+                        </button>
+                      </div>
+
+                      {/* Alternating Margins Pill */}
+                      <button
+                        type="button"
+                        onClick={() => setSettings({ ...settings, position: "alternating-margins" })}
+                        className={`w-full py-2 px-3 rounded-xl text-xs font-mono transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                          settings.position === "alternating-margins"
+                            ? "bg-blue-600 text-white font-semibold shadow-md ring-2 ring-blue-400"
+                            : "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10 border border-white/5"
+                        }`}
+                      >
+                        <span>📖 Alternating Book Margins (Odd Right, Even Left)</span>
+                      </button>
+                    </div>
                   </div>
 
                   {/* Bates specific inputs */}
@@ -325,6 +405,33 @@ export function PageNumbersTool() {
                   <span>{errorMessage}</span>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Mobile Sticky Thumb-Zone Action Bar */}
+          {fileItem && !metrics && (
+            <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-safe bg-[#05060B]/90 backdrop-blur-xl border-t border-white/10 md:hidden flex items-center justify-between gap-3 shadow-2xl">
+              <div className="text-xs text-zinc-300 font-mono">
+                <span className="font-semibold text-cyan-400 capitalize">{settings.position.replace("-", " ")}</span>
+              </div>
+              <button
+                type="button"
+                disabled={isProcessing}
+                onClick={handleApply}
+                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 active:from-blue-700 active:to-cyan-700 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg disabled:opacity-40"
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Stamping...</span>
+                  </>
+                ) : (
+                  <>
+                    <Hash className="w-3.5 h-3.5" />
+                    <span>Stamp Numbers</span>
+                  </>
+                )}
+              </button>
             </div>
           )}
         </>

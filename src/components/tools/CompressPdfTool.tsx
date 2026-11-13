@@ -275,6 +275,64 @@ export function CompressPdfTool() {
 
   const totalOriginalBytes = files.reduce((acc, f) => acc + f.size, 0);
 
+  // Beginner-Friendly Plain-English Presets
+  const EVERYDAY_COMPRESS_PRESETS = [
+    {
+      id: "preset-100kb",
+      title: "Portal / Exam Upload",
+      badge: "Under 100 KB",
+      desc: "Perfect for government, university & job portal caps",
+      action: () => {
+        setMode("exact-size");
+        setTargetKb(95);
+      },
+      isActive: mode === "exact-size" && targetKb <= 100,
+    },
+    {
+      id: "preset-200kb",
+      title: "Standard Form Size",
+      badge: "Under 200 KB",
+      desc: "Widely accepted size for official PDF documents",
+      action: () => {
+        setMode("exact-size");
+        setTargetKb(195);
+      },
+      isActive: mode === "exact-size" && targetKb > 100 && targetKb <= 250,
+    },
+    {
+      id: "preset-500kb",
+      title: "WhatsApp & Email Friendly",
+      badge: "Under 500 KB",
+      desc: "Fast sharing across phones without quality loss",
+      action: () => {
+        setMode("exact-size");
+        setTargetKb(480);
+      },
+      isActive: mode === "exact-size" && targetKb > 250 && targetKb <= 500,
+    },
+    {
+      id: "preset-50pct",
+      title: "High Clarity Reduce",
+      badge: "50% Smaller",
+      desc: "Halves file weight while preserving crisp vector text",
+      action: () => {
+        setMode("percentage");
+        setPercentageReduction(50);
+      },
+      isActive: mode === "percentage" && percentageReduction === 50,
+    },
+    {
+      id: "preset-custom",
+      title: "Custom Exact Size",
+      badge: `${targetKb} KB`,
+      desc: "Enter any exact target size limit you need",
+      action: () => {
+        setMode("exact-size");
+      },
+      isActive: mode === "exact-size" && targetKb !== 95 && targetKb !== 195 && targetKb !== 480,
+    },
+  ];
+
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6">
       {metrics ? (
@@ -340,6 +398,54 @@ export function CompressPdfTool() {
                     30-Doc Zero-Crash Engine Ready
                   </span>
                 </div>
+              </div>
+
+              {/* Beginner-Friendly 1-Tap Everyday Presets */}
+              <div className="space-y-2">
+                <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block font-mono">
+                  ⚡ 1-Tap Everyday Presets
+                </span>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+                  {EVERYDAY_COMPRESS_PRESETS.map((preset) => (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      onClick={preset.action}
+                      className={`p-3 rounded-2xl border text-left flex flex-col justify-between transition-all cursor-pointer ${
+                        preset.isActive
+                          ? "bg-indigo-600/20 border-indigo-500 shadow-[0_0_16px_rgba(99,102,241,0.3)] ring-1 ring-indigo-500"
+                          : "bg-white/[0.03] border-white/10 hover:border-white/20 hover:bg-white/[0.05]"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-1 mb-1">
+                        <span className="text-xs font-bold text-white truncate">{preset.title}</span>
+                      </div>
+                      <span className="text-[10px] font-mono text-cyan-300 font-semibold mb-1 block">
+                        {preset.badge}
+                      </span>
+                      <p className="text-[10px] text-zinc-400 leading-tight">
+                        {preset.desc}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Live Visual Feedback Box */}
+              <div className="p-3.5 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-xs text-cyan-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-cyan-400">✨</span>
+                  <span>
+                    {mode === "exact-size"
+                      ? `Ready: Will compress ${files.length} PDF${files.length > 1 ? "s" : ""} to exact ~${targetKb} KB max cap while keeping text sharp.`
+                      : mode === "percentage"
+                      ? `Ready: Will reduce file weight by ${percentageReduction}% across ${files.length} PDF${files.length > 1 ? "s" : ""}.`
+                      : `Ready: Will apply manual ${manualDpi} DPI & ${Math.round(manualQuality * 100)}% quality.`}
+                  </span>
+                </div>
+                <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-cyan-400/20 text-cyan-300 shrink-0">
+                  Zero Upload • 100% In-Memory
+                </span>
               </div>
 
               {/* Compression Mode Selector */}
@@ -581,7 +687,7 @@ export function CompressPdfTool() {
                 )}
               </div>
 
-              {/* Action Button & Live Progress */}
+              {/* Desktop Action Button & Live Progress */}
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-[#12141D] border border-white/10">
                 <div className="text-xs text-slate-400">
                   {isProcessing ? (
@@ -606,7 +712,7 @@ export function CompressPdfTool() {
                   type="button"
                   onClick={handleCompress}
                   disabled={isProcessing || files.length === 0}
-                  className="w-full sm:w-auto px-7 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-600 hover:to-indigo-700 disabled:opacity-40 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all"
+                  className="w-full sm:w-auto px-7 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-600 hover:to-indigo-700 disabled:opacity-40 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all cursor-pointer"
                 >
                   {isProcessing ? (
                     <>
@@ -620,6 +726,32 @@ export function CompressPdfTool() {
                         {files.length > 1
                           ? `Compress All ${files.length} PDFs (Batch 30x)`
                           : "Compress PDF Now"}
+                      </span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Mobile Thumb-Zone Sticky Action Bar */}
+              <div className="fixed bottom-0 inset-x-0 z-40 pb-safe md:hidden p-3 bg-[#05060B]/95 backdrop-blur-2xl border-t border-white/15 shadow-[0_-8px_30px_rgba(0,0,0,0.8)]">
+                <button
+                  type="button"
+                  onClick={handleCompress}
+                  disabled={isProcessing || files.length === 0}
+                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-cyan-500 via-indigo-600 to-indigo-700 hover:from-cyan-600 hover:to-indigo-800 disabled:opacity-40 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(6,182,212,0.5)] active:scale-[0.98] transition-all cursor-pointer"
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Compressing ({progressPct}%)...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Minimize2 className="w-4 h-4" />
+                      <span>
+                        {files.length > 1
+                          ? `Compress ${files.length} PDFs`
+                          : `Compress PDF (${mode === "exact-size" ? `${targetKb} KB` : `${percentageReduction}%`})`}
                       </span>
                     </>
                   )}

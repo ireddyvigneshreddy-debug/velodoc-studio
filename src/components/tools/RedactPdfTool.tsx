@@ -108,7 +108,7 @@ export function RedactPdfTool() {
     };
   }, [originalBuffer, currentPage]);
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -117,7 +117,7 @@ export function RedactPdfTool() {
     setCurrentBox({ x, y, w: 0, h: 0 });
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isDrawing || !startPos) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const curX = e.clientX - rect.left;
@@ -131,7 +131,7 @@ export function RedactPdfTool() {
     setCurrentBox({ x, y, w, h });
   };
 
-  const handleMouseUp = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isDrawing || !startPos || !currentBox) {
       setIsDrawing(false);
       return;
@@ -372,10 +372,10 @@ export function RedactPdfTool() {
 
                 {/* Interactive Redaction Drawing Stage */}
                 <div
-                  onMouseDown={handleMouseDown}
-                  onMouseMove={handleMouseMove}
-                  onMouseUp={handleMouseUp}
-                  className="relative border border-white/15 rounded-2xl overflow-hidden bg-black/60 shadow-2xl max-w-full cursor-crosshair select-none"
+                  onPointerDown={handlePointerDown}
+                  onPointerMove={handlePointerMove}
+                  onPointerUp={handlePointerUp}
+                  className="relative border border-white/15 rounded-2xl overflow-hidden bg-black/60 shadow-2xl max-w-full cursor-crosshair select-none touch-none"
                 >
                   <canvas ref={pageCanvasRef} className="max-w-full h-auto block pointer-events-none" />
 
@@ -417,7 +417,7 @@ export function RedactPdfTool() {
                           e.stopPropagation();
                           setRedactions((prev) => prev.filter((item) => item.id !== r.id));
                         }}
-                        className="opacity-0 group-hover:opacity-100 p-1 rounded-full bg-rose-600 text-white transition-opacity shadow-lg cursor-pointer"
+                        className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 p-1 rounded-full bg-rose-600 text-white transition-opacity shadow-lg cursor-pointer"
                         title="Delete redaction box"
                       >
                         <Trash2 className="w-3 h-3" />
@@ -430,6 +430,33 @@ export function RedactPdfTool() {
                   Click and drag across sensitive text on the page to draw redaction blocks
                 </span>
               </div>
+            </div>
+          )}
+
+          {/* Mobile Sticky Thumb-Zone Action Bar */}
+          {redactions.length > 0 && !metrics && (
+            <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-safe bg-[#05060B]/90 backdrop-blur-xl border-t border-white/10 md:hidden flex items-center justify-between gap-3 shadow-2xl">
+              <div className="text-xs text-zinc-300 font-mono">
+                <span className="font-semibold text-rose-400">{redactions.length}</span> redacted box{redactions.length > 1 ? "es" : ""}
+              </div>
+              <button
+                type="button"
+                disabled={isProcessing}
+                onClick={handleRedactAndSanitize}
+                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-rose-600 to-red-700 active:from-rose-700 active:to-red-800 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg disabled:opacity-40"
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Flattening...</span>
+                  </>
+                ) : (
+                  <>
+                    <EyeOff className="w-3.5 h-3.5" />
+                    <span>Flatten &amp; Redact PDF</span>
+                  </>
+                )}
+              </button>
             </div>
           )}
         </>

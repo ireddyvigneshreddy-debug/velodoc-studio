@@ -718,7 +718,7 @@ export function CameraScannerModal({
   const activePage = scannedPages[activePageIndex];
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#090A10]/95 backdrop-blur-2xl flex flex-col select-none overflow-hidden animate-in fade-in duration-200">
+    <div className="fixed inset-0 h-dvh min-h-dvh z-50 bg-[#090A10]/95 backdrop-blur-2xl flex flex-col select-none overflow-hidden animate-in fade-in duration-200">
       {/* SCREEN FLASH OVERLAY */}
       <div
         className={`pointer-events-none absolute inset-0 z-50 bg-white transition-opacity duration-150 ${
@@ -1526,7 +1526,7 @@ export function CameraScannerModal({
       {/* ================================================================= */}
       {/* COMPLETION FOOTER ACTIONS */}
       {/* ================================================================= */}
-      <footer className="relative z-20 flex flex-col sm:flex-row items-center justify-between gap-3 px-4 sm:px-6 py-3 bg-[#0D0F17] border-t border-white/10 shrink-0">
+      <footer className="relative z-20 flex flex-col sm:flex-row items-center justify-between gap-3 px-4 sm:px-6 py-3 pb-safe bg-[#0D0F17] border-t border-white/10 shrink-0">
         <div className="flex items-center gap-3 text-xs text-slate-400">
           <span className="font-semibold text-white">
             {scannedPages.length} {scannedPages.length === 1 ? "page" : "pages"} captured

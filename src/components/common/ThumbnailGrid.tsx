@@ -112,8 +112,8 @@ export function ThumbnailGrid({
         </div>
       )}
 
-      {/* Grid of Pages */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+      {/* Grid of Pages (Mobile 2-cols with large touch targets) */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2.5 sm:gap-4">
         {thumbnails.map((thumb, index) => {
           const isSelected = selectedIndices.has(index);
 

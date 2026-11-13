@@ -115,9 +115,9 @@ export function BentoGrid() {
   return (
     <div id="all-tools" className="space-y-4">
       {/* Category Tabs & Search Bar Strip */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-3 pt-2">
-        {/* Sliding Pill Category Filter */}
-        <div className="relative flex items-center gap-1 p-1 rounded-full glass-pill overflow-x-auto max-w-full scrollbar-none">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 pt-2">
+        {/* Sliding Pill Category Filter (Swipeable on Mobile) */}
+        <div className="relative flex items-center gap-1 p-1 rounded-full glass-pill overflow-x-auto no-scrollbar snap-x snap-mandatory max-w-full pb-1">
           {TOOL_CATEGORIES.map((category) => {
             const isSelected = selectedCategory === category;
             const count = categoryCounts[category] || 0;
@@ -126,7 +126,7 @@ export function BentoGrid() {
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`relative px-3 py-1.5 rounded-full text-xs font-medium transition-colors shrink-0 flex items-center gap-1.5 cursor-pointer z-10 ${
+                className={`relative px-3 py-1.5 rounded-full text-xs font-medium transition-colors shrink-0 snap-start flex items-center gap-1.5 cursor-pointer z-10 ${
                   isSelected
                     ? "text-white font-semibold"
                     : "text-zinc-400 hover:text-zinc-200"
@@ -143,7 +143,7 @@ export function BentoGrid() {
                     }}
                   />
                 )}
-                <span className="relative z-10">{category}</span>
+                <span className="relative z-10 whitespace-nowrap">{category}</span>
                 <span
                   className={`relative z-10 text-[10px] font-mono px-1.5 py-0.2 rounded-full tabular-nums ${
                     isSelected
@@ -180,7 +180,7 @@ export function BentoGrid() {
       </div>
 
       {/* High-Density 5-Column Responsive Spotlight Bento Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 sm:gap-3">
         {filteredTools.map((tool) => {
           const theme = getToolFamilyTheme(tool);
 

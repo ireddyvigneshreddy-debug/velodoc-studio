@@ -560,6 +560,101 @@ export function WatermarkPdfTool() {
                   </div>
                 </div>
 
+                {/* 9-Box Position Selector when not in full-page tiled grid */}
+                {!watermark.tiledGrid && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-medium text-slate-300 block font-mono">
+                        Watermark Placement
+                      </label>
+                      <span className="text-[11px] text-indigo-400 font-mono capitalize">
+                        {watermark.position.replace("-", " ")}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-1.5 p-2 bg-black/40 border border-white/10 rounded-xl max-w-[220px]">
+                      <button
+                        type="button"
+                        onClick={() => setWatermark((prev) => ({ ...prev, position: "top-left" }))}
+                        className={`py-1.5 rounded-lg text-[10px] font-mono transition-all flex items-center justify-center cursor-pointer ${
+                          watermark.position === "top-left"
+                            ? "bg-indigo-600 text-white font-bold shadow-md ring-2 ring-indigo-400"
+                            : "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
+                        }`}
+                      >
+                        TL
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setWatermark((prev) => ({ ...prev, position: "top-center" }))}
+                        className={`py-1.5 rounded-lg text-[10px] font-mono transition-all flex items-center justify-center cursor-pointer ${
+                          watermark.position === "top-center"
+                            ? "bg-indigo-600 text-white font-bold shadow-md ring-2 ring-indigo-400"
+                            : "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
+                        }`}
+                      >
+                        Top
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setWatermark((prev) => ({ ...prev, position: "top-right" }))}
+                        className={`py-1.5 rounded-lg text-[10px] font-mono transition-all flex items-center justify-center cursor-pointer ${
+                          watermark.position === "top-right"
+                            ? "bg-indigo-600 text-white font-bold shadow-md ring-2 ring-indigo-400"
+                            : "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
+                        }`}
+                      >
+                        TR
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setWatermark((prev) => ({ ...prev, position: "center" }))}
+                        className={`col-span-3 py-1.5 rounded-lg text-[10px] font-mono font-bold transition-all flex items-center justify-center cursor-pointer ${
+                          watermark.position === "center"
+                            ? "bg-indigo-600 text-white font-bold shadow-md ring-2 ring-indigo-400"
+                            : "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
+                        }`}
+                      >
+                        Center
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setWatermark((prev) => ({ ...prev, position: "bottom-left" }))}
+                        className={`py-1.5 rounded-lg text-[10px] font-mono transition-all flex items-center justify-center cursor-pointer ${
+                          watermark.position === "bottom-left"
+                            ? "bg-indigo-600 text-white font-bold shadow-md ring-2 ring-indigo-400"
+                            : "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
+                        }`}
+                      >
+                        BL
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setWatermark((prev) => ({ ...prev, position: "bottom-center" }))}
+                        className={`py-1.5 rounded-lg text-[10px] font-mono transition-all flex items-center justify-center cursor-pointer ${
+                          watermark.position === "bottom-center"
+                            ? "bg-indigo-600 text-white font-bold shadow-md ring-2 ring-indigo-400"
+                            : "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
+                        }`}
+                      >
+                        Bottom
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setWatermark((prev) => ({ ...prev, position: "bottom-right" }))}
+                        className={`py-1.5 rounded-lg text-[10px] font-mono transition-all flex items-center justify-center cursor-pointer ${
+                          watermark.position === "bottom-right"
+                            ? "bg-indigo-600 text-white font-bold shadow-md ring-2 ring-indigo-400"
+                            : "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
+                        }`}
+                      >
+                        BR
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {/* Page Filter Scope */}
                 <div>
                   <label className="text-xs font-medium text-slate-300 mb-1.5 block">
@@ -661,6 +756,33 @@ export function WatermarkPdfTool() {
               )}
             </div>
           </div>
+
+          {/* Mobile Sticky Thumb-Zone Action Bar */}
+          {fileItem && !metrics && (
+            <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-safe bg-[#05060B]/90 backdrop-blur-xl border-t border-white/10 md:hidden flex items-center justify-between gap-3 shadow-2xl">
+              <div className="text-xs text-zinc-300 font-mono truncate max-w-[120px]">
+                {watermark.text || "Watermark"}
+              </div>
+              <button
+                type="button"
+                onClick={handleApply}
+                disabled={isProcessing}
+                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 active:from-indigo-700 active:to-indigo-800 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg disabled:opacity-50"
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Stamping...</span>
+                  </>
+                ) : (
+                  <>
+                    <Stamp className="w-3.5 h-3.5" />
+                    <span>Apply Watermark</span>
+                  </>
+                )}
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

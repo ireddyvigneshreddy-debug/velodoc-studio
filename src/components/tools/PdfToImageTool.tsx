@@ -420,6 +420,33 @@ export function PdfToImageTool() {
               )}
             </button>
           </div>
+
+          {/* Mobile Sticky Thumb-Zone Action Bar */}
+          {fileItem && (
+            <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-safe bg-[#05060B]/90 backdrop-blur-xl border-t border-white/10 md:hidden flex items-center justify-between gap-3 shadow-2xl">
+              <div className="text-xs text-zinc-300 font-mono">
+                <span className="font-semibold text-indigo-400">{format.toUpperCase()}</span> ({scale * 72} DPI)
+              </div>
+              <button
+                type="button"
+                onClick={handleConvert}
+                disabled={isProcessing}
+                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 active:from-indigo-600 active:to-indigo-700 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg disabled:opacity-40"
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Converting...</span>
+                  </>
+                ) : (
+                  <>
+                    <ImageIcon className="w-3.5 h-3.5" />
+                    <span>Convert to {format.toUpperCase()}</span>
+                  </>
+                )}
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

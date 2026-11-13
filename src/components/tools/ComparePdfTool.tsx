@@ -300,7 +300,7 @@ export function ComparePdfTool() {
                 )}
               </div>
 
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto no-scrollbar">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
                     <tr className="border-b border-white/10 text-slate-400 font-medium text-[11px]">

@@ -295,6 +295,37 @@ export function RemovePagesTool() {
               />
             </div>
           )}
+
+          {/* Mobile Sticky Thumb-Zone Action Bar */}
+          {fileItem && !metrics && (
+            <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-safe bg-[#05060B]/90 backdrop-blur-xl border-t border-white/10 md:hidden flex items-center justify-between gap-3 shadow-2xl">
+              <div className="text-xs text-zinc-300 font-mono">
+                <span className="font-semibold text-rose-400">{deleteIndices.size}</span> to delete
+              </div>
+              <button
+                type="button"
+                disabled={
+                  deleteIndices.size === 0 ||
+                  deleteIndices.size >= thumbnails.length ||
+                  isProcessing
+                }
+                onClick={handleRemovePages}
+                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-rose-500 to-red-600 active:from-rose-600 active:to-red-700 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg disabled:opacity-40"
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Removing...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Remove {deleteIndices.size} {deleteIndices.size === 1 ? "Page" : "Pages"}</span>
+                  </>
+                )}
+              </button>
+            </div>
+          )}
         </>
       )}
     </div>
