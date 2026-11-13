@@ -12,11 +12,13 @@ import {
 import { sessionHistory } from "@/lib/session-history";
 import { createPdfBlob } from "@/lib/utils";
 import {
-  ShieldAlert,
   Loader2,
   Trash2,
   AlertCircle,
   EyeOff,
+  ChevronLeft,
+  ChevronRight,
+  ShieldCheck,
 } from "lucide-react";
 
 export function RedactPdfTool() {
@@ -88,7 +90,7 @@ export function RedactPdfTool() {
     async function loadPage() {
       if (!originalBuffer) return;
       try {
-        const canvas = await renderPdfPageToCanvas(originalBuffer, currentPage, 1.2);
+        const canvas = await renderPdfPageToCanvas(originalBuffer, currentPage, 1.4);
         if (active && pageCanvasRef.current) {
           const target = pageCanvasRef.current;
           target.width = canvas.width;
@@ -196,7 +198,7 @@ export function RedactPdfTool() {
         downloadUrl,
         downloadFilename: `${baseName}_sanitized_redacted.pdf`,
         pageCount: fileItem.pageCount || 1,
-        targetAccuracy: "True Flatten Security (0 Text Recoverable)",
+        targetAccuracy: "True Flatten Security (0 Recoverable Text)",
       });
     } catch (err: unknown) {
       console.error(err);
@@ -229,101 +231,156 @@ export function RedactPdfTool() {
               onRemoveFile={() => {}}
               acceptedFileTypes={{ "application/pdf": [".pdf"] }}
               multiple={false}
-              title="Upload PDF to redact sensitive text &amp; sanitize"
-              subtitle="Draw blackout boxes with true rasterization flattening to permanently destroy text streams"
+              title="Upload PDF to permanently redact text &amp; sanitize"
+              subtitle="Draw redaction rectangles directly across sensitive text with true rasterized bitmap flattening"
             />
           ) : (
-            <div className="space-y-6">
-              {/* Header Configuration Banner */}
-              <div className="p-5 rounded-3xl bg-[#12141D] border border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
-                <div>
-                  <h3 className="font-semibold text-white text-base">
-                    {fileItem.name}
-                  </h3>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    {redactions.length} redaction area(s) marked • Drag boxes over sensitive numbers, names, or addresses
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2 text-xs text-slate-300">
-                    <span>Redaction Color:</span>
-                    <button
-                      type="button"
-                      onClick={() => setRedactColor("#000000")}
-                      className={`w-6 h-6 rounded-full bg-black border-2 ${
-                        redactColor === "#000000"
-                          ? "border-rose-500 scale-110 shadow"
-                          : "border-white/20"
-                      }`}
-                      title="Blackout"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setRedactColor("#FFFFFF")}
-                      className={`w-6 h-6 rounded-full bg-white border-2 ${
-                        redactColor === "#FFFFFF"
-                          ? "border-rose-500 scale-110 shadow"
-                          : "border-white/20"
-                      }`}
-                      title="Whiteout"
-                    />
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Left Column: Security Redaction Controls */}
+              <div className="lg:col-span-5 space-y-5">
+                <div className="p-5 sm:p-6 rounded-3xl premium-card space-y-5 shadow-xl">
+                  <div>
+                    <h3 className="font-semibold text-white text-base">
+                      {fileItem.name}
+                    </h3>
+                    <p className="text-xs text-zinc-400 mt-0.5 font-mono">
+                      Page {currentPage} of {totalPages} • {redactions.length} Total Redactions Active
+                    </p>
                   </div>
 
-                  <button
-                    type="button"
-                    disabled={isProcessing || redactions.length === 0}
-                    onClick={handleRedactAndSanitize}
-                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-700 hover:to-rose-800 disabled:opacity-40 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 shadow-[0_0_20px_rgba(225,29,72,0.4)] transition-all"
-                  >
-                    {isProcessing ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Flattening...</span>
-                      </>
-                    ) : (
-                      <>
-                        <EyeOff className="w-4 h-4" />
-                        <span>Apply Redactions &amp; Flatten PDF</span>
-                      </>
-                    )}
-                  </button>
+                  {/* Redaction Style Selector */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider block font-mono">
+                      Redaction Mask Style
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setRedactColor("#000000")}
+                        className={`p-3 rounded-2xl border text-xs font-medium flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                          redactColor === "#000000"
+                            ? "bg-black text-white border-zinc-500 shadow-lg ring-2 ring-indigo-500"
+                            : "bg-white/[0.03] border-white/10 text-zinc-400 hover:text-white"
+                        }`}
+                      >
+                        <span className="w-3.5 h-3.5 rounded bg-black border border-white/30" />
+                        <span>Blackout Box</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setRedactColor("#FFFFFF")}
+                        className={`p-3 rounded-2xl border text-xs font-medium flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                          redactColor === "#FFFFFF"
+                            ? "bg-white text-black border-white shadow-lg ring-2 ring-indigo-500"
+                            : "bg-white/[0.03] border-white/10 text-zinc-400 hover:text-white"
+                        }`}
+                      >
+                        <span className="w-3.5 h-3.5 rounded bg-white border border-black/30" />
+                        <span>Whiteout Box</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Security Guarantee Pill */}
+                  <div className="p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-indigo-300 space-y-1">
+                    <div className="flex items-center gap-1.5 font-semibold font-mono">
+                      <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                      <span>True Bitmap Raster Flattening</span>
+                    </div>
+                    <p className="text-[11px] text-zinc-400 leading-relaxed">
+                      Redacted pages are rasterized into flat pixel bitmaps. All underlying text, vector curves, and search streams are irrevocably erased.
+                    </p>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="space-y-2 pt-1">
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        disabled={currentPageRedactions.length === 0}
+                        onClick={() =>
+                          setRedactions((prev) =>
+                            prev.filter((r) => r.pageNumber !== currentPage)
+                          )
+                        }
+                        className="flex-1 py-2 rounded-xl glass-pill text-xs text-zinc-400 hover:text-rose-400 disabled:opacity-30 cursor-pointer"
+                      >
+                        Clear Current Page
+                      </button>
+                      <button
+                        type="button"
+                        disabled={redactions.length === 0}
+                        onClick={() => setRedactions([])}
+                        className="flex-1 py-2 rounded-xl glass-pill text-xs text-zinc-400 hover:text-rose-400 disabled:opacity-30 cursor-pointer"
+                      >
+                        Clear All ({redactions.length})
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={isProcessing || redactions.length === 0}
+                      onClick={handleRedactAndSanitize}
+                      className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 to-red-700 hover:from-rose-700 hover:to-red-800 disabled:opacity-40 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(225,29,72,0.4)] transition-all cursor-pointer"
+                    >
+                      {isProcessing ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Sanitizing &amp; Flattening...</span>
+                        </>
+                      ) : (
+                        <>
+                          <EyeOff className="w-4 h-4" />
+                          <span>Flatten &amp; Redact PDF ({redactions.length})</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  {errorMessage && (
+                    <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      <span>{errorMessage}</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Stage Container */}
-              <div className="flex flex-col items-center space-y-3">
-                <div className="flex items-center justify-between w-full text-xs text-slate-400 px-2">
+              {/* Right Column: Interactive Canvas Stage */}
+              <div className="lg:col-span-7 space-y-3 flex flex-col items-center">
+                <div className="flex items-center justify-between w-full text-xs text-zinc-400 px-2 font-mono">
                   <span>Page {currentPage} of {totalPages}</span>
-                  <div className="flex gap-2">
+                  <div className="flex items-center gap-1.5">
                     <button
                       disabled={currentPage <= 1}
                       onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 disabled:opacity-30"
+                      className="p-1 rounded-lg glass-pill text-zinc-300 hover:text-white disabled:opacity-20 cursor-pointer"
                     >
-                      Prev
+                      <ChevronLeft className="w-3.5 h-3.5" />
                     </button>
+                    <span className="px-1 text-zinc-300">{currentPage}/{totalPages}</span>
                     <button
                       disabled={currentPage >= totalPages}
                       onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                      className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 disabled:opacity-30"
+                      className="p-1 rounded-lg glass-pill text-zinc-300 hover:text-white disabled:opacity-20 cursor-pointer"
                     >
-                      Next
+                      <ChevronRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
 
-                {/* Interactive Drawing Stage */}
+                {/* Interactive Redaction Drawing Stage */}
                 <div
                   onMouseDown={handleMouseDown}
                   onMouseMove={handleMouseMove}
                   onMouseUp={handleMouseUp}
-                  className="relative border border-white/15 rounded-2xl overflow-hidden bg-black/60 shadow-2xl cursor-crosshair max-w-full select-none"
+                  className="relative border border-white/15 rounded-2xl overflow-hidden bg-black/60 shadow-2xl max-w-full cursor-crosshair select-none"
                 >
                   <canvas ref={pageCanvasRef} className="max-w-full h-auto block pointer-events-none" />
 
-                  {/* Active drawing rubber band */}
-                  {currentBox && currentBox.w > 0 && currentBox.h > 0 && (
+                  {/* Live dragging box preview */}
+                  {isDrawing && currentBox && (
                     <div
                       style={{
                         position: "absolute",
@@ -331,14 +388,13 @@ export function RedactPdfTool() {
                         top: `${currentBox.y}px`,
                         width: `${currentBox.w}px`,
                         height: `${currentBox.h}px`,
-                        backgroundColor: redactColor,
-                        opacity: 0.85,
+                        backgroundColor: redactColor === "#000000" ? "rgba(0,0,0,0.75)" : "rgba(255,255,255,0.75)",
                       }}
-                      className="border-2 border-rose-500 pointer-events-none"
+                      className="border-2 border-dashed border-rose-500 shadow-lg pointer-events-none"
                     />
                   )}
 
-                  {/* Render saved redaction rectangles */}
+                  {/* Render saved redaction areas */}
                   {currentPageRedactions.map((r) => (
                     <div
                       key={r.id}
@@ -350,17 +406,19 @@ export function RedactPdfTool() {
                         height: `${r.heightPercent}%`,
                         backgroundColor: r.color,
                       }}
-                      className="group border border-dashed border-rose-500 shadow-md"
+                      className={`group border ${
+                        r.color === "#000000" ? "border-white/20" : "border-black/30"
+                      } flex items-center justify-center shadow-md`}
                     >
+                      {/* Delete this redaction */}
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setRedactions((prev) =>
-                            prev.filter((item) => item.id !== r.id)
-                          );
+                          setRedactions((prev) => prev.filter((item) => item.id !== r.id));
                         }}
-                        className="absolute -top-2 -right-2 p-1 rounded-full bg-rose-600 text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Delete Redaction"
+                        className="opacity-0 group-hover:opacity-100 p-1 rounded-full bg-rose-600 text-white transition-opacity shadow-lg cursor-pointer"
+                        title="Delete redaction box"
                       >
                         <Trash2 className="w-3 h-3" />
                       </button>
@@ -368,20 +426,10 @@ export function RedactPdfTool() {
                   ))}
                 </div>
 
-                <div className="flex items-center gap-2 text-[11px] text-emerald-400 font-medium">
-                  <ShieldAlert className="w-3.5 h-3.5" />
-                  <span>
-                    True Security Flatten: Pages will be rasterized to guarantee no underlying text or vector streams remain
-                  </span>
-                </div>
+                <span className="text-[11px] text-zinc-500 text-center font-mono">
+                  Click and drag across sensitive text on the page to draw redaction blocks
+                </span>
               </div>
-
-              {errorMessage && (
-                <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  <span>{errorMessage}</span>
-                </div>
-              )}
             </div>
           )}
         </>

@@ -240,8 +240,19 @@ export function ResultPreviewStudio({
   };
 
   const isPdf = outputMimeType === "application/pdf";
+  const isImage = outputMimeType.startsWith("image/");
   const isSaving = activeMetrics.savedPercentage > 0;
   const hasMultipleBatch = batchItems.length > 1;
+
+  const imagePreviewUrl = useMemo(() => {
+    if (isImage && currentOutputBytes) {
+      const blob = new Blob([currentOutputBytes as unknown as BlobPart], {
+        type: outputMimeType,
+      });
+      return URL.createObjectURL(blob);
+    }
+    return null;
+  }, [isImage, currentOutputBytes, outputMimeType]);
 
   return (
     <div className="w-full premium-card rounded-3xl overflow-hidden shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
@@ -520,8 +531,21 @@ export function ResultPreviewStudio({
                 />
               </div>
             )
+          ) : isImage && imagePreviewUrl ? (
+            /* Visual Image Output Preview */
+            <div className="flex flex-col items-center justify-center p-4 max-w-full">
+              <div className="p-2.5 rounded-2xl bg-black/60 border border-white/[0.12] shadow-2xl max-w-full max-h-[460px] overflow-hidden flex items-center justify-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={imagePreviewUrl}
+                  alt={filename}
+                  style={{ transform: `scale(${zoomLevel})` }}
+                  className="max-w-full max-h-[420px] object-contain rounded-lg transition-transform duration-150 shadow-md"
+                />
+              </div>
+            </div>
           ) : (
-            /* Non-PDF outputs */
+            /* Text or ZIP outputs */
             <div className="p-8 text-center space-y-2">
               <div className="p-4 rounded-2xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 inline-block shadow-lg">
                 <Layers className="w-8 h-8" />
@@ -552,7 +576,7 @@ export function ResultPreviewStudio({
         {/* Right: Chaining + Single Download + Master ZIP Export */}
         <div className="flex items-center gap-2.5 w-full sm:w-auto flex-wrap sm:flex-nowrap justify-end">
           {/* Tool Chaining Dropdown */}
-          {currentOutputBytes && isPdf && (
+          {currentOutputBytes && (isPdf || isImage) && (
             <div className="relative w-full sm:w-auto">
               <button
                 type="button"
@@ -574,9 +598,18 @@ export function ResultPreviewStudio({
                       Pass Output Directly To:
                     </div>
                     <div className="space-y-0.5 pt-1">
-                      {TOOLS.filter(
-                        (t) => t.acceptedFileTypes["application/pdf"] !== undefined
-                      ).map((tool) => (
+                      {TOOLS.filter((t) => {
+                        if (isPdf) {
+                          return t.acceptedFileTypes["application/pdf"] !== undefined;
+                        }
+                        if (isImage) {
+                          return (
+                            t.acceptedFileTypes["image/jpeg"] !== undefined ||
+                            t.acceptedFileTypes["image/png"] !== undefined
+                          );
+                        }
+                        return true;
+                      }).map((tool) => (
                         <button
                           key={tool.id}
                           onClick={() => handleChainToTool(tool.path)}

@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { DropZone } from "@/components/common/DropZone";
-import { ThumbnailGrid } from "@/components/common/ThumbnailGrid";
 import { ResultPreviewStudio } from "@/components/ResultPreviewStudio";
 import { UploadedFileItem, PageThumbnail, ProcessingMetrics } from "@/types";
 import {
@@ -19,6 +19,7 @@ import {
   AlertCircle,
   FileCheck,
   PlusCircle,
+  Plus,
 } from "lucide-react";
 
 export function AddPagesTool() {
@@ -33,7 +34,7 @@ export function AddPagesTool() {
   const [blankPageSize, setBlankPageSize] = useState<"a4" | "letter" | "match">("a4");
   const [blankPattern, setBlankPattern] = useState<"blank" | "lined" | "grid" | "dotted">("blank");
   const [paperTint, setPaperTint] = useState<string>("#FFFFFF");
-  const [insertPosition, setInsertPosition] = useState<number>(0);
+  const [insertPosition, setInsertPosition] = useState<number>(0); // 0 = at beginning, 1 = after page 1, etc.
 
   // Auxiliary PDF for insertion
   const [auxFile, setAuxFile] = useState<UploadedFileItem | null>(null);
@@ -98,62 +99,49 @@ export function AddPagesTool() {
       file,
       name: file.name,
       size: file.size,
-      status: "loading",
+      status: "ready",
     };
     setAuxFile(item);
-
-    try {
-      const buffer = await file.arrayBuffer();
-      const count = await getPdfPageCount(buffer);
-      item.pageCount = count;
-      item.status = "ready";
-      setAuxFile({ ...item });
-    } catch (err) {
-      console.error(err);
-      item.status = "error";
-      item.error = "Invalid or encrypted PDF";
-      setAuxFile({ ...item });
-    }
   };
 
   const handleInsert = async () => {
     if (!baseFile || !originalBuffer) return;
-    if (insertType === "pdf" && !auxFile) {
-      setErrorMessage("Please upload a second PDF to graft pages from.");
-      return;
-    }
 
     setIsProcessing(true);
     setErrorMessage(null);
     const startTime = performance.now();
 
     try {
-      let options: InsertPagesOptions;
-
-      if (insertType === "blank") {
-        options = {
-          type: "blank",
-          count: blankCount,
-          pattern: blankPattern,
-          pageSize: blankPageSize,
-          tint: paperTint,
-        };
-      } else {
-        const auxBuffer = await auxFile!.file.arrayBuffer();
-        options = {
-          type: "pdf",
-          sourceBuffer: auxBuffer,
-        };
+      let secondaryBuffer: ArrayBuffer | undefined = undefined;
+      if (insertType === "pdf") {
+        if (!auxFile) {
+          throw new Error("Please select a secondary PDF to insert.");
+        }
+        secondaryBuffer = await auxFile.file.arrayBuffer();
       }
 
-      const newPdfBytes = await insertPages(
+      const options: InsertPagesOptions =
+        insertType === "blank"
+          ? {
+              type: "blank",
+              count: blankCount,
+              pattern: blankPattern,
+              pageSize: blankPageSize,
+              tint: paperTint,
+            }
+          : {
+              type: "pdf",
+              sourceBuffer: secondaryBuffer!,
+            };
+
+      const resultBytes = await insertPages(
         originalBuffer,
         insertPosition,
         options
       );
       const endTime = performance.now();
 
-      const blob = createPdfBlob(newPdfBytes);
+      const blob = createPdfBlob(resultBytes);
       const downloadUrl = URL.createObjectURL(blob);
       const durationMs = endTime - startTime;
 
@@ -161,22 +149,20 @@ export function AddPagesTool() {
         baseFile.name.substring(0, baseFile.name.lastIndexOf(".")) ||
         baseFile.name;
 
-      const pageCount = await getPdfPageCount(newPdfBytes);
-
-      setOutputBytes(newPdfBytes);
+      setOutputBytes(resultBytes);
       setMetrics({
-        originalSize: baseFile.size + (auxFile ? auxFile.size : 0),
-        processedSize: newPdfBytes.byteLength,
+        originalSize: baseFile.size,
+        processedSize: resultBytes.byteLength,
         savedBytes: 0,
         savedPercentage: 0,
         durationMs,
         downloadUrl,
         downloadFilename: `${baseName}_pages_added.pdf`,
-        pageCount,
-        targetAccuracy: `Inserted at Page ${insertPosition}`,
+        pageCount: thumbnails.length + (insertType === "blank" ? blankCount : 1),
+        targetAccuracy: `Added ${insertType === "blank" ? `${blankCount} Blank` : "PDF"} Pages`,
       });
     } catch (err: unknown) {
-      console.error("Add pages error:", err);
+      console.error(err);
       setErrorMessage(
         err instanceof Error ? err.message : "Failed to insert pages."
       );
@@ -204,20 +190,20 @@ export function AddPagesTool() {
               onRemoveFile={() => {}}
               acceptedFileTypes={{ "application/pdf": [".pdf"] }}
               multiple={false}
-              title="Upload primary PDF to insert pages"
-              subtitle="Add blank, lined, or grid pages, or graft pages from an auxiliary document"
+              title="Upload Base PDF to add &amp; insert pages"
+              subtitle="Insert blank, lined, or grid notebook pages or inject pages from another PDF"
             />
           ) : (
             <div className="space-y-6">
-              {/* Document Info & Insert Controls */}
-              <div className="p-6 rounded-3xl bg-[#12141D] border border-white/10 space-y-5 shadow-xl">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
+              {/* Configuration Controls Bar */}
+              <div className="p-5 sm:p-6 rounded-3xl premium-card space-y-5 shadow-xl">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-4">
                   <div>
                     <h3 className="font-semibold text-white text-base">
                       {baseFile.name}
                     </h3>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      {thumbnails.length} pages currently loaded • Choose insertion settings below
+                    <p className="text-xs text-zinc-400 mt-0.5 font-mono tabular-nums">
+                      {thumbnails.length} base pages • Selected insert slot: {insertPosition === 0 ? "Beginning (Before Page 1)" : `After Page ${insertPosition}`}
                     </p>
                   </div>
 
@@ -229,27 +215,27 @@ export function AddPagesTool() {
                       setThumbnails([]);
                       setAuxFile(null);
                     }}
-                    className="px-3.5 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 transition-colors"
+                    className="px-3.5 py-1.5 rounded-xl text-xs font-medium text-zinc-400 hover:text-white glass-pill transition-colors cursor-pointer"
                   >
-                    Change Base PDF
+                    Change PDF
                   </button>
                 </div>
 
-                {/* Configuration Options */}
+                {/* Configuration Options Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                   {/* Page Source */}
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block">
+                    <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider block font-mono">
                       Page Source
                     </label>
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         type="button"
                         onClick={() => setInsertType("blank")}
-                        className={`px-3 py-2.5 rounded-xl text-xs font-medium border transition-all ${
+                        className={`px-3 py-2.5 rounded-xl text-xs font-medium border transition-all cursor-pointer ${
                           insertType === "blank"
-                            ? "bg-emerald-600/20 border-emerald-500 text-white shadow-md"
-                            : "bg-white/5 border-white/10 text-slate-400 hover:text-white"
+                            ? "bg-emerald-600/20 border-emerald-500 text-white shadow-md font-semibold"
+                            : "bg-white/[0.03] border-white/10 text-zinc-400 hover:text-white"
                         }`}
                       >
                         Blank / Paper
@@ -257,26 +243,26 @@ export function AddPagesTool() {
                       <button
                         type="button"
                         onClick={() => setInsertType("pdf")}
-                        className={`px-3 py-2.5 rounded-xl text-xs font-medium border transition-all ${
+                        className={`px-3 py-2.5 rounded-xl text-xs font-medium border transition-all cursor-pointer ${
                           insertType === "pdf"
-                            ? "bg-emerald-600/20 border-emerald-500 text-white shadow-md"
-                            : "bg-white/5 border-white/10 text-slate-400 hover:text-white"
+                            ? "bg-emerald-600/20 border-emerald-500 text-white shadow-md font-semibold"
+                            : "bg-white/[0.03] border-white/10 text-zinc-400 hover:text-white"
                         }`}
                       >
-                        Another PDF
+                        From 2nd PDF
                       </button>
                     </div>
                   </div>
 
-                  {/* Position */}
+                  {/* Position Selector */}
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block">
-                      Target Position
+                    <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider block font-mono">
+                      Insertion Position
                     </label>
                     <select
                       value={insertPosition}
                       onChange={(e) => setInsertPosition(Number(e.target.value))}
-                      className="w-full px-3 py-2.5 rounded-xl bg-black/40 border border-white/10 text-white text-xs focus:outline-none focus:border-emerald-500"
+                      className="w-full px-3 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white text-xs focus:outline-none focus:border-emerald-500 font-mono"
                     >
                       <option value={0}>At the Beginning (Before Page 1)</option>
                       {thumbnails.map((_, i) => (
@@ -290,58 +276,64 @@ export function AddPagesTool() {
                   {/* Options details */}
                   {insertType === "blank" ? (
                     <div className="space-y-2">
+                      <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider block font-mono">
+                        Paper Pattern &amp; Count
+                      </label>
                       <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <label className="text-[11px] text-slate-400 block mb-1">Count</label>
+                        <select
+                          value={blankPattern}
+                          onChange={(e) =>
+                            setBlankPattern(
+                              e.target.value as "blank" | "lined" | "grid" | "dotted"
+                            )
+                          }
+                          className="px-2.5 py-2 rounded-xl bg-black/60 border border-white/10 text-white text-xs focus:outline-none focus:border-emerald-500"
+                        >
+                          <option value="blank">Plain Blank</option>
+                          <option value="lined">Lined Paper</option>
+                          <option value="grid">Grid / Graph</option>
+                          <option value="dotted">Dotted Paper</option>
+                        </select>
+                        <div className="flex items-center gap-1.5 bg-black/60 border border-white/10 px-2.5 py-1.5 rounded-xl text-xs">
+                          <span className="text-zinc-400 text-[11px]">Pages:</span>
                           <input
                             type="number"
                             min={1}
                             max={20}
                             value={blankCount}
                             onChange={(e) => setBlankCount(Math.max(1, Number(e.target.value)))}
-                            className="w-full px-2.5 py-1.5 rounded-xl bg-black/40 border border-white/10 text-white text-xs font-mono"
+                            className="w-full bg-transparent text-white font-mono text-center focus:outline-none"
                           />
                         </div>
-                        <div>
-                          <label className="text-[11px] text-slate-400 block mb-1">Size</label>
-                          <select
-                            value={blankPageSize}
-                            onChange={(e) => setBlankPageSize(e.target.value as "a4" | "letter" | "match")}
-                            className="w-full px-2.5 py-1.5 rounded-xl bg-black/40 border border-white/10 text-white text-xs"
-                          >
-                            <option value="a4">A4</option>
-                            <option value="letter">US Letter</option>
-                            <option value="match">Match Document</option>
-                          </select>
-                        </div>
                       </div>
-                      <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block">
-                        Paper Pattern &amp; Tint
-                      </label>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-2 gap-2 pt-1">
                         <select
-                          value={blankPattern}
-                          onChange={(e) => setBlankPattern(e.target.value as "blank" | "lined" | "grid" | "dotted")}
-                          className="px-2.5 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs focus:outline-none focus:border-emerald-500"
+                          value={blankPageSize}
+                          onChange={(e) =>
+                            setBlankPageSize(
+                              e.target.value as "a4" | "letter" | "match"
+                            )
+                          }
+                          className="px-2.5 py-1.5 rounded-xl bg-black/60 border border-white/10 text-white text-xs"
                         >
-                          <option value="blank">Plain Blank</option>
-                          <option value="lined">Lined Paper</option>
-                          <option value="grid">Grid / Graph</option>
+                          <option value="a4">A4 Standard</option>
+                          <option value="letter">US Letter</option>
+                          <option value="match">Match Doc</option>
                         </select>
                         <select
                           value={paperTint}
                           onChange={(e) => setPaperTint(e.target.value)}
-                          className="px-2.5 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs focus:outline-none focus:border-emerald-500"
+                          className="px-2.5 py-1.5 rounded-xl bg-black/60 border border-white/10 text-white text-xs"
                         >
-                          <option value="#FFFFFF">White</option>
-                          <option value="#FFFBEB">Cream / Warm</option>
+                          <option value="#FFFFFF">White Paper</option>
+                          <option value="#FFFBEB">Warm Cream</option>
                           <option value="#F8FAFC">Cool Slate</option>
                         </select>
                       </div>
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block">
+                      <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider block font-mono">
                         Secondary PDF
                       </label>
                       {!auxFile ? (
@@ -359,7 +351,7 @@ export function AddPagesTool() {
                           <span>+ Upload 2nd PDF</span>
                         </label>
                       ) : (
-                        <div className="flex items-center justify-between p-2 rounded-xl bg-black/40 border border-white/10 text-xs">
+                        <div className="flex items-center justify-between p-2 rounded-xl bg-black/60 border border-white/10 text-xs">
                           <div className="flex items-center gap-1.5 truncate">
                             <FileCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                             <span className="text-white truncate">
@@ -369,7 +361,7 @@ export function AddPagesTool() {
                           <button
                             type="button"
                             onClick={() => setAuxFile(null)}
-                            className="text-slate-400 hover:text-rose-400 text-[10px] ml-2 shrink-0"
+                            className="text-zinc-400 hover:text-rose-400 text-[10px] ml-2 shrink-0 cursor-pointer"
                           >
                             Remove
                           </button>
@@ -379,23 +371,25 @@ export function AddPagesTool() {
                   )}
                 </div>
 
-                {/* Timeline Insertion Quick Bar */}
-                <div className="p-3 rounded-2xl bg-black/40 border border-white/5 flex items-center justify-between text-xs">
-                  <span className="text-slate-400 flex items-center gap-1.5">
-                    <PlusCircle className="w-4 h-4 text-emerald-400" />
-                    <span>Inserting {blankCount} page(s) at position: {insertPosition === 0 ? "Beginning" : `After Page ${insertPosition}`}</span>
+                {/* Primary Action Button */}
+                <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                  <span className="text-zinc-300 flex items-center gap-1.5 font-mono">
+                    <PlusCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>
+                      Inserting {insertType === "blank" ? `${blankCount} ${blankPattern} page(s)` : "pages from 2nd PDF"} {insertPosition === 0 ? "at Beginning" : `after Page ${insertPosition}`}
+                    </span>
                   </span>
 
                   <button
                     type="button"
                     disabled={isProcessing || (insertType === "pdf" && !auxFile)}
                     onClick={handleInsert}
-                    className="px-6 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 disabled:opacity-40 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.35)] transition-all"
+                    className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 disabled:opacity-40 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(16,185,129,0.35)] transition-all cursor-pointer"
                   >
                     {isProcessing ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Inserting...</span>
+                        <span>Inserting Pages...</span>
                       </>
                     ) : (
                       <>
@@ -408,23 +402,116 @@ export function AddPagesTool() {
               </div>
 
               {errorMessage && (
-                <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm flex items-center gap-2">
+                <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 shrink-0" />
                   <span>{errorMessage}</span>
                 </div>
               )}
 
-              {/* Base Document Pages Grid */}
-              <div className="space-y-2">
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
-                  Current Document Structure ({thumbnails.length} Pages)
-                </span>
-                <ThumbnailGrid
-                  thumbnails={thumbnails}
-                  mode="view"
-                  isLoading={isLoadingThumbnails}
-                  totalPageEstimate={baseFile.pageCount || 0}
-                />
+              {/* Interactive Visual Page Timeline with "+ Insert Page Here" Slots */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider font-mono">
+                    Visual Document Timeline ({thumbnails.length} Current Pages)
+                  </span>
+                  <span className="text-[11px] text-emerald-400 font-mono">
+                    Click &ldquo;+ Insert Page Here&rdquo; at any slot
+                  </span>
+                </div>
+
+                {/* Slot 0: Insert at beginning */}
+                <div className="w-full">
+                  <button
+                    type="button"
+                    onClick={() => setInsertPosition(0)}
+                    className={`w-full py-2 px-4 rounded-xl border flex items-center justify-center gap-2 text-xs transition-all cursor-pointer font-mono ${
+                      insertPosition === 0
+                        ? "bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.35)] ring-1 ring-emerald-400"
+                        : "bg-white/[0.02] border-dashed border-white/15 text-zinc-400 hover:text-white hover:border-emerald-400/50 hover:bg-emerald-500/5"
+                    }`}
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>
+                      {insertPosition === 0
+                        ? "▲ Active Insert Slot: At the Beginning (Before Page 1)"
+                        : "+ Insert Page Here (At the Beginning)"}
+                    </span>
+                  </button>
+                </div>
+
+                {/* Page Cards with in-between insertion slots */}
+                <div className="space-y-3">
+                  {isLoadingThumbnails && (
+                    <div className="p-8 text-center text-zinc-400 font-mono text-xs flex items-center justify-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
+                      <span>Rendering page timeline...</span>
+                    </div>
+                  )}
+                  {thumbnails.map((thumb, index) => {
+                    const slotPosition = index + 1;
+                    const isSelectedSlot = insertPosition === slotPosition;
+
+                    return (
+                      <React.Fragment key={`${thumb.pageNumber}-${index}`}>
+                        <div className="p-3 rounded-2xl premium-card border border-white/10 flex items-center gap-4">
+                          {/* Mini Thumbnail */}
+                          <div className="relative w-16 h-20 rounded-lg overflow-hidden bg-black/60 shrink-0 border border-white/10">
+                            <Image
+                              src={thumb.dataUrl}
+                              alt={`Page ${thumb.pageNumber}`}
+                              fill
+                              className="object-contain"
+                              unoptimized
+                            />
+                          </div>
+
+                          {/* Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-semibold text-white font-mono">
+                              Page {thumb.pageNumber}
+                            </div>
+                            <div className="text-xs text-zinc-400">
+                              Base document page
+                            </div>
+                          </div>
+
+                          {/* Fast Slot Selector Button */}
+                          <button
+                            type="button"
+                            onClick={() => setInsertPosition(slotPosition)}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
+                              isSelectedSlot
+                                ? "bg-emerald-500 text-white font-semibold shadow-md"
+                                : "glass-pill text-zinc-300 hover:text-white hover:bg-white/[0.08]"
+                            }`}
+                          >
+                            {isSelectedSlot ? "Selected Insertion Point" : `Insert After Page ${thumb.pageNumber}`}
+                          </button>
+                        </div>
+
+                        {/* Interactive Insert Divider between pages */}
+                        <div className="w-full">
+                          <button
+                            type="button"
+                            onClick={() => setInsertPosition(slotPosition)}
+                            className={`w-full py-1.5 px-3 rounded-xl border flex items-center justify-center gap-2 text-xs transition-all cursor-pointer font-mono ${
+                              isSelectedSlot
+                                ? "bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.35)] ring-1 ring-emerald-400"
+                                : "bg-white/[0.015] border-dashed border-white/10 text-zinc-500 hover:text-zinc-200 hover:border-emerald-500/40 hover:bg-emerald-500/5"
+                            }`}
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                            <span>
+                              {isSelectedSlot
+                                ? `▲ Active Insert Slot: Between Page ${thumb.pageNumber} and ${thumb.pageNumber + 1}`
+                                : `+ Insert Page Here (After Page ${thumb.pageNumber})`}
+                            </span>
+                          </button>
+                        </div>
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           )}

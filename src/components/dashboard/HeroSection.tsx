@@ -2,7 +2,10 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { CommandPalette } from "@/components/common/CommandPalette";
+import { CameraScannerModal } from "@/components/CameraScannerModal";
+import { sessionHistory } from "@/lib/session-history";
 import {
   Sparkles,
   ArrowRight,
@@ -25,8 +28,9 @@ const EVERYDAY_INTENT_CHIPS = [
     id: "camera-scan",
     label: "Scan pages with Camera → PDF",
     icon: Camera,
+    isCameraModal: true,
     href: "/tools/image-to-pdf?scan=true",
-    color: "text-cyan-400 bg-cyan-500/10 border-cyan-500/25 hover:border-cyan-400/50 hover:bg-cyan-500/15",
+    color: "text-cyan-400 bg-cyan-500/10 border-cyan-500/25 hover:border-cyan-400/50 hover:bg-cyan-500/15 ring-1 ring-cyan-500/40",
   },
   {
     id: "combine-30",
@@ -52,7 +56,22 @@ const EVERYDAY_INTENT_CHIPS = [
 ];
 
 export function HeroSection() {
+  const router = useRouter();
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [cameraModalOpen, setCameraModalOpen] = useState(false);
+
+  const handleCameraScanned = async (files: File[]) => {
+    if (files.length > 0) {
+      try {
+        const buffer = await files[0].arrayBuffer();
+        sessionHistory.setChainedFile(new Uint8Array(buffer), files[0].name, files[0].type);
+      } catch (err) {
+        console.error("Camera scan chain error:", err);
+      }
+      setCameraModalOpen(false);
+      router.push("/tools/image-to-pdf");
+    }
+  };
 
   return (
     <>
@@ -86,6 +105,21 @@ export function HeroSection() {
           <div className="pt-1.5 flex flex-wrap items-center justify-center gap-2 max-w-4xl mx-auto">
             {EVERYDAY_INTENT_CHIPS.map((chip) => {
               const Icon = chip.icon;
+              if (chip.isCameraModal) {
+                return (
+                  <button
+                    key={chip.id}
+                    type="button"
+                    onClick={() => setCameraModalOpen(true)}
+                    className={`group inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 shadow-sm cursor-pointer hover:scale-[1.03] active:scale-[0.98] ${chip.color}`}
+                  >
+                    <Icon className="w-3.5 h-3.5 shrink-0" />
+                    <span>{chip.label}</span>
+                    <ArrowRight className="w-3 h-3 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+                  </button>
+                );
+              }
+
               return (
                 <Link
                   key={chip.id}
@@ -102,6 +136,15 @@ export function HeroSection() {
         </div>
       </section>
 
+      {/* 1-Click Camera Scanner Modal on Dashboard */}
+      <CameraScannerModal
+        isOpen={cameraModalOpen}
+        onClose={() => setCameraModalOpen(false)}
+        onAddScansToQueue={handleCameraScanned}
+        onInstantGeneratePdf={handleCameraScanned}
+      />
+
+      {/* Global Command Palette */}
       <CommandPalette
         isOpen={paletteOpen}
         onClose={() => setPaletteOpen(false)}

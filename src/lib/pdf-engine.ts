@@ -13,6 +13,24 @@ import {
 import { yieldToMain } from "@/lib/batch-queue-engine";
 import { toSafeArrayBuffer } from "@/lib/utils";
 
+// Polyfill Promise.withResolvers for cross-browser safety (required by modern PDF.js)
+if (typeof window !== "undefined") {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (typeof (Promise as any).withResolvers === "undefined") {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (Promise as any).withResolvers = function <T>() {
+      let resolve!: (value: T | PromiseLike<T>) => void;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let reject!: (reason?: any) => void;
+      const promise = new Promise<T>((res, rej) => {
+        resolve = res;
+        reject = rej;
+      });
+      return { promise, resolve, reject };
+    };
+  }
+}
+
 // Cached dynamic PDF.js instance
 let pdfjsPromise: Promise<typeof import("pdfjs-dist")> | null = null;
 
@@ -23,8 +41,11 @@ export async function getPdfJs() {
   if (!pdfjsPromise) {
     pdfjsPromise = import("pdfjs-dist").then((pdfjs) => {
       if (pdfjs.GlobalWorkerOptions) {
-        const localWorker = `${window.location.origin}/pdf.worker.min.mjs`;
-        pdfjs.GlobalWorkerOptions.workerSrc = localWorker;
+        const version = pdfjs.version || "4.10.38";
+        // Bulletproof CDN worker loading cascade (cdnjs -> unpkg -> local)
+        // cdnjs serves proper application/javascript with CORS enabled
+        const cdnWorker = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${version}/pdf.worker.min.mjs`;
+        pdfjs.GlobalWorkerOptions.workerSrc = cdnWorker;
       }
       return pdfjs;
     });

@@ -11,7 +11,20 @@ import {
 } from "@/lib/pdf-engine";
 import { sessionHistory } from "@/lib/session-history";
 import { createPdfBlob } from "@/lib/utils";
-import { Crop, Loader2, AlertCircle } from "lucide-react";
+import {
+  Crop,
+  Loader2,
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+
+const CROP_PRESETS = [
+  { label: "Standard Trim (5%)", top: 5, bottom: 5, left: 5, right: 5 },
+  { label: "Header & Footer (12%)", top: 12, bottom: 12, left: 4, right: 4 },
+  { label: "Binding Gutter (Left 10%)", top: 4, bottom: 4, left: 10, right: 4 },
+  { label: "Full Bleed (0%)", top: 0, bottom: 0, left: 0, right: 0 },
+];
 
 export function CropPdfTool() {
   const [fileItem, setFileItem] = useState<UploadedFileItem | null>(null);
@@ -81,7 +94,7 @@ export function CropPdfTool() {
     async function loadPage() {
       if (!originalBuffer) return;
       try {
-        const canvas = await renderPdfPageToCanvas(originalBuffer, currentPage, 1.2);
+        const canvas = await renderPdfPageToCanvas(originalBuffer, currentPage, 1.4);
         if (active && pageCanvasRef.current) {
           const target = pageCanvasRef.current;
           target.width = canvas.width;
@@ -164,22 +177,50 @@ export function CropPdfTool() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               {/* Left Column: Margin Sliders */}
               <div className="lg:col-span-5 space-y-4">
-                <div className="p-6 rounded-3xl bg-[#12141D] border border-white/10 space-y-5 shadow-xl">
+                <div className="p-6 rounded-3xl premium-card space-y-5 shadow-xl">
                   <div className="flex items-center justify-between border-b border-white/5 pb-3">
-                    <h3 className="font-semibold text-white text-sm">
-                      Margin Trim Controls (%)
+                    <h3 className="font-semibold text-white text-base">
+                      {fileItem.name}
                     </h3>
-                    <span className="text-[11px] text-slate-400">
+                    <span className="text-[11px] text-zinc-400 font-mono">
                       Page {currentPage}/{totalPages}
                     </span>
                   </div>
 
-                  <div className="space-y-4">
+                  {/* Preset Chips */}
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block font-mono">
+                      Margin Presets
+                    </span>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {CROP_PRESETS.map((p) => (
+                        <button
+                          key={p.label}
+                          type="button"
+                          onClick={() =>
+                            setMargins({
+                              ...margins,
+                              topPercent: p.top,
+                              bottomPercent: p.bottom,
+                              leftPercent: p.left,
+                              rightPercent: p.right,
+                            })
+                          }
+                          className="px-2.5 py-1.5 rounded-xl glass-pill text-xs text-zinc-300 hover:text-white hover:bg-white/[0.08] transition-all text-left truncate cursor-pointer font-mono"
+                        >
+                          {p.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Range Sliders */}
+                  <div className="space-y-4 pt-1">
                     {/* Top */}
                     <div className="space-y-1">
                       <div className="flex justify-between text-xs">
-                        <span className="text-slate-400">Top Margin Trim</span>
-                        <span className="font-mono text-cyan-400 font-semibold">
+                        <span className="text-zinc-400">Top Margin Trim</span>
+                        <span className="font-mono text-amber-400 font-semibold tabular-nums">
                           {margins.topPercent}%
                         </span>
                       </div>
@@ -194,15 +235,15 @@ export function CropPdfTool() {
                             topPercent: Number(e.target.value),
                           })
                         }
-                        className="w-full accent-amber-500"
+                        className="w-full accent-amber-500 cursor-pointer"
                       />
                     </div>
 
                     {/* Bottom */}
                     <div className="space-y-1">
                       <div className="flex justify-between text-xs">
-                        <span className="text-slate-400">Bottom Margin Trim</span>
-                        <span className="font-mono text-cyan-400 font-semibold">
+                        <span className="text-zinc-400">Bottom Margin Trim</span>
+                        <span className="font-mono text-amber-400 font-semibold tabular-nums">
                           {margins.bottomPercent}%
                         </span>
                       </div>
@@ -217,15 +258,15 @@ export function CropPdfTool() {
                             bottomPercent: Number(e.target.value),
                           })
                         }
-                        className="w-full accent-amber-500"
+                        className="w-full accent-amber-500 cursor-pointer"
                       />
                     </div>
 
                     {/* Left */}
                     <div className="space-y-1">
                       <div className="flex justify-between text-xs">
-                        <span className="text-slate-400">Left Margin Trim</span>
-                        <span className="font-mono text-cyan-400 font-semibold">
+                        <span className="text-zinc-400">Left Margin Trim</span>
+                        <span className="font-mono text-amber-400 font-semibold tabular-nums">
                           {margins.leftPercent}%
                         </span>
                       </div>
@@ -240,15 +281,15 @@ export function CropPdfTool() {
                             leftPercent: Number(e.target.value),
                           })
                         }
-                        className="w-full accent-amber-500"
+                        className="w-full accent-amber-500 cursor-pointer"
                       />
                     </div>
 
                     {/* Right */}
                     <div className="space-y-1">
                       <div className="flex justify-between text-xs">
-                        <span className="text-slate-400">Right Margin Trim</span>
-                        <span className="font-mono text-cyan-400 font-semibold">
+                        <span className="text-zinc-400">Right Margin Trim</span>
+                        <span className="font-mono text-amber-400 font-semibold tabular-nums">
                           {margins.rightPercent}%
                         </span>
                       </div>
@@ -263,7 +304,7 @@ export function CropPdfTool() {
                             rightPercent: Number(e.target.value),
                           })
                         }
-                        className="w-full accent-amber-500"
+                        className="w-full accent-amber-500 cursor-pointer"
                       />
                     </div>
                   </div>
@@ -273,7 +314,7 @@ export function CropPdfTool() {
                       type="button"
                       disabled={isProcessing}
                       onClick={handleCrop}
-                      className="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-700 hover:to-yellow-700 disabled:opacity-40 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(217,119,6,0.35)] transition-all"
+                      className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-700 hover:to-yellow-700 disabled:opacity-40 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(217,119,6,0.35)] transition-all cursor-pointer"
                     >
                       {isProcessing ? (
                         <>
@@ -291,7 +332,7 @@ export function CropPdfTool() {
                 </div>
 
                 {errorMessage && (
-                  <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
+                  <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
                     <AlertCircle className="w-4 h-4 shrink-0" />
                     <span>{errorMessage}</span>
                   </div>
@@ -300,30 +341,31 @@ export function CropPdfTool() {
 
               {/* Right Column: Live Visual Crop Box Overlay */}
               <div className="lg:col-span-7 flex flex-col items-center space-y-3">
-                <div className="flex items-center justify-between w-full text-xs text-slate-400 px-2">
-                  <span>Visual Trim Preview</span>
-                  <div className="flex gap-2">
+                <div className="flex items-center justify-between w-full text-xs text-zinc-400 px-2 font-mono">
+                  <span>Live Visual Crop Overlay</span>
+                  <div className="flex items-center gap-1.5">
                     <button
                       disabled={currentPage <= 1}
                       onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 disabled:opacity-30"
+                      className="p-1 rounded-lg glass-pill text-zinc-300 hover:text-white disabled:opacity-20 cursor-pointer"
                     >
-                      Prev
+                      <ChevronLeft className="w-3.5 h-3.5" />
                     </button>
+                    <span className="px-1 text-zinc-300">{currentPage}/{totalPages}</span>
                     <button
                       disabled={currentPage >= totalPages}
                       onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                      className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 disabled:opacity-30"
+                      className="p-1 rounded-lg glass-pill text-zinc-300 hover:text-white disabled:opacity-20 cursor-pointer"
                     >
-                      Next
+                      <ChevronRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
 
-                <div className="relative border border-white/15 rounded-2xl overflow-hidden bg-black/60 shadow-2xl max-w-full">
+                <div className="relative border border-white/15 rounded-2xl overflow-hidden bg-black/60 shadow-2xl max-w-full select-none">
                   <canvas ref={pageCanvasRef} className="max-w-full h-auto block" />
 
-                  {/* Active crop frame overlay */}
+                  {/* Active crop frame overlay with dimmed exterior */}
                   <div
                     style={{
                       position: "absolute",
@@ -332,12 +374,16 @@ export function CropPdfTool() {
                       left: `${margins.leftPercent}%`,
                       right: `${margins.rightPercent}%`,
                     }}
-                    className="border-2 border-dashed border-amber-400 shadow-[0_0_0_9999px_rgba(0,0,0,0.55)] pointer-events-none"
-                  />
+                    className="border-2 border-dashed border-amber-400 shadow-[0_0_0_9999px_rgba(0,0,0,0.65)] pointer-events-none transition-all duration-100 flex items-center justify-center"
+                  >
+                    <span className="text-[10px] font-mono text-amber-300/80 bg-black/60 px-2 py-0.5 rounded border border-amber-400/40">
+                      Crop Area
+                    </span>
+                  </div>
                 </div>
 
-                <span className="text-[11px] text-slate-500 text-center">
-                  Adjust sliders on the left to set custom crop bounds across all pages
+                <span className="text-[11px] text-zinc-500 text-center font-mono">
+                  Adjust sliders on the left to trim margins. The highlighted area represents the final page.
                 </span>
               </div>
             </div>
