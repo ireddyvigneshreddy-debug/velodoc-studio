@@ -1,6 +1,7 @@
 import {
   TechTalkSlide,
   ApiVaultConfig,
+  IareMetadata,
 } from "@/types/ppt";
 
 export interface GenerateTechTalkOptions {
@@ -11,6 +12,7 @@ export interface GenerateTechTalkOptions {
   collegeName?: string;
   eventName?: string;
   config: ApiVaultConfig;
+  iareMetadata?: IareMetadata;
 }
 
 const SYSTEM_PROMPT = `You are a distinguished Computer Science Professor and Principal Systems Architect.
@@ -228,6 +230,44 @@ async function callPollinations(options: GenerateTechTalkOptions): Promise<TechT
 // ============================================================================
 
 function buildUserPrompt(options: GenerateTechTalkOptions): string {
+  const isIare = options.iareMetadata?.isIareMode;
+  const iare = options.iareMetadata;
+
+  if (isIare && iare) {
+    return `Generate an official Institute of Aeronautical Engineering (IARE Autonomous) academic presentation for:
+Topic: "${options.topic}"
+Assessment Type: "${iare.assessmentType}"
+Department: "${iare.department}"
+Course Name: "${iare.courseName}"
+Course Code: "${iare.courseCode}"
+Semester & Regulation: "${iare.semesterRegulation}"
+Student Name: "${iare.studentName}"
+Roll Number: "${iare.rollNumber}"
+Faculty / Coordinator: "${iare.facultyName || "Course Coordinator"}"
+Reference Notes / Syllabus / Abstract: "${options.details || "In-depth engineering curriculum overview"}"
+Target Slide Count: Exactly ${options.slideCount} slides (Numbered 1 to ${options.slideCount})
+
+Follow IARE's Outcome-Based Education (OBE) and Continuous Internal Assessment (CIA/AAT) evaluation structure:
+1. Slide 1: Official IARE Title & Student/Course Metadata Cover (layout: "title", category: "${iare.assessmentType.toUpperCase()}")
+2. Slide 2: Presentation Outline / Contents (layout: "two-column")
+3. Slide 3: Learning Objectives & Course Outcome (CO) Mapping (layout: "three-card", linking topic to CO1, CO2, CO3 and Bloom's Taxonomy levels)
+4. Slide 4: Key Definitions & Fundamental Terminology (layout: "three-card")
+5. Slide 5: Introduction, Background & Technological Motivation (layout: "two-column")
+6. Slide 6: Problem Statement & Existing Engineering Bottlenecks (layout: "two-column")
+7. Slide 7: Core Theoretical Concept & Mathematical/Logical Foundation (layout: "metric-highlight")
+8. Slide 8: System Architecture & Block Diagram / Component Workflow (layout: "process-flow")
+9. Slide 9: Step-by-Step Working Mechanism / Algorithmic Execution (layout: "process-flow")
+10. Slide 10: Practical Implementation / Code Example / Numerical Case Study (layout: "code-algorithm")
+11. Slide 11: Comparative Analysis Table: Traditional vs. Modern Approach (layout: "comparison-table")
+12. Slide 12: Advantages, Limitations & Engineering Trade-offs (layout: "two-column")
+13. Slide 13: Real-World Industrial & Engineering Applications (layout: "three-card")
+14. Slide 14: Conclusion, Future Scope & Summary Takeaways (layout: "two-column")
+15. Slide 15: References (Standard Textbooks, IEEE Transactions, NPTEL) & Thank You / Q&A (layout: "two-column")
+
+If slideCount is less than 15 (e.g. 10 to 14), condense middle technical slides cleanly to equal exactly ${options.slideCount} slides.
+Ensure every single slide includes 3-4 complete, articulate conversational sentences in "speakerNotes" for what the student should say out loud on stage to the evaluators and faculty.`;
+  }
+
   return `Generate an academic college tech-talk presentation for:
 Topic: "${options.topic}"
 Reference Notes / Syllabus / Abstract: "${options.details || "Comprehensive technical overview"}"
@@ -300,12 +340,535 @@ function parseSlidesFromJson(
 }
 
 // ============================================================================
+// IARE OFFICIAL TECH TALK & AAT OBE SYNTHESIS ENGINE
+// ============================================================================
+
+export function synthesizeIarePresentation(options: GenerateTechTalkOptions): TechTalkSlide[] {
+  const { topic, details, slideCount, iareMetadata } = options;
+  const titleTopic = topic.trim() || "Design and Analysis of Algorithms";
+  const iare = iareMetadata || {
+    isIareMode: true,
+    assessmentType: "AAT-I Tech Talk",
+    department: "Computer Science and Engineering (CSE)",
+    semesterRegulation: "II B.Tech I Semester (BT24 / BT25)",
+    courseName: "Design and Analysis of Algorithms",
+    courseCode: "ACSD08",
+    studentName: "Vignesh Reddy",
+    rollNumber: "24951A0501",
+    facultyName: "Dr. K. Srinivas Rao, Professor",
+  };
+
+  const lower = (topic + " " + (details || "")).toLowerCase();
+  const isAi = lower.includes("ai") || lower.includes("llm") || lower.includes("model") || lower.includes("neural") || lower.includes("agent") || lower.includes("learn");
+  const isCrypto = lower.includes("crypto") || lower.includes("security") || lower.includes("quantum") || lower.includes("tls") || lower.includes("cipher") || lower.includes("block");
+  const isAero = lower.includes("aero") || lower.includes("uav") || lower.includes("flight") || lower.includes("propulsion") || lower.includes("drone") || lower.includes("avionics");
+
+  const domainName = isAi
+    ? "Artificial Intelligence & Computational Systems"
+    : isCrypto
+    ? "Network Security & Cryptography"
+    : isAero
+    ? "Aeronautical & Autonomous Systems"
+    : "Computer Science & Engineering";
+
+  const iareSlideTemplates: TechTalkSlide[] = [
+    // 1. Cover Slide
+    {
+      id: "iare-s1",
+      slideNumber: 1,
+      layout: "title",
+      title: titleTopic,
+      subtitle: `${iare.courseName} (${iare.courseCode}) — ${iare.semesterRegulation}`,
+      category: `${iare.assessmentType.toUpperCase()} PRESENTATION`,
+      columns: [
+        {
+          title: "Presented By",
+          bullets: [
+            `Student: ${iare.studentName}`,
+            `Roll No: ${iare.rollNumber}`,
+            `Dept: ${iare.department}`,
+          ],
+        },
+        {
+          title: "Course Coordinator / Evaluated By",
+          bullets: [
+            `Faculty: ${iare.facultyName || "Course Coordinator"}`,
+            `Department of ${iare.department}`,
+            `IARE (Autonomous), Hyderabad`,
+          ],
+        },
+      ],
+      speakerNotes: `Respected Course Coordinator and dear peers, I am ${iare.studentName}, bearing Hall Ticket Number ${iare.rollNumber} from ${iare.department}. Today, I am presenting our ${iare.assessmentType} on "${titleTopic}" under the course ${iare.courseName} (${iare.courseCode}). In this technical presentation, we will walk through theoretical foundations, system architecture, working mechanisms, benchmark matrices, and real-world engineering deployments.`,
+    },
+
+    // 2. Presentation Outline
+    {
+      id: "iare-s2",
+      slideNumber: 2,
+      layout: "two-column",
+      title: "Presentation Outline & Structure",
+      subtitle: "Systematic academic traversal aligned with IARE CIA / AAT evaluation rubrics",
+      category: "OUTLINE",
+      columns: [
+        {
+          title: "Module I: Theoretical Foundations",
+          bullets: [
+            "Learning Objectives & Course Outcome (CO) Mapping",
+            "Key Definitions, Nomenclature & Primitives",
+            "Introduction, Motivation & Technological Context",
+            "Problem Statement & Critical Legacy Bottlenecks",
+          ],
+        },
+        {
+          title: "Module II: Engineering Execution & Results",
+          bullets: [
+            "Theoretical Models & Mathematical Formulation",
+            "System Architecture & End-to-End Block Diagram",
+            "Step-by-Step Algorithm & Working Mechanism",
+            "Comparative Benchmarks, Industrial Applications & Future Scope",
+          ],
+        },
+      ],
+      speakerNotes: `On this roadmap slide, we outline the systematic progression of our tech talk. We begin with Outcome-Based Education course mapping and fundamental definitions in Module One, before delving into system architecture, algorithmic mechanics, and benchmark matrices in Module Two.`,
+    },
+
+    // 3. Learning Objectives & CO Mapping
+    {
+      id: "iare-s3",
+      slideNumber: 3,
+      layout: "three-card",
+      title: "Learning Objectives & CO Mapping",
+      subtitle: "Direct alignment with Autonomous Course Outcomes and Bloom's Taxonomy Cognitive Levels",
+      category: "OUTCOME-BASED EDUCATION (OBE)",
+      cards: [
+        {
+          tag: "CO 1 • UNDERSTAND (L2)",
+          title: "Foundational Comprehension",
+          text: `Understand foundational primitives, architectural paradigms, and design constraints governing ${titleTopic}.`,
+        },
+        {
+          tag: "CO 2 • APPLY (L3)",
+          title: "System Modeling & Design",
+          text: `Apply mathematical models, block diagram workflows, and algorithmic routines to solve computational engineering tasks.`,
+        },
+        {
+          tag: "CO 3 • ANALYZE (L4)",
+          title: "Quantitative Evaluation",
+          text: `Analyze comparative performance, time/space complexity trade-offs, and industrial scalability benchmarks against legacy methods.`,
+        },
+      ],
+      speakerNotes: `Here we establish our Outcome-Based Education alignment with the course syllabus. This presentation directly maps to Course Outcome 1 for foundational understanding, Course Outcome 2 for algorithmic design and application, and Course Outcome 3 for quantitative comparative evaluation.`,
+    },
+
+    // 4. Key Definitions & Terminology
+    {
+      id: "iare-s4",
+      slideNumber: 4,
+      layout: "three-card",
+      title: "Key Definitions & Nomenclature",
+      subtitle: "Core technical definitions required for CIA & AAT evaluation",
+      category: "TERMINOLOGY",
+      cards: [
+        {
+          tag: "PRIMITIVE 1",
+          title: "Core Mechanism",
+          text: `The central operating protocol that coordinates state transitions, data transformations, and synchronization under deterministic boundaries.`,
+        },
+        {
+          tag: "PRIMITIVE 2",
+          title: "Invariance & Safety",
+          text: `Mathematical guarantee ensuring data integrity, non-repudiation, and error containment across distributed operating nodes.`,
+        },
+        {
+          tag: "PRIMITIVE 3",
+          title: "Throughput Efficiency",
+          text: `The quantitative metric defining processing rate per unit resource, minimizing latency and computational overhead.`,
+        },
+      ],
+      speakerNotes: `To ensure absolute technical clarity, this slide establishes the three foundational terms. Understanding these primitives is vital because the subsequent architecture relies directly on these mathematical invariants and throughput boundaries.`,
+    },
+
+    // 5. Introduction & Technological Context
+    {
+      id: "iare-s5",
+      slideNumber: 5,
+      layout: "two-column",
+      title: "Introduction & Technological Context",
+      subtitle: `Evolutionary computing paradigm shifts driving modern engineering adoption`,
+      category: "BACKGROUND",
+      columns: [
+        {
+          title: "Historical Context & Precedents",
+          bullets: [
+            "Legacy systems relied on monolithic, single-threaded processing loops with centralized state.",
+            "Exponential data growth exposed severe computational bottlenecks and linear latency degradations.",
+            "Monolithic synchronization creates single points of failure across enterprise infrastructures.",
+          ],
+        },
+        {
+          title: "Catalysts for Modern Engineering",
+          bullets: [
+            `Modern ${domainName} mandates microsecond response times and zero-downtime resilience.`,
+            "Transition toward modular, decoupled architectures with distributed consensus primitives.",
+            "Hardware-accelerated processing pipelines achieving order-of-magnitude energy efficiency.",
+          ],
+        },
+      ],
+      speakerNotes: `Looking at the introduction, traditional architectures struggled with monolithic bottlenecks and single points of failure when subjected to high data volumes. Modern engineering demands distributed fault tolerance, decoupled execution, and hardware acceleration, which sparked the evolution of this technology.`,
+    },
+
+    // 6. Problem Statement & Existing Challenges
+    {
+      id: "iare-s6",
+      slideNumber: 6,
+      layout: "two-column",
+      title: "Problem Statement & Critical Bottlenecks",
+      subtitle: "Why conventional implementations fail to meet contemporary production scale",
+      category: "PROBLEM STATEMENT",
+      columns: [
+        {
+          title: "Critical Legacy Vulnerabilities",
+          bullets: [
+            "Severe I/O and Memory Thrashing under concurrent high-throughput workloads.",
+            "Quadratic O(N²) scaling overhead in synchronization and communication barriers.",
+            "Fragile error recovery resulting in cascading system failures and silent data corruption.",
+          ],
+        },
+        {
+          title: "Engineering Constraints to Overcome",
+          bullets: [
+            "Strict Sub-10ms P99 latency bounds across heterogenous edge and cloud networks.",
+            "Zero tolerance for state inconsistency during unexpected hardware fault transients.",
+            "Energy and memory footprint constraints for embedded and autonomous deployments.",
+          ],
+        },
+      ],
+      speakerNotes: `This problem statement highlights why we cannot simply scale conventional solutions. Under high concurrency, legacy systems suffer severe memory thrashing and quadratic scaling overhead. Our objective is to achieve sub-ten-millisecond P99 latency while preserving absolute state consistency.`,
+    },
+
+    // 7. Core Theoretical Concept & Mathematical Model
+    {
+      id: "iare-s7",
+      slideNumber: 7,
+      layout: "metric-highlight",
+      title: "Theoretical & Mathematical Foundation",
+      subtitle: "Formal analytical model governing state transitions and asymptotic bounds",
+      category: "THEORETICAL FOUNDATION",
+      metric: {
+        value: "O(log N)",
+        label: "Asymptotic Upper Bound",
+        context: "Logarithmic execution complexity achieved via partitioned balanced DAG trees",
+      },
+      bulletPoints: [
+        "State space modeled as a directed acyclic graph (DAG) with guaranteed acyclic convergence.",
+        "Formal mathematical invariant: ∀ S_t, H(S_t) = Hash(S_{t-1} || Input_t) ensuring immutability.",
+        "Proved bounds: Worst-case search complexity reduced from linear O(N) to logarithmic O(log N).",
+        "Probabilistic error bounds strictly bounded by ε < 2^(-128) using cryptographic entropy roots.",
+      ],
+      speakerNotes: `Turning to the theoretical foundation, the system models state transitions through a directed acyclic graph. By enforcing cryptographic hashing invariants between consecutive states, we reduce worst-case operational complexity from linear O(N) to logarithmic O(log N).`,
+    },
+
+    // 8. System Architecture & Block Diagram
+    {
+      id: "iare-s8",
+      slideNumber: 8,
+      layout: "process-flow",
+      title: "System Architecture & Block Flow Diagram",
+      subtitle: "End-to-end component decomposition from client ingestion to durable persistence",
+      category: "SYSTEM ARCHITECTURE",
+      processSteps: [
+        {
+          step: 1,
+          title: "Ingestion & Filter Gate",
+          desc: "Validates incoming payload schema, applies rate limiting, and normalizes byte streams.",
+        },
+        {
+          step: 2,
+          title: "Orchestration Engine",
+          desc: "Dispatches workloads to parallel compute kernels with dynamic load rebalancing.",
+        },
+        {
+          step: 3,
+          title: "State & Memory Mesh",
+          desc: "Maintains atomic in-memory cache synchronized with distributed consensus quorums.",
+        },
+        {
+          step: 4,
+          title: "Verification & Persistence",
+          desc: "Applies cryptographically signed commits, logs telemetry, and returns verifiable output.",
+        },
+      ],
+      speakerNotes: `This block flow diagram illustrates the end-to-end system architecture. Inputs first arrive at the Ingestion and Filter Gate for schema validation, pass into the Orchestration Engine for load-balanced execution, synchronize through the State Mesh, and finalize with verified cryptographic commits.`,
+    },
+
+    // 9. Step-by-Step Working Mechanism / Algorithm
+    {
+      id: "iare-s9",
+      slideNumber: 9,
+      layout: "process-flow",
+      title: "Algorithmic Execution & Process Logic",
+      subtitle: "Step-by-step state machine transition flow during live runtime execution",
+      category: "WORKING MECHANISM",
+      processSteps: [
+        {
+          step: 1,
+          title: "Handshake & Init",
+          desc: "Initializes internal registers, verifies peer certificates, and allocates contiguous memory buffers.",
+        },
+        {
+          step: 2,
+          title: "Iterative Transformation",
+          desc: "Executes SIMD-accelerated transform rounds over partitioned tensor/packet chunks.",
+        },
+        {
+          step: 3,
+          title: "Integrity Assertion",
+          desc: "Computes checksum parity vectors; verifies invariant correctness before state commitment.",
+        },
+        {
+          step: 4,
+          title: "State Commit & Ack",
+          desc: "Atomically commits updated state index and broadcasts confirmation packets to listening sinks.",
+        },
+      ],
+      speakerNotes: `Examining the algorithmic execution flow, the engine begins with register initialization and memory buffer reservation. It then executes parallelized transform rounds, verifies mathematical invariant integrity through parity checks, and atomically commits state without race conditions.`,
+    },
+
+    // 10. Practical Implementation & Code Routine
+    {
+      id: "iare-s10",
+      slideNumber: 10,
+      layout: "code-algorithm",
+      title: "Practical Implementation & Code Routine",
+      subtitle: "Production-grade reference implementation demonstrating core processing logic",
+      category: "IMPLEMENTATION",
+      codeSnippet: {
+        language: "typescript",
+        caption: `${iare.courseCode} Lab Implementation: Parallel Pipeline Routine`,
+        code: `// High-Throughput Processing Routine for ${titleTopic.slice(0, 32)}
+async function executeModularPipeline<T>(workload: T[]): Promise<PipelineResult> {
+  const context = new ExecutionContext({ timeoutMs: 5000 });
+  const memoryPool = allocateDirectBuffer(workload.length * 64);
+  
+  try {
+    // Stage 1: Parallel asynchronous map transformation
+    const mapped = await Promise.all(workload.map(item => transformKernel(item, context)));
+    
+    // Stage 2: Consensus reduction & invariant verification
+    const reduced = foldQuorum(mapped, (acc, cur) => acc.merge(cur));
+    assertIntegrityInvariant(reduced);
+    
+    return { success: true, processedCount: mapped.length, digest: reduced.checksum };
+  } finally {
+    memoryPool.release(); // Prevent heap leaks
+  }
+}`,
+      },
+      speakerNotes: `This code snippet demonstrates the practical implementation of the algorithm. Notice the explicit direct buffer allocation that avoids garbage collection overhead, followed by asynchronous parallel map transformations, consensus reduction, and deterministic resource release.`,
+    },
+
+    // 11. Comparative Analysis Table
+    {
+      id: "iare-s11",
+      slideNumber: 11,
+      layout: "comparison-table",
+      title: "Comparative Engineering Benchmark Analysis",
+      subtitle: "Quantifying architectural efficiency against conventional approaches across core metrics",
+      category: "EVALUATION MATRIX",
+      table: {
+        headers: ["Performance Metric", "Conventional Paradigm", "Proposed Architecture", "Engineering Delta"],
+        rows: [
+          ["Time Complexity (Search/Query)", "O(N) Linear Scan", "O(log N) Indexed Tree", "10x–100x Faster"],
+          ["P99 Latency (10k Concurrency)", "142.6 ms", "8.4 ms", "94.1% Latency Reduction"],
+          ["Memory Footprint", "High (Unbounded Heap)", "Bounded (Fixed Pool)", "65% RAM Conservation"],
+          ["Fault Tolerance Guarantee", "Single Point of Failure", "Byzantine Fault Tolerant", "Zero-Downtime Recovery"],
+          ["Energy Efficiency (Joules/Op)", "18.4 mJ / op", "2.1 mJ / op", "8.7x Green Computing Gain"],
+        ],
+      },
+      speakerNotes: `Our comparative evaluation matrix clearly demonstrates the quantitative engineering gains. Across P99 latency, the proposed architecture drops response times from over one hundred and forty milliseconds to just eight point four milliseconds, while reducing memory consumption by sixty-five percent.`,
+    },
+
+    // 12. Advantages, Limitations & Engineering Trade-offs
+    {
+      id: "iare-s12",
+      slideNumber: 12,
+      layout: "two-column",
+      title: "Key Advantages & Engineering Trade-offs",
+      subtitle: "Balancing peak operational performance against deployment complexity",
+      category: "CRITICAL ANALYSIS",
+      columns: [
+        {
+          title: "Key Engineering Advantages",
+          bullets: [
+            "Extreme Throughput: Handles massive concurrent transactions without performance cliffing.",
+            "Mathematical Safety: Formally proven immutability and absence of race conditions.",
+            "Hardware Synergy: Leverages modern SIMD, GPU, and multi-core vector extensions.",
+            "Autonomous Recovery: Self-healing watchdog threads resolve failed worker nodes instantly.",
+          ],
+        },
+        {
+          title: "Engineering Limitations & Trade-offs",
+          bullets: [
+            "Initial Complexity: Steeper implementation curve and specialized protocol knowledge.",
+            "Startup Warmup: Cache pre-warming required to achieve peak microsecond throughput.",
+            "Network Bandwidth: Quorum synchronization packets increase inter-node traffic by ~12%.",
+          ],
+        },
+      ],
+      speakerNotes: `Every engineering design involves trade-offs. While the proposed approach delivers extreme throughput and formally verified safety, it introduces higher architectural complexity and requires brief initial cache warm-up cycles during cold boot.`,
+    },
+
+    // 13. Real-World Industrial & Engineering Applications
+    {
+      id: "iare-s13",
+      slideNumber: 13,
+      layout: "three-card",
+      title: "Industrial & Real-World Applications",
+      subtitle: "Deployments across mission-critical, enterprise, and emerging autonomous systems",
+      category: "INDUSTRY DEPLOYMENT",
+      cards: [
+        {
+          tag: "SECTOR 1 • AEROSPACE & DEFENSE",
+          title: "Avionics & Autonomous UAVs",
+          text: `Mission-critical telemetry processing, real-time collision avoidance, and fail-safe flight trajectory calculation under strict real-time deadlines.`,
+        },
+        {
+          tag: "SECTOR 2 • FINTECH & CLOUD",
+          title: "Ultra-Low Latency Clearing",
+          text: `Financial exchange transaction ordering, distributed ledger settlement, and fraud prevention pipelines handling 500,000 operations per second.`,
+        },
+        {
+          tag: "SECTOR 3 • HEALTHCARE & IOT",
+          title: "Medical Diagnostic Edge AI",
+          text: `Real-time patient monitoring sensors and edge neural inference engines operating on low-power battery constraints with guaranteed data privacy.`,
+        },
+      ],
+      speakerNotes: `In terms of industrial applications, this technology is actively deployed in aerospace and unmanned aerial systems for real-time telemetry, in high-frequency financial exchanges for instant settlement, and in medical edge devices for secure on-device patient diagnostics.`,
+    },
+
+    // 14. Conclusion & Future Research Directions
+    {
+      id: "iare-s14",
+      slideNumber: 14,
+      layout: "two-column",
+      title: "Conclusion & Future Research Directions",
+      subtitle: "Summary of technical findings and prospective innovations for 2026 and beyond",
+      category: "SUMMARY & FUTURE SCOPE",
+      columns: [
+        {
+          title: "Key Summary Conclusions",
+          bullets: [
+            `${titleTopic} successfully resolves legacy concurrency, scaling, and throughput bottlenecks.`,
+            "Achieved formal verification of system invariants alongside 94% lower P99 latencies.",
+            "Outcome-Based Education objectives CO1, CO2, and CO3 successfully fulfilled and demonstrated.",
+          ],
+        },
+        {
+          title: "2026+ Prospective Research Scope",
+          bullets: [
+            "Integration with Post-Quantum Lattice Cryptography for quantum-resistant communications.",
+            "Neuromorphic spiking neural hardware execution to achieve sub-milliwatt power draw.",
+            "Autonomous zero-shot self-tuning algorithms using localized reinforcement learning models.",
+          ],
+        },
+      ],
+      speakerNotes: `In conclusion, this presentation demonstrated how ${titleTopic} resolves legacy scalability bottlenecks, achieving verified safety and ninety-four percent lower latency. Future research will explore post-quantum cryptographic integration and neuromorphic hardware adaptation.`,
+    },
+
+    // 15. References & Q&A
+    {
+      id: "iare-s15",
+      slideNumber: 15,
+      layout: "two-column",
+      title: "Academic References & Open Discussion",
+      subtitle: "Standard textbooks, IEEE peer-reviewed publications, and evaluation floor",
+      category: "REFERENCES & Q&A",
+      columns: [
+        {
+          title: "Academic References & Citations",
+          bullets: [
+            "Thomas H. Cormen, et al. 'Introduction to Algorithms' (4th Edition), MIT Press.",
+            "IEEE Transactions on Parallel and Distributed Systems (Vol. 35, 2025).",
+            "NPTEL / Swayam National Course Lecture Series on Advanced Engineering Systems.",
+            "IARE Course Curriculum & Autonomous Laboratory Manuals (Academic Year 2025-2026).",
+          ],
+        },
+        {
+          title: "Course Outcome Attainment & Q&A",
+          bullets: [
+            `Student Name: ${iare.studentName} | Roll No: ${iare.rollNumber}`,
+            `Department: ${iare.department}`,
+            `Assessment: ${iare.assessmentType} (${iare.courseCode})`,
+            "Floor is now open for Faculty Evaluation, queries, and technical discussion.",
+          ],
+        },
+      ],
+      speakerNotes: `Thank you respected faculty coordinator and dear peers for your time and attention. The academic references and NPTEL course citations are listed on the left. I am now ready for evaluation questions and technical discussion.`,
+    },
+  ];
+
+  const targetCount = Math.max(8, Math.min(20, slideCount));
+  if (targetCount === 15) {
+    return iareSlideTemplates;
+  }
+
+  if (targetCount < 15) {
+    const dropCandidates = [11, 3, 6, 12, 9];
+    const dropCount = 15 - targetCount;
+    const indicesToDrop = new Set(dropCandidates.slice(0, dropCount));
+
+    const selected = iareSlideTemplates.filter((_, idx) => !indicesToDrop.has(idx));
+    if (selected.length > 0 && selected[selected.length - 1].category !== "REFERENCES & Q&A") {
+      selected[selected.length - 1] = iareSlideTemplates[14];
+    }
+    return selected.map((s, idx) => ({ ...s, slideNumber: idx + 1, id: `iare-slide-${idx + 1}` }));
+  }
+
+  const expanded = [...iareSlideTemplates];
+  while (expanded.length < targetCount) {
+    const extraNum = expanded.length;
+    expanded.splice(expanded.length - 2, 0, {
+      id: `iare-extra-${extraNum}`,
+      slideNumber: extraNum,
+      layout: extraNum % 2 === 0 ? "three-card" : "two-column",
+      title: `Advanced Technical Deep-Dive ${extraNum - 13}`,
+      subtitle: `In-depth analysis of subsystem performance, fault recovery and telemetry`,
+      category: "DEEP DIVE",
+      cards: [
+        {
+          tag: "PROFILING",
+          title: "Cache Affinity & Memory Bound",
+          text: "Optimized cache locality reduces L3 misses to under 0.8% across extreme load bursts.",
+        },
+        {
+          tag: "RELIABILITY",
+          title: "Byzantine Agreement Protocol",
+          text: "Guarantees consensus across n ≥ 3f + 1 nodes despite arbitrary network drops.",
+        },
+        {
+          tag: "COMPLIANCE",
+          title: "Autonomous IEEE Standards",
+          text: "Full compliance with IEEE 802.1 / POSIX real-time deterministic standards.",
+        },
+      ],
+      speakerNotes: `On this extended deep-dive slide, we examine cache affinity profiling and Byzantine fault tolerance mechanisms, confirming strict adherence to real-time deterministic computing standards.`,
+    });
+  }
+
+  return expanded.map((s, idx) => ({ ...s, slideNumber: idx + 1, id: `iare-slide-${idx + 1}` }));
+}
+
+// ============================================================================
 // DEEP DETERMINISTIC CLIENT-SIDE SYNTHESIS ENGINE
 // ============================================================================
 
 export function synthesizeTechTalkLocally(
   options: GenerateTechTalkOptions
 ): TechTalkSlide[] {
+  if (options.iareMetadata?.isIareMode) {
+    return synthesizeIarePresentation(options);
+  }
+
   const { topic, details, slideCount, presenterName, collegeName, eventName } = options;
 
   const titleTopic = topic.trim() || "Distributed Systems & Cloud Computing";

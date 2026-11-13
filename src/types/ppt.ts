@@ -7,7 +7,46 @@ export type SlideLayoutType =
   | "code-algorithm"
   | "metric-highlight";
 
-export type PptThemeId = "neon" | "ieee" | "emerald" | "royal" | "paper";
+export type PptThemeId =
+  | "iare"
+  | "neon"
+  | "ieee"
+  | "emerald"
+  | "royal"
+  | "paper";
+
+export type IareAssessmentType =
+  | "AAT-I Tech Talk"
+  | "AAT-II Tech Talk"
+  | "Concept Video Presentation"
+  | "Open-Ended Experiment"
+  | "Project Review";
+
+export type IareDepartment =
+  | "Computer Science and Engineering (CSE)"
+  | "CSE (Artificial Intelligence & Machine Learning)"
+  | "CSE (Data Science)"
+  | "CSE (Cyber Security)"
+  | "Information Technology (IT)"
+  | "Electronics and Communication Engineering (ECE)"
+  | "Electrical and Electronics Engineering (EEE)"
+  | "Aeronautical Engineering (AE)"
+  | "Mechanical Engineering (ME)"
+  | "Civil Engineering (CE)"
+  | "Freshman Engineering (I B.Tech)";
+
+export interface IareMetadata {
+  isIareMode: boolean;
+  assessmentType: IareAssessmentType;
+  department: string;
+  semesterRegulation: string;
+  courseName: string;
+  courseCode: string;
+  rollNumber: string;
+  studentName: string;
+  facultyName?: string;
+  customLogoBase64?: string;
+}
 
 export interface PptThemeDefinition {
   id: PptThemeId;
@@ -84,6 +123,7 @@ export interface TechTalkPresentation {
   themeId: PptThemeId;
   slides: TechTalkSlide[];
   createdAt: number;
+  iareMetadata?: IareMetadata;
 }
 
 export type AiProviderId =

@@ -1,6 +1,19 @@
 import { PptThemeDefinition, PptThemeId } from "@/types/ppt";
 
 export const PPT_THEMES: Record<PptThemeId, PptThemeDefinition> = {
+  iare: {
+    id: "iare",
+    name: "IARE Official Tech Talk & AAT",
+    tagline: "Autonomous institutional template with Maroon, Navy & Gold crest styling",
+    bgHex: "#FFFFFF",
+    cardBgHex: "#F8FAFC",
+    textHex: "#0F172A",
+    subtextHex: "#334155",
+    primaryAccentHex: "#8B0000",
+    secondaryAccentHex: "#002147",
+    borderHex: "#CBD5E1",
+    isDark: false,
+  },
   neon: {
     id: "neon",
     name: "Silicon Valley Dark Neon",

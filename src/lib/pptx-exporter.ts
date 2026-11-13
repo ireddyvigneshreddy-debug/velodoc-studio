@@ -15,7 +15,10 @@ export async function exportToPptx(presentation: TechTalkPresentation): Promise<
   pptx.author = presentation.presenterName || "VeloDoc Studio";
   pptx.company = presentation.collegeName || "Dept. of Computer Science";
 
-  const theme = PPT_THEMES[presentation.themeId] || PPT_THEMES.neon;
+  const isIare = Boolean(presentation.iareMetadata?.isIareMode || presentation.themeId === "iare");
+  const iare = presentation.iareMetadata;
+
+  const theme = isIare ? PPT_THEMES.iare : (PPT_THEMES[presentation.themeId] || PPT_THEMES.neon);
   const cleanBg = theme.bgHex.replace("#", "");
   const cleanCardBg = theme.cardBgHex.replace("#", "");
   const cleanText = theme.textHex.replace("#", "");
@@ -30,151 +33,486 @@ export async function exportToPptx(presentation: TechTalkPresentation): Promise<
     // 1. Background color fill
     slide.background = { color: cleanBg };
 
-    // 2. Top Accent Glow Bar
-    slide.addShape(pptx.ShapeType.rect, {
-      x: 0,
-      y: 0,
-      w: "100%",
-      h: 0.1,
-      fill: { color: cleanAccent },
-      line: { color: cleanAccent, width: 0 },
-    });
-
-    // 3. Embedded Native PowerPoint Speaker Notes Pane
+    // 2. Embedded Native PowerPoint Speaker Notes Pane
     if (s.speakerNotes) {
       slide.addNotes(s.speakerNotes);
     }
 
-    // 4. Slide Footer (Slide Number + Presenter / College credits)
-    slide.addText(`${s.slideNumber} / ${presentation.slides.length}`, {
-      x: 8.8,
-      y: 5.15,
-      w: 1.0,
-      h: 0.35,
-      fontSize: 10,
-      fontFace: "Arial",
-      color: cleanSubtext,
-      align: "right",
-    });
-
-    if (presentation.collegeName || presentation.presenterName) {
-      const footerCredit = [presentation.presenterName, presentation.collegeName].filter(Boolean).join(" • ");
-      slide.addText(footerCredit, {
-        x: 0.6,
-        y: 5.15,
-        w: 6.5,
-        h: 0.35,
-        fontSize: 9,
-        fontFace: "Arial",
-        color: cleanSubtext,
-      });
-    }
-
-    // 5. Layout Rendering
-    if (s.layout === "title") {
-      // TITLE SLIDE
-      // Decorative glowing badge
-      slide.addText(s.category || "COLLEGE TECHNICAL SEMINAR", {
-        x: 0.8,
-        y: 0.8,
-        w: 8.4,
-        h: 0.35,
-        fontSize: 11,
-        fontFace: "Arial",
-        color: cleanAccent2,
-        bold: true,
-        charSpacing: 2,
+    // 3. Top Accent / Header Strip & Footer Rules
+    if (isIare) {
+      // Top Maroon Accent Bar
+      slide.addShape(pptx.ShapeType.rect, {
+        x: 0,
+        y: 0,
+        w: "100%",
+        h: 0.08,
+        fill: { color: "8B0000" },
+        line: { color: "8B0000", width: 0 },
       });
 
-      slide.addText(s.title, {
-        x: 0.8,
-        y: 1.25,
-        w: 8.4,
-        h: 1.6,
-        fontSize: 32,
-        fontFace: "Arial",
-        color: cleanText,
-        bold: true,
-        valign: "top",
-      });
+      // Bottom Master Footer on non-title slides
+      if (s.layout !== "title") {
+        slide.addShape(pptx.ShapeType.rect, {
+          x: 0.6,
+          y: 5.12,
+          w: 8.8,
+          h: 0.015,
+          fill: { color: "CBD5E1" },
+          line: { color: "CBD5E1", width: 0 },
+        });
 
-      if (s.subtitle) {
-        slide.addText(s.subtitle, {
-          x: 0.8,
-          y: 2.9,
-          w: 8.4,
-          h: 0.8,
-          fontSize: 15,
+        slide.addText(`${iare?.rollNumber || ""} — ${iare?.studentName || presentation.presenterName}`, {
+          x: 0.6,
+          y: 5.18,
+          w: 3.6,
+          h: 0.3,
+          fontSize: 8.5,
           fontFace: "Arial",
-          color: cleanSubtext,
-          valign: "top",
+          color: "475569",
+        });
+
+        slide.addText(presentation.topic.substring(0, 48), {
+          x: 3.8,
+          y: 5.18,
+          w: 3.4,
+          h: 0.3,
+          fontSize: 8.5,
+          fontFace: "Arial",
+          color: "64748B",
+          align: "center",
+        });
+
+        slide.addText(`Slide ${s.slideNumber} of ${presentation.slides.length}`, {
+          x: 7.8,
+          y: 5.18,
+          w: 1.6,
+          h: 0.3,
+          fontSize: 8.5,
+          fontFace: "Arial",
+          bold: true,
+          color: "002147",
+          align: "right",
         });
       }
-
-      // Presenter Info Card at Bottom
-      slide.addShape(pptx.ShapeType.roundRect, {
-        x: 0.8,
-        y: 3.8,
-        w: 8.4,
-        h: 1.15,
-        fill: { color: cleanCardBg },
-        line: { color: cleanBorder, width: 1 },
-        rectRadius: 0.1,
-      });
-
-      const presenterText = [
-        `Lead Presenter: ${presentation.presenterName || "Student Presenter"}`,
-        `Institution: ${presentation.collegeName || "Dept. of Computer Science & Engineering"}`,
-        `Academic Forum: ${presentation.eventName || "Technical Seminar 2026"}`,
-      ].join("\n");
-
-      slide.addText(presenterText, {
-        x: 1.0,
-        y: 3.9,
-        w: 8.0,
-        h: 0.95,
-        fontSize: 11,
-        fontFace: "Arial",
-        color: cleanText,
-        lineSpacing: 18,
-      });
     } else {
-      // STANDARD SLIDES (Header)
-      slide.addText((s.category || "TECH TALK").toUpperCase(), {
-        x: 0.8,
-        y: 0.35,
-        w: 8.4,
-        h: 0.3,
+      // Top Accent Glow Bar
+      slide.addShape(pptx.ShapeType.rect, {
+        x: 0,
+        y: 0,
+        w: "100%",
+        h: 0.1,
+        fill: { color: cleanAccent },
+        line: { color: cleanAccent, width: 0 },
+      });
+
+      // Slide Footer (Slide Number + Presenter / College credits)
+      slide.addText(`${s.slideNumber} / ${presentation.slides.length}`, {
+        x: 8.8,
+        y: 5.15,
+        w: 1.0,
+        h: 0.35,
         fontSize: 10,
         fontFace: "Arial",
-        color: cleanAccent,
-        bold: true,
-        charSpacing: 2,
+        color: cleanSubtext,
+        align: "right",
       });
 
-      slide.addText(s.title, {
-        x: 0.8,
-        y: 0.65,
-        w: 8.4,
-        h: 0.6,
-        fontSize: 22,
-        fontFace: "Arial",
-        color: cleanText,
-        bold: true,
-        valign: "top",
-      });
+      if (presentation.collegeName || presentation.presenterName) {
+        const footerCredit = [presentation.presenterName, presentation.collegeName].filter(Boolean).join(" • ");
+        slide.addText(footerCredit, {
+          x: 0.6,
+          y: 5.15,
+          w: 6.5,
+          h: 0.35,
+          fontSize: 9,
+          fontFace: "Arial",
+          color: cleanSubtext,
+        });
+      }
+    }
 
-      if (s.subtitle) {
-        slide.addText(s.subtitle, {
+    // 4. Layout Rendering
+    if (s.layout === "title") {
+      if (isIare) {
+        // OFFICIAL IARE TITLE COVER SLIDE
+        let textStartX = 0.6;
+        let textWidth = 8.8;
+
+        if (iare?.customLogoBase64) {
+          try {
+            slide.addImage({
+              data: iare.customLogoBase64,
+              x: 0.6,
+              y: 0.28,
+              w: 1.15,
+              h: 1.15,
+            });
+            textStartX = 1.95;
+            textWidth = 7.45;
+          } catch {
+            // fallback
+          }
+        }
+
+        slide.addText("INSTITUTE OF AERONAUTICAL ENGINEERING", {
+          x: textStartX,
+          y: 0.28,
+          w: textWidth,
+          h: 0.35,
+          fontSize: 15,
+          fontFace: "Georgia",
+          bold: true,
+          color: "8B0000",
+        });
+
+        slide.addText("(Autonomous)", {
+          x: textStartX,
+          y: 0.6,
+          w: textWidth,
+          h: 0.24,
+          fontSize: 11,
+          fontFace: "Arial",
+          bold: true,
+          color: "002147",
+        });
+
+        slide.addText("Dundigal, Hyderabad - 500 043, Telangana", {
+          x: textStartX,
+          y: 0.82,
+          w: textWidth,
+          h: 0.22,
+          fontSize: 9,
+          fontFace: "Arial",
+          color: "475569",
+        });
+
+        slide.addText(`DEPARTMENT OF ${(iare?.department || "COMPUTER SCIENCE AND ENGINEERING").toUpperCase()}`, {
+          x: textStartX,
+          y: 1.05,
+          w: textWidth,
+          h: 0.3,
+          fontSize: 10.5,
+          fontFace: "Arial",
+          bold: true,
+          color: "8B0000",
+        });
+
+        // Double Horizontal Rule (Maroon + Gold)
+        slide.addShape(pptx.ShapeType.rect, {
+          x: 0.6,
+          y: 1.42,
+          w: 8.8,
+          h: 0.035,
+          fill: { color: "8B0000" },
+          line: { color: "8B0000", width: 0 },
+        });
+        slide.addShape(pptx.ShapeType.rect, {
+          x: 0.6,
+          y: 1.47,
+          w: 8.8,
+          h: 0.02,
+          fill: { color: "D97706" },
+          line: { color: "D97706", width: 0 },
+        });
+
+        // Assessment Pill Badge
+        slide.addShape(pptx.ShapeType.roundRect, {
+          x: 0.6,
+          y: 1.62,
+          w: 4.4,
+          h: 0.32,
+          fill: { color: "FEF3C7" },
+          line: { color: "D97706", width: 1 },
+          rectRadius: 0.08,
+        });
+        slide.addText(`[ ${(iare?.assessmentType || "AAT-I TECH TALK").toUpperCase()} PRESENTATION ]`, {
+          x: 0.6,
+          y: 1.63,
+          w: 4.4,
+          h: 0.3,
+          fontSize: 9.5,
+          fontFace: "Arial",
+          bold: true,
+          color: "8B0000",
+          align: "center",
+        });
+
+        // Large Topic Title
+        slide.addText(s.title, {
+          x: 0.6,
+          y: 2.05,
+          w: 8.8,
+          h: 1.0,
+          fontSize: 23,
+          fontFace: "Arial",
+          bold: true,
+          color: "002147",
+          valign: "top",
+        });
+
+        // Course block
+        slide.addText(`Course: ${iare?.courseName || ""} (${iare?.courseCode || ""}) • ${iare?.semesterRegulation || ""}`, {
+          x: 0.6,
+          y: 3.1,
+          w: 8.8,
+          h: 0.3,
+          fontSize: 10.5,
+          fontFace: "Arial",
+          bold: true,
+          color: "334155",
+        });
+
+        // 2-Column Metadata Box at Bottom
+        const boxY = 3.52;
+        const boxH = 1.48;
+        const boxW = 4.25;
+
+        // Left box: Presented By
+        slide.addShape(pptx.ShapeType.roundRect, {
+          x: 0.6,
+          y: boxY,
+          w: boxW,
+          h: boxH,
+          fill: { color: "F8FAFC" },
+          line: { color: "CBD5E1", width: 1 },
+          rectRadius: 0.08,
+        });
+        slide.addText("PRESENTED BY:", {
+          x: 0.8,
+          y: boxY + 0.12,
+          w: boxW - 0.4,
+          h: 0.25,
+          fontSize: 9.5,
+          fontFace: "Arial",
+          bold: true,
+          color: "8B0000",
+        });
+        const studentInfo = [
+          `Student Name: ${iare?.studentName || presentation.presenterName}`,
+          `Roll Number: ${iare?.rollNumber || "24951A05XX"}`,
+          `Department: ${iare?.department || "CSE"}`,
+        ].join("\n");
+        slide.addText(studentInfo, {
+          x: 0.8,
+          y: boxY + 0.38,
+          w: boxW - 0.4,
+          h: 0.95,
+          fontSize: 10,
+          fontFace: "Arial",
+          color: "0F172A",
+          lineSpacing: 16,
+        });
+
+        // Right box: Evaluated By
+        slide.addShape(pptx.ShapeType.roundRect, {
+          x: 5.15,
+          y: boxY,
+          w: boxW,
+          h: boxH,
+          fill: { color: "F8FAFC" },
+          line: { color: "CBD5E1", width: 1 },
+          rectRadius: 0.08,
+        });
+        slide.addText("COURSE COORDINATOR / EVALUATED BY:", {
+          x: 5.35,
+          y: boxY + 0.12,
+          w: boxW - 0.4,
+          h: 0.25,
+          fontSize: 9.5,
+          fontFace: "Arial",
+          bold: true,
+          color: "002147",
+        });
+        const facultyInfo = [
+          `Faculty Name: ${iare?.facultyName || "Course Coordinator"}`,
+          `Department of ${iare?.department || "CSE"}`,
+          "IARE (Autonomous), Dundigal, Hyderabad",
+        ].join("\n");
+        slide.addText(facultyInfo, {
+          x: 5.35,
+          y: boxY + 0.38,
+          w: boxW - 0.4,
+          h: 0.95,
+          fontSize: 10,
+          fontFace: "Arial",
+          color: "0F172A",
+          lineSpacing: 16,
+        });
+      } else {
+        // GENERAL TITLE SLIDE
+        slide.addText(s.category || "COLLEGE TECHNICAL SEMINAR", {
+          x: 0.8,
+          y: 0.8,
+          w: 8.4,
+          h: 0.35,
+          fontSize: 11,
+          fontFace: "Arial",
+          color: cleanAccent2,
+          bold: true,
+          charSpacing: 2,
+        });
+
+        slide.addText(s.title, {
           x: 0.8,
           y: 1.25,
           w: 8.4,
-          h: 0.4,
-          fontSize: 11,
+          h: 1.6,
+          fontSize: 32,
           fontFace: "Arial",
-          color: cleanSubtext,
+          color: cleanText,
+          bold: true,
           valign: "top",
         });
+
+        if (s.subtitle) {
+          slide.addText(s.subtitle, {
+            x: 0.8,
+            y: 2.9,
+            w: 8.4,
+            h: 0.8,
+            fontSize: 15,
+            fontFace: "Arial",
+            color: cleanSubtext,
+            valign: "top",
+          });
+        }
+
+        // Presenter Info Card at Bottom
+        slide.addShape(pptx.ShapeType.roundRect, {
+          x: 0.8,
+          y: 3.8,
+          w: 8.4,
+          h: 1.15,
+          fill: { color: cleanCardBg },
+          line: { color: cleanBorder, width: 1 },
+          rectRadius: 0.1,
+        });
+
+        const presenterText = [
+          `Lead Presenter: ${presentation.presenterName || "Student Presenter"}`,
+          `Institution: ${presentation.collegeName || "Dept. of Computer Science & Engineering"}`,
+          `Academic Forum: ${presentation.eventName || "Technical Seminar 2026"}`,
+        ].join("\n");
+
+        slide.addText(presenterText, {
+          x: 1.0,
+          y: 3.9,
+          w: 8.0,
+          h: 0.95,
+          fontSize: 11,
+          fontFace: "Arial",
+          color: cleanText,
+          lineSpacing: 18,
+        });
+      }
+    } else {
+      // STANDARD CONTENT SLIDES
+      if (isIare) {
+        // IARE MASTER CONTENT HEADER STRIP
+        const shortDept = (iare?.department || "CSE").replace(/\s*\(.*\)/, "");
+        slide.addText(`IARE (Autonomous) • Dept. of ${shortDept}`, {
+          x: 0.6,
+          y: 0.16,
+          w: 5.0,
+          h: 0.22,
+          fontSize: 9,
+          fontFace: "Arial",
+          bold: true,
+          color: "8B0000",
+        });
+
+        slide.addText(`${iare?.assessmentType || "Tech Talk"} — ${iare?.courseCode || ""}`, {
+          x: 5.6,
+          y: 0.16,
+          w: 3.8,
+          h: 0.22,
+          fontSize: 9,
+          fontFace: "Arial",
+          color: "475569",
+          align: "right",
+        });
+
+        slide.addShape(pptx.ShapeType.rect, {
+          x: 0.6,
+          y: 0.42,
+          w: 8.8,
+          h: 0.015,
+          fill: { color: "CBD5E1" },
+          line: { color: "CBD5E1", width: 0 },
+        });
+
+        // Left accent bar
+        slide.addShape(pptx.ShapeType.rect, {
+          x: 0.6,
+          y: 0.54,
+          w: 0.08,
+          h: 0.42,
+          fill: { color: "8B0000" },
+          line: { color: "8B0000", width: 0 },
+        });
+
+        slide.addText(s.title, {
+          x: 0.78,
+          y: 0.5,
+          w: 8.6,
+          h: 0.5,
+          fontSize: 20,
+          fontFace: "Arial",
+          bold: true,
+          color: "002147",
+          valign: "top",
+        });
+
+        if (s.subtitle) {
+          slide.addText(s.subtitle, {
+            x: 0.78,
+            y: 1.0,
+            w: 8.6,
+            h: 0.35,
+            fontSize: 10.5,
+            fontFace: "Arial",
+            color: "475569",
+            valign: "top",
+          });
+        }
+      } else {
+        // NON-IARE STANDARD HEADER
+        slide.addText((s.category || "TECH TALK").toUpperCase(), {
+          x: 0.8,
+          y: 0.35,
+          w: 8.4,
+          h: 0.3,
+          fontSize: 10,
+          fontFace: "Arial",
+          color: cleanAccent,
+          bold: true,
+          charSpacing: 2,
+        });
+
+        slide.addText(s.title, {
+          x: 0.8,
+          y: 0.65,
+          w: 8.4,
+          h: 0.6,
+          fontSize: 22,
+          fontFace: "Arial",
+          color: cleanText,
+          bold: true,
+          valign: "top",
+        });
+
+        if (s.subtitle) {
+          slide.addText(s.subtitle, {
+            x: 0.8,
+            y: 1.25,
+            w: 8.4,
+            h: 0.4,
+            fontSize: 11,
+            fontFace: "Arial",
+            color: cleanSubtext,
+            valign: "top",
+          });
+        }
       }
 
       // SLIDE BODY BY LAYOUT
@@ -519,7 +857,10 @@ export async function exportToPdfDeck(presentation: TechTalkPresentation): Promi
   const fontHelvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const fontHelveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-  const theme = PPT_THEMES[presentation.themeId] || PPT_THEMES.neon;
+  const isIare = Boolean(presentation.iareMetadata?.isIareMode || presentation.themeId === "iare");
+  const iare = presentation.iareMetadata;
+
+  const theme = isIare ? PPT_THEMES.iare : (PPT_THEMES[presentation.themeId] || PPT_THEMES.neon);
   const bgRgb = hexToPdfRgb(theme.bgHex);
   const cardRgb = hexToPdfRgb(theme.cardBgHex);
   const textRgb = hexToPdfRgb(theme.textHex);
@@ -527,6 +868,13 @@ export async function exportToPdfDeck(presentation: TechTalkPresentation): Promi
   const accentRgb = hexToPdfRgb(theme.primaryAccentHex);
   const accent2Rgb = hexToPdfRgb(theme.secondaryAccentHex);
   const borderRgb = hexToPdfRgb(theme.borderHex);
+
+  const maroonRgb = hexToPdfRgb("#8B0000");
+  const navyRgb = hexToPdfRgb("#002147");
+  const goldRgb = hexToPdfRgb("#D97706");
+  const goldPillBgRgb = hexToPdfRgb("#FEF3C7");
+  const slateCardRgb = hexToPdfRgb("#F8FAFC");
+  const slateBorderRgb = hexToPdfRgb("#CBD5E1");
 
   // 16:9 widescreen dimensions in points (960 x 540)
   const pageWidth = 960;
@@ -544,123 +892,392 @@ export async function exportToPdfDeck(presentation: TechTalkPresentation): Promi
       color: bgRgb,
     });
 
-    // 2. Top Accent Glow Bar
-    page.drawRectangle({
-      x: 0,
-      y: pageHeight - 8,
-      width: pageWidth,
-      height: 8,
-      color: accentRgb,
-    });
+    // 2. Top Accent / Header Rules
+    if (isIare) {
+      page.drawRectangle({
+        x: 0,
+        y: pageHeight - 6,
+        width: pageWidth,
+        height: 6,
+        color: maroonRgb,
+      });
 
-    // 3. Slide Number & Footer
-    page.drawText(`${s.slideNumber} / ${presentation.slides.length}`, {
-      x: pageWidth - 80,
-      y: 20,
-      size: 9,
-      font: fontHelvetica,
-      color: subtextRgb,
-    });
+      // Bottom Master Footer on non-title slides
+      if (s.layout !== "title") {
+        page.drawRectangle({
+          x: 45,
+          y: 35,
+          width: pageWidth - 90,
+          height: 1,
+          color: slateBorderRgb,
+        });
 
-    const footerText = [presentation.presenterName, presentation.collegeName].filter(Boolean).join(" • ");
-    if (footerText) {
-      page.drawText(footerText.substring(0, 75), {
-        x: 45,
+        page.drawText(`${iare?.rollNumber || ""} — ${iare?.studentName || presentation.presenterName}`, {
+          x: 45,
+          y: 18,
+          size: 8.5,
+          font: fontHelvetica,
+          color: subtextRgb,
+        });
+
+        page.drawText(presentation.topic.substring(0, 50), {
+          x: 360,
+          y: 18,
+          size: 8.5,
+          font: fontHelvetica,
+          color: subtextRgb,
+        });
+
+        page.drawText(`Slide ${s.slideNumber} of ${presentation.slides.length}`, {
+          x: pageWidth - 110,
+          y: 18,
+          size: 8.5,
+          font: fontHelveticaBold,
+          color: navyRgb,
+        });
+      }
+    } else {
+      page.drawRectangle({
+        x: 0,
+        y: pageHeight - 8,
+        width: pageWidth,
+        height: 8,
+        color: accentRgb,
+      });
+
+      page.drawText(`${s.slideNumber} / ${presentation.slides.length}`, {
+        x: pageWidth - 80,
         y: 20,
         size: 9,
         font: fontHelvetica,
         color: subtextRgb,
       });
-    }
 
-    if (s.layout === "title") {
-      // TITLE SLIDE
-      page.drawText((s.category || "COLLEGE TECHNICAL SEMINAR").toUpperCase(), {
-        x: 45,
-        y: pageHeight - 65,
-        size: 11,
-        font: fontHelveticaBold,
-        color: accent2Rgb,
-      });
-
-      page.drawText(s.title.substring(0, 52), {
-        x: 45,
-        y: pageHeight - 120,
-        size: 30,
-        font: fontHelveticaBold,
-        color: textRgb,
-      });
-
-      if (s.subtitle) {
-        page.drawText(s.subtitle.substring(0, 85), {
+      const footerText = [presentation.presenterName, presentation.collegeName].filter(Boolean).join(" • ");
+      if (footerText) {
+        page.drawText(footerText.substring(0, 75), {
           x: 45,
-          y: pageHeight - 155,
-          size: 14,
+          y: 20,
+          size: 9,
           font: fontHelvetica,
           color: subtextRgb,
         });
       }
+    }
 
-      // Presenter card
-      page.drawRectangle({
-        x: 45,
-        y: 80,
-        width: pageWidth - 90,
-        height: 120,
-        color: cardRgb,
-        borderColor: borderRgb,
-        borderWidth: 1,
-      });
-
-      page.drawText(`Lead Presenter: ${presentation.presenterName || "Student Presenter"}`, {
-        x: 65,
-        y: 165,
-        size: 11,
-        font: fontHelveticaBold,
-        color: textRgb,
-      });
-
-      page.drawText(`Institution: ${presentation.collegeName || "Dept. of Computer Science & Engineering"}`, {
-        x: 65,
-        y: 140,
-        size: 10,
-        font: fontHelvetica,
-        color: subtextRgb,
-      });
-
-      page.drawText(`Academic Forum: ${presentation.eventName || "Technical Seminar 2026"}`, {
-        x: 65,
-        y: 115,
-        size: 10,
-        font: fontHelvetica,
-        color: subtextRgb,
-      });
-    } else {
-      // STANDARD SLIDE HEADER
-      page.drawText((s.category || "TECH TALK").toUpperCase(), {
-        x: 45,
-        y: pageHeight - 45,
-        size: 9.5,
-        font: fontHelveticaBold,
-        color: accentRgb,
-      });
-
-      page.drawText(s.title.substring(0, 60), {
-        x: 45,
-        y: pageHeight - 75,
-        size: 20,
-        font: fontHelveticaBold,
-        color: textRgb,
-      });
-
-      if (s.subtitle) {
-        page.drawText(s.subtitle.substring(0, 95), {
+    if (s.layout === "title") {
+      if (isIare) {
+        // OFFICIAL IARE TITLE COVER SLIDE
+        page.drawText("INSTITUTE OF AERONAUTICAL ENGINEERING", {
           x: 45,
-          y: pageHeight - 95,
+          y: pageHeight - 48,
+          size: 16,
+          font: fontHelveticaBold,
+          color: maroonRgb,
+        });
+
+        page.drawText("(Autonomous)", {
+          x: 45,
+          y: pageHeight - 68,
           size: 11,
+          font: fontHelveticaBold,
+          color: navyRgb,
+        });
+
+        page.drawText("Dundigal, Hyderabad - 500 043, Telangana", {
+          x: 45,
+          y: pageHeight - 85,
+          size: 9.5,
           font: fontHelvetica,
           color: subtextRgb,
         });
+
+        page.drawText(`DEPARTMENT OF ${(iare?.department || "COMPUTER SCIENCE AND ENGINEERING").toUpperCase()}`, {
+          x: 45,
+          y: pageHeight - 105,
+          size: 11,
+          font: fontHelveticaBold,
+          color: maroonRgb,
+        });
+
+        // Double Horizontal Rule
+        page.drawRectangle({
+          x: 45,
+          y: pageHeight - 118,
+          width: pageWidth - 90,
+          height: 3,
+          color: maroonRgb,
+        });
+        page.drawRectangle({
+          x: 45,
+          y: pageHeight - 123,
+          width: pageWidth - 90,
+          height: 2,
+          color: goldRgb,
+        });
+
+        // Assessment Pill Badge
+        page.drawRectangle({
+          x: 45,
+          y: pageHeight - 156,
+          width: 330,
+          height: 22,
+          color: goldPillBgRgb,
+          borderColor: goldRgb,
+          borderWidth: 1,
+        });
+        page.drawText(`[ ${(iare?.assessmentType || "AAT-I TECH TALK").toUpperCase()} PRESENTATION ]`, {
+          x: 55,
+          y: pageHeight - 149,
+          size: 9.5,
+          font: fontHelveticaBold,
+          color: maroonRgb,
+        });
+
+        // Large Topic Title
+        page.drawText(s.title.substring(0, 52), {
+          x: 45,
+          y: pageHeight - 192,
+          size: 23,
+          font: fontHelveticaBold,
+          color: navyRgb,
+        });
+
+        // Course block
+        page.drawText(`Course: ${iare?.courseName || ""} (${iare?.courseCode || ""}) • ${iare?.semesterRegulation || ""}`, {
+          x: 45,
+          y: pageHeight - 218,
+          size: 11,
+          font: fontHelveticaBold,
+          color: hexToPdfRgb("#334155"),
+        });
+
+        // 2-Column Metadata Box at Bottom
+        const boxY = 65;
+        const boxH = 135;
+        const boxW = 415;
+
+        // Left box (Presented By)
+        page.drawRectangle({
+          x: 45,
+          y: boxY,
+          width: boxW,
+          height: boxH,
+          color: slateCardRgb,
+          borderColor: slateBorderRgb,
+          borderWidth: 1,
+        });
+        page.drawText("PRESENTED BY:", {
+          x: 65,
+          y: boxY + boxH - 25,
+          size: 10,
+          font: fontHelveticaBold,
+          color: maroonRgb,
+        });
+        page.drawText(`Student Name: ${iare?.studentName || presentation.presenterName}`, {
+          x: 65,
+          y: boxY + boxH - 52,
+          size: 10.5,
+          font: fontHelveticaBold,
+          color: textRgb,
+        });
+        page.drawText(`Roll Number: ${iare?.rollNumber || "24951A05XX"}`, {
+          x: 65,
+          y: boxY + boxH - 74,
+          size: 10,
+          font: fontHelvetica,
+          color: textRgb,
+        });
+        page.drawText(`Department: ${iare?.department || "CSE"}`, {
+          x: 65,
+          y: boxY + boxH - 96,
+          size: 9.5,
+          font: fontHelvetica,
+          color: subtextRgb,
+        });
+
+        // Right box (Evaluated By)
+        page.drawRectangle({
+          x: 500,
+          y: boxY,
+          width: boxW,
+          height: boxH,
+          color: slateCardRgb,
+          borderColor: slateBorderRgb,
+          borderWidth: 1,
+        });
+        page.drawText("COURSE COORDINATOR / EVALUATED BY:", {
+          x: 520,
+          y: boxY + boxH - 25,
+          size: 10,
+          font: fontHelveticaBold,
+          color: navyRgb,
+        });
+        page.drawText(`Faculty: ${iare?.facultyName || "Course Coordinator"}`, {
+          x: 520,
+          y: boxY + boxH - 52,
+          size: 10.5,
+          font: fontHelveticaBold,
+          color: textRgb,
+        });
+        page.drawText(`Department of ${iare?.department || "CSE"}`, {
+          x: 520,
+          y: boxY + boxH - 74,
+          size: 10,
+          font: fontHelvetica,
+          color: textRgb,
+        });
+        page.drawText("IARE (Autonomous), Dundigal, Hyderabad", {
+          x: 520,
+          y: boxY + boxH - 96,
+          size: 9.5,
+          font: fontHelvetica,
+          color: subtextRgb,
+        });
+      } else {
+        // NON-IARE TITLE SLIDE
+        page.drawText((s.category || "COLLEGE TECHNICAL SEMINAR").toUpperCase(), {
+          x: 45,
+          y: pageHeight - 65,
+          size: 11,
+          font: fontHelveticaBold,
+          color: accent2Rgb,
+        });
+
+        page.drawText(s.title.substring(0, 52), {
+          x: 45,
+          y: pageHeight - 120,
+          size: 30,
+          font: fontHelveticaBold,
+          color: textRgb,
+        });
+
+        if (s.subtitle) {
+          page.drawText(s.subtitle.substring(0, 85), {
+            x: 45,
+            y: pageHeight - 155,
+            size: 14,
+            font: fontHelvetica,
+            color: subtextRgb,
+          });
+        }
+
+        // Presenter card
+        page.drawRectangle({
+          x: 45,
+          y: 80,
+          width: pageWidth - 90,
+          height: 120,
+          color: cardRgb,
+          borderColor: borderRgb,
+          borderWidth: 1,
+        });
+
+        page.drawText(`Lead Presenter: ${presentation.presenterName || "Student Presenter"}`, {
+          x: 65,
+          y: 165,
+          size: 11,
+          font: fontHelveticaBold,
+          color: textRgb,
+        });
+
+        page.drawText(`Institution: ${presentation.collegeName || "Dept. of Computer Science & Engineering"}`, {
+          x: 65,
+          y: 140,
+          size: 10,
+          font: fontHelvetica,
+          color: subtextRgb,
+        });
+
+        page.drawText(`Academic Forum: ${presentation.eventName || "Technical Seminar 2026"}`, {
+          x: 65,
+          y: 115,
+          size: 10,
+          font: fontHelvetica,
+          color: subtextRgb,
+        });
+      }
+    } else {
+      if (isIare) {
+        // IARE MASTER CONTENT HEADER STRIP
+        const shortDept = (iare?.department || "CSE").replace(/\s*\(.*\)/, "");
+        page.drawText(`IARE (Autonomous) • Dept. of ${shortDept}`, {
+          x: 45,
+          y: pageHeight - 24,
+          size: 9,
+          font: fontHelveticaBold,
+          color: maroonRgb,
+        });
+
+        page.drawText(`${iare?.assessmentType || "Tech Talk"} — ${iare?.courseCode || ""}`, {
+          x: pageWidth - 260,
+          y: pageHeight - 24,
+          size: 9,
+          font: fontHelvetica,
+          color: subtextRgb,
+        });
+
+        page.drawRectangle({
+          x: 45,
+          y: pageHeight - 32,
+          width: pageWidth - 90,
+          height: 1,
+          color: slateBorderRgb,
+        });
+
+        // Left accent bar
+        page.drawRectangle({
+          x: 45,
+          y: pageHeight - 64,
+          width: 5,
+          height: 24,
+          color: maroonRgb,
+        });
+
+        page.drawText(s.title.substring(0, 60), {
+          x: 58,
+          y: pageHeight - 60,
+          size: 20,
+          font: fontHelveticaBold,
+          color: navyRgb,
+        });
+
+        if (s.subtitle) {
+          page.drawText(s.subtitle.substring(0, 95), {
+            x: 58,
+            y: pageHeight - 80,
+            size: 10.5,
+            font: fontHelvetica,
+            color: subtextRgb,
+          });
+        }
+      } else {
+        // NON-IARE STANDARD SLIDE HEADER
+        page.drawText((s.category || "TECH TALK").toUpperCase(), {
+          x: 45,
+          y: pageHeight - 45,
+          size: 9.5,
+          font: fontHelveticaBold,
+          color: accentRgb,
+        });
+
+        page.drawText(s.title.substring(0, 60), {
+          x: 45,
+          y: pageHeight - 75,
+          size: 20,
+          font: fontHelveticaBold,
+          color: textRgb,
+        });
+
+        if (s.subtitle) {
+          page.drawText(s.subtitle.substring(0, 95), {
+            x: 45,
+            y: pageHeight - 95,
+            size: 11,
+            font: fontHelvetica,
+            color: subtextRgb,
+          });
+        }
       }
 
       // SLIDE BODY
