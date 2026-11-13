@@ -1,6 +1,7 @@
 import React from "react";
 import { HeroSection } from "@/components/dashboard/HeroSection";
 import { BentoGrid } from "@/components/dashboard/BentoGrid";
+import { TechTalkPptStudio } from "@/components/ppt/TechTalkPptStudio";
 import {
   CheckCircle2,
   XCircle,
@@ -195,6 +196,11 @@ export default function HomePage() {
             </p>
           </div>
         </div>
+      </section>
+
+      {/* 5. AI Tech-Talk & Presentation Studio (Topic to 10–15 Slide PPTX & PDF Generator) */}
+      <section id="tech-talk-ppt-studio" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+        <TechTalkPptStudio />
       </section>
     </div>
   );

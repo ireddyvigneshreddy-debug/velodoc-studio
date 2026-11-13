@@ -7,7 +7,7 @@ import { CommandPalette } from "@/components/common/CommandPalette";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { SessionHistoryDrawer } from "@/components/common/SessionHistoryDrawer";
 import { sessionHistory } from "@/lib/session-history";
-import { ShieldCheck, Search, LayoutGrid, History } from "lucide-react";
+import { ShieldCheck, Search, LayoutGrid, History, Presentation } from "lucide-react";
 
 export function Navbar() {
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -76,6 +76,15 @@ export function Navbar() {
 
           {/* Right: Hardware Keycap Command Palette Button + History + Theme Toggle */}
           <div className="flex items-center gap-2 sm:gap-2.5">
+            {/* AI Tech-Talk Studio Anchor */}
+            <Link
+              href="/#tech-talk-ppt-studio"
+              className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-amber-300 bg-amber-500/10 border border-amber-500/25 hover:bg-amber-500/20 hover:border-amber-400/50 transition-all shadow-sm"
+            >
+              <Presentation className="w-3.5 h-3.5 text-amber-400" />
+              <span>AI Tech-Talk PPT</span>
+            </Link>
+
             {/* ⌘K Command Palette Hardware Keycap Button */}
             <button
               onClick={() => setPaletteOpen(true)}

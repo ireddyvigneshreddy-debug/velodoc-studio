@@ -6,6 +6,25 @@ import { X, CornerDownLeft, Sparkles, Command } from "lucide-react";
 import { TOOLS } from "@/lib/constants";
 import { ToolIcon } from "@/components/common/ToolIcon";
 
+const SEARCHABLE_TOOLS = [
+  ...TOOLS,
+  {
+    id: "tech-talk-ppt-studio",
+    name: "AI Tech-Talk & PPTX Studio (10–15 Slides)",
+    category: "Extreme & Smart Pro",
+    toolType: "presentation",
+    description: "Generate 10–15 slide college seminar PowerPoint (.pptx) & PDF decks with speaker notes",
+    shortDesc: "Topic to 10–15 slide PPTX & PDF with speaker notes",
+    inputOutputBadge: "Topic → 15-Slide PPTX",
+    icon: "Presentation",
+    color: "from-amber-500 to-indigo-600",
+    badge: "AI 10–15 Slides",
+    path: "/#tech-talk-ppt-studio",
+    acceptedFileTypes: {},
+    multipleFiles: false,
+  },
+];
+
 interface CommandPaletteProps {
   isOpen: boolean;
   onClose: () => void;
@@ -17,7 +36,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const filteredTools = TOOLS.filter((tool) => {
+  const filteredTools = SEARCHABLE_TOOLS.filter((tool) => {
     const q = query.toLowerCase();
     return (
       tool.name.toLowerCase().includes(q) ||

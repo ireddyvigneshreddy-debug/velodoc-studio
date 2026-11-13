@@ -14,6 +14,7 @@ import {
   Trash2,
   GitCompare,
   Minimize2,
+  Presentation,
 } from "lucide-react";
 
 const EVERYDAY_INTENT_CHIPS = [
@@ -31,6 +32,13 @@ const EVERYDAY_INTENT_CHIPS = [
     isCameraModal: true,
     href: "/tools/image-to-pdf?scan=true",
     color: "text-cyan-400 bg-cyan-500/10 border-cyan-500/25 hover:border-cyan-400/50 hover:bg-cyan-500/15 ring-1 ring-cyan-500/40",
+  },
+  {
+    id: "tech-talk-ppt",
+    label: "AI Tech-Talk PPTX Studio (10–15 Slides)",
+    icon: Presentation,
+    href: "#tech-talk-ppt-studio",
+    color: "text-amber-300 bg-amber-500/10 border-amber-500/25 hover:border-amber-400/50 hover:bg-amber-500/15 ring-1 ring-amber-500/30",
   },
   {
     id: "combine-30",

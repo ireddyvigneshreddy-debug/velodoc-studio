@@ -27,6 +27,13 @@ export const QUICK_INTENT_PRESETS: QuickIntentPreset[] = [
     description: "4K camera document scanner with auto-shutter and adaptive B&W filters",
   },
   {
+    id: "tech-talk-ppt",
+    label: "AI Tech-Talk PPTX Studio",
+    toolId: "tech-talk-ppt",
+    path: "/#tech-talk-ppt-studio",
+    description: "Generate 10–15 slide college seminar PowerPoint (.pptx) & PDF decks with speaker notes",
+  },
+  {
     id: "under-200kb",
     label: "Need PDF under 200 KB?",
     toolId: "compress-pdf",
