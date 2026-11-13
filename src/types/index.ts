@@ -1,8 +1,12 @@
 export type ToolCategory =
+  | "All Studio Tools (19)"
   | "All Tools (19)"
+  | "Shrink & Exact KB"
   | "Shrink & Compress"
   | "Merge & Split"
+  | "Edit & Organize Pages"
   | "Edit Pages"
+  | "Convert & Camera Scan"
   | "Convert Formats"
   | "Sign, Redact & Compare";
 

@@ -1,77 +1,103 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { CommandPalette } from "@/components/common/CommandPalette";
 import {
   Sparkles,
-  Search,
-  ShieldCheck,
-  Cpu,
-  Lock,
+  ArrowRight,
+  Camera,
+  Layers,
+  Trash2,
+  GitCompare,
+  Minimize2,
 } from "lucide-react";
+
+const EVERYDAY_INTENT_CHIPS = [
+  {
+    id: "shrink-200kb",
+    label: "Shrink PDF to exact 200 KB",
+    icon: Minimize2,
+    href: "/tools/compress-pdf?target=200kb",
+    color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/25 hover:border-emerald-400/50 hover:bg-emerald-500/15",
+  },
+  {
+    id: "camera-scan",
+    label: "Scan pages with Camera → PDF",
+    icon: Camera,
+    href: "/tools/image-to-pdf?scan=true",
+    color: "text-cyan-400 bg-cyan-500/10 border-cyan-500/25 hover:border-cyan-400/50 hover:bg-cyan-500/15",
+  },
+  {
+    id: "combine-30",
+    label: "Combine up to 30 PDFs",
+    icon: Layers,
+    href: "/tools/merge-pdf",
+    color: "text-indigo-400 bg-indigo-500/10 border-indigo-500/25 hover:border-indigo-400/50 hover:bg-indigo-500/15",
+  },
+  {
+    id: "delete-pages",
+    label: "Delete unwanted pages",
+    icon: Trash2,
+    href: "/tools/remove-pages",
+    color: "text-rose-400 bg-rose-500/10 border-rose-500/25 hover:border-rose-400/50 hover:bg-rose-500/15",
+  },
+  {
+    id: "compare-docs",
+    label: "Compare 2–30 PDFs",
+    icon: GitCompare,
+    href: "/tools/compare-pdf",
+    color: "text-violet-400 bg-violet-500/10 border-violet-500/25 hover:border-violet-400/50 hover:bg-violet-500/15",
+  },
+];
 
 export function HeroSection() {
   const [paletteOpen, setPaletteOpen] = useState(false);
 
   return (
     <>
-      <section className="relative pt-6 pb-6 sm:pt-10 sm:pb-8 text-center overflow-hidden">
-        {/* Subtle radial ambient mesh glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[250px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
-
-        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 space-y-3.5">
-          {/* Top Pill Announcement */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-xs text-slate-300 shadow-inner backdrop-blur-sm">
-            <span className="p-0.5 rounded-full bg-cyan-500/20 text-cyan-400">
+      <section className="relative pt-4 pb-4 sm:pt-7 sm:pb-5 text-center overflow-hidden">
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 space-y-3.5">
+          {/* Top Pill Announcement with Live Telemetry */}
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-pill text-xs text-zinc-300 shadow-inner">
+            <span className="p-0.5 rounded-full bg-indigo-500/20 text-cyan-300">
               <Sparkles className="w-3 h-3" />
             </span>
-            <span className="font-medium text-[11px] sm:text-xs">
-              VeloDoc Pro • 30-Document Zero-Crash Batch Studio • 100% Client-Side
+            <span className="font-medium text-[11px] sm:text-xs tracking-tight">
+              VeloDoc Pro • <span className="font-mono tabular-nums text-indigo-300">30-Document</span> Zero-Crash Batch Studio • 100% In-Memory
             </span>
           </div>
 
-          {/* Main Hero Headline */}
-          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
-            High-Performance Client-Side{" "}
+          {/* Main Hero Headline with Swiss Precision & Metallic Typography */}
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-[-0.03em] leading-tight max-w-4xl mx-auto">
+            <span className="text-metallic">Universal Client-Side</span>{" "}
             <span className="bg-gradient-to-r from-indigo-400 via-cyan-300 to-emerald-400 bg-clip-text text-transparent">
-              PDF &amp; Image Studio
+              Document &amp; PDF Studio
             </span>
           </h1>
 
           {/* Compact Subtitle */}
-          <p className="max-w-2xl mx-auto text-xs sm:text-sm text-slate-400 leading-normal">
+          <p className="max-w-2xl mx-auto text-xs sm:text-sm text-zinc-400 leading-normal font-normal">
             Precision binary-search KB compression, 30-file batch pipelines, visual diff, and lossless format conversions.
             Zero cloud uploads • Zero tracking • Runs 100% in local browser memory.
           </p>
 
-          {/* Quick Action Buttons */}
-          <div className="flex items-center justify-center gap-3 pt-1">
-            <button
-              type="button"
-              onClick={() => setPaletteOpen(true)}
-              className="px-4 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-white font-medium text-xs transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
-            >
-              <Search className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Instant Search (19 Tools)</span>
-              <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-white/5 border border-white/10 rounded text-slate-400">
-                ⌘K
-              </kbd>
-            </button>
-
-            <div className="hidden sm:flex items-center gap-4 text-[11px] text-slate-400">
-              <span className="flex items-center gap-1 text-emerald-400">
-                <ShieldCheck className="w-3.5 h-3.5" />
-                Zero Upload
-              </span>
-              <span className="flex items-center gap-1 text-indigo-400">
-                <Cpu className="w-3.5 h-3.5" />
-                60 FPS Engine
-              </span>
-              <span className="flex items-center gap-1 text-cyan-400">
-                <Lock className="w-3.5 h-3.5" />
-                Air-Gapped Privacy
-              </span>
-            </div>
+          {/* 1-Click Everyday Intent Chips */}
+          <div className="pt-1.5 flex flex-wrap items-center justify-center gap-2 max-w-4xl mx-auto">
+            {EVERYDAY_INTENT_CHIPS.map((chip) => {
+              const Icon = chip.icon;
+              return (
+                <Link
+                  key={chip.id}
+                  href={chip.href}
+                  className={`group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-200 shadow-sm cursor-pointer hover:scale-[1.03] active:scale-[0.98] ${chip.color}`}
+                >
+                  <Icon className="w-3.5 h-3.5 shrink-0" />
+                  <span>{chip.label}</span>
+                  <ArrowRight className="w-3 h-3 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>

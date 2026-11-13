@@ -200,19 +200,19 @@ export function SplitPdfTool() {
           ) : (
             <div className="space-y-6">
               {/* Header Configuration Panel */}
-              <div className="p-5 rounded-3xl bg-[#12141D] border border-white/10 space-y-4 shadow-xl">
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-white/5 pb-4">
+              <div className="p-5 sm:p-6 rounded-3xl premium-card space-y-4 shadow-xl">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-white/[0.08] pb-4">
                   <div>
                     <h3 className="font-semibold text-white text-base">
                       {fileItem.name}
                     </h3>
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <p className="text-xs text-zinc-400 mt-0.5 font-mono tabular-nums">
                       {thumbnails.length} total pages rendered • Choose mode below
                     </p>
                   </div>
 
                   {/* Mode Selector */}
-                  <div className="flex flex-wrap rounded-xl bg-white/5 p-1 border border-white/10 text-xs">
+                  <div className="flex flex-wrap rounded-2xl glass-pill p-1 text-xs">
                     {[
                       { id: "extract", label: "Extract Selection" },
                       { id: "burst-all", label: "Burst All to ZIP" },

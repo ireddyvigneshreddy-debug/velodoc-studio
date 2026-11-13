@@ -370,71 +370,71 @@ export function ComparePdfTool() {
           {/* Synchronized Live Viewport */}
           {hasPair && (
             <div className="space-y-4">
-              {/* Controls Toolbar */}
-              <div className="p-4 rounded-2xl bg-[#12141D] border border-white/10 flex flex-wrap items-center justify-between gap-4 shadow-xl text-xs">
+              {/* Controls Toolbar with Premium Glass Specular Rim Lit Styling */}
+              <div className="p-4 sm:p-5 rounded-3xl premium-card flex flex-wrap items-center justify-between gap-4 shadow-xl text-xs">
                 <div>
-                  <h4 className="font-semibold text-white">
+                  <h4 className="font-semibold text-white tracking-tight">
                     Synchronized Viewport: <span className="text-purple-300">{baseDoc.name}</span>{" "}
                     vs. <span className="text-cyan-300">{compDoc.name}</span>
                   </h4>
-                  <p className="text-slate-400 mt-0.5 text-[11px] flex items-center gap-1.5">
-                    {isProcessing && <Loader2 className="w-3 h-3 animate-spin text-cyan-400" />}
+                  <p className="text-zinc-400 mt-1 text-[11px] flex items-center gap-1.5">
+                    {isProcessing && <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-400" />}
                     {errorMessage ? (
                       <span className="text-rose-400">{errorMessage}</span>
                     ) : diffStats ? (
                       diffStats.diffPercentage > 0 ? (
-                        <span className="text-rose-400 font-mono font-medium">
+                        <span className="text-rose-400 font-mono tabular-nums font-semibold">
                           Page {currentPage}: {diffStats.diffPercentage}% Visual Variance ({diffStats.diffPixels} altered pixels)
                         </span>
                       ) : (
-                        <span className="text-emerald-400 font-medium">Page {currentPage}: 100% Identical</span>
+                        <span className="text-emerald-400 font-mono font-semibold">Page {currentPage}: 100% Identical</span>
                       )
                     ) : (
-                      "Calculating diff..."
+                      "Calculating pixel diff..."
                     )}
                   </p>
                 </div>
 
                 <div className="flex items-center gap-3">
                   {/* Page Nav */}
-                  <div className="flex items-center gap-1.5 text-slate-300">
+                  <div className="flex items-center gap-1.5 text-zinc-300 glass-pill px-2.5 py-1 rounded-xl">
                     <button
                       disabled={currentPage <= 1}
                       onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 disabled:opacity-30"
+                      className="p-1 rounded-lg hover:bg-white/10 text-zinc-300 disabled:opacity-25 cursor-pointer"
                     >
-                      <ChevronLeft className="w-4 h-4" />
+                      <ChevronLeft className="w-3.5 h-3.5" />
                     </button>
-                    <span className="font-mono text-xs">
-                      Page {currentPage} of {totalPages}
+                    <span className="font-mono tabular-nums text-xs px-1">
+                      {currentPage} / {totalPages}
                     </span>
                     <button
                       disabled={currentPage >= totalPages}
                       onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                      className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 disabled:opacity-30"
+                      className="p-1 rounded-lg hover:bg-white/10 text-zinc-300 disabled:opacity-25 cursor-pointer"
                     >
-                      <ChevronRight className="w-4 h-4" />
+                      <ChevronRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
 
                   {/* Mode Toggle */}
-                  <div className="flex rounded-xl bg-white/5 p-1 border border-white/10 text-xs">
+                  <div className="flex rounded-xl glass-pill p-1 text-xs">
                     <button
                       onClick={() => setViewMode("side-by-side")}
-                      className={`px-3 py-1 rounded-lg font-medium transition-all ${
+                      className={`px-3 py-1 rounded-lg font-medium transition-all cursor-pointer ${
                         viewMode === "side-by-side"
-                          ? "bg-purple-600 text-white shadow"
-                          : "text-slate-400 hover:text-white"
+                          ? "bg-purple-600 text-white shadow-md shadow-purple-600/30"
+                          : "text-zinc-400 hover:text-white"
                       }`}
                     >
                       Side-by-Side
                     </button>
                     <button
                       onClick={() => setViewMode("neon-diff")}
-                      className={`px-3 py-1 rounded-lg font-medium transition-all ${
+                      className={`px-3 py-1 rounded-lg font-medium transition-all cursor-pointer ${
                         viewMode === "neon-diff"
-                          ? "bg-rose-600 text-white shadow"
-                          : "text-slate-400 hover:text-white"
+                          ? "bg-rose-600 text-white shadow-md shadow-rose-600/30"
+                          : "text-zinc-400 hover:text-white"
                       }`}
                     >
                       Visual Red Diff

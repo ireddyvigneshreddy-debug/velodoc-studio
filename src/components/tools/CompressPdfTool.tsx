@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { DropZone } from "@/components/common/DropZone";
 import { ResultPreviewStudio, ProcessedItemOutput } from "@/components/ResultPreviewStudio";
 import { UploadedFileItem, ProcessingMetrics } from "@/types";
@@ -342,27 +343,34 @@ export function CompressPdfTool() {
               </div>
 
               {/* Compression Mode Selector */}
-              <div className="p-6 rounded-3xl bg-[#10121A] border border-white/10 space-y-6 shadow-xl">
+              <div className="p-6 rounded-3xl premium-card space-y-6 shadow-xl">
                 <div>
-                  <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+                  <h4 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">
                     Select Target Compression Mode
                   </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="relative grid grid-cols-1 md:grid-cols-3 gap-2.5 p-1.5 rounded-2xl glass-pill">
                     {/* Mode 1: Exact KB/MB Size */}
                     <button
                       type="button"
                       onClick={() => setMode("exact-size")}
-                      className={`p-4 rounded-2xl border text-left transition-all ${
+                      className={`relative p-3.5 rounded-xl text-left transition-all cursor-pointer z-10 ${
                         mode === "exact-size"
-                          ? "bg-indigo-600/15 border-indigo-500 text-white shadow-[0_0_20px_rgba(99,102,241,0.2)]"
-                          : "bg-white/[0.02] border-white/10 text-slate-300 hover:border-white/20"
+                          ? "text-white font-semibold"
+                          : "text-zinc-400 hover:text-zinc-200"
                       }`}
                     >
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <Target className={`w-4 h-4 ${mode === "exact-size" ? "text-indigo-400" : "text-slate-400"}`} />
+                      {mode === "exact-size" && (
+                        <motion.div
+                          layoutId="compressMode"
+                          className="absolute inset-0 rounded-xl bg-indigo-600/25 border border-indigo-500/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_4px_16px_rgba(99,102,241,0.25)] backdrop-blur-md"
+                          transition={{ type: "spring", stiffness: 420, damping: 32 }}
+                        />
+                      )}
+                      <div className="relative z-10 flex items-center gap-2 mb-1">
+                        <Target className={`w-4 h-4 ${mode === "exact-size" ? "text-indigo-400" : "text-zinc-400"}`} />
                         <span className="font-semibold text-sm">Exact Target Size</span>
                       </div>
-                      <p className="text-xs text-slate-400">
+                      <p className="relative z-10 text-[11.5px] text-zinc-400 leading-snug">
                         Type exact KB/MB (e.g. 200 KB or 1 MB for portal limits).
                       </p>
                     </button>
@@ -371,17 +379,24 @@ export function CompressPdfTool() {
                     <button
                       type="button"
                       onClick={() => setMode("percentage")}
-                      className={`p-4 rounded-2xl border text-left transition-all ${
+                      className={`relative p-3.5 rounded-xl text-left transition-all cursor-pointer z-10 ${
                         mode === "percentage"
-                          ? "bg-cyan-600/15 border-cyan-500 text-white shadow-[0_0_20px_rgba(6,182,212,0.2)]"
-                          : "bg-white/[0.02] border-white/10 text-slate-300 hover:border-white/20"
+                          ? "text-white font-semibold"
+                          : "text-zinc-400 hover:text-zinc-200"
                       }`}
                     >
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <Percent className={`w-4 h-4 ${mode === "percentage" ? "text-cyan-400" : "text-slate-400"}`} />
+                      {mode === "percentage" && (
+                        <motion.div
+                          layoutId="compressMode"
+                          className="absolute inset-0 rounded-xl bg-cyan-600/25 border border-cyan-500/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_4px_16px_rgba(6,182,212,0.25)] backdrop-blur-md"
+                          transition={{ type: "spring", stiffness: 420, damping: 32 }}
+                        />
+                      )}
+                      <div className="relative z-10 flex items-center gap-2 mb-1">
+                        <Percent className={`w-4 h-4 ${mode === "percentage" ? "text-cyan-400" : "text-zinc-400"}`} />
                         <span className="font-semibold text-sm">Exact % Reduction</span>
                       </div>
-                      <p className="text-xs text-slate-400">
+                      <p className="relative z-10 text-[11.5px] text-zinc-400 leading-snug">
                         Pick exact percentage to shrink (e.g. 50% or 75%).
                       </p>
                     </button>
@@ -390,17 +405,24 @@ export function CompressPdfTool() {
                     <button
                       type="button"
                       onClick={() => setMode("manual")}
-                      className={`p-4 rounded-2xl border text-left transition-all ${
+                      className={`relative p-3.5 rounded-xl text-left transition-all cursor-pointer z-10 ${
                         mode === "manual"
-                          ? "bg-purple-600/15 border-purple-500 text-white shadow-[0_0_20px_rgba(168,85,247,0.2)]"
-                          : "bg-white/[0.02] border-white/10 text-slate-300 hover:border-white/20"
+                          ? "text-white font-semibold"
+                          : "text-zinc-400 hover:text-zinc-200"
                       }`}
                     >
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <Sliders className={`w-4 h-4 ${mode === "manual" ? "text-purple-400" : "text-slate-400"}`} />
+                      {mode === "manual" && (
+                        <motion.div
+                          layoutId="compressMode"
+                          className="absolute inset-0 rounded-xl bg-purple-600/25 border border-purple-500/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_4px_16px_rgba(168,85,247,0.25)] backdrop-blur-md"
+                          transition={{ type: "spring", stiffness: 420, damping: 32 }}
+                        />
+                      )}
+                      <div className="relative z-10 flex items-center gap-2 mb-1">
+                        <Sliders className={`w-4 h-4 ${mode === "manual" ? "text-purple-400" : "text-zinc-400"}`} />
                         <span className="font-semibold text-sm">Manual Pro</span>
                       </div>
-                      <p className="text-xs text-slate-400">
+                      <p className="relative z-10 text-[11.5px] text-zinc-400 leading-snug">
                         Direct DPI, JPEG quality %, and color controls.
                       </p>
                     </button>
@@ -415,7 +437,7 @@ export function CompressPdfTool() {
                         <label className="text-xs font-semibold text-white block">
                           Target Maximum File Size (KB)
                         </label>
-                        <span className="text-[11px] text-slate-400">
+                        <span className="text-[11px] text-zinc-400 font-mono tabular-nums">
                           Applied across {files.length} document{files.length > 1 ? "s" : ""}
                         </span>
                       </div>
@@ -427,24 +449,24 @@ export function CompressPdfTool() {
                           max={50000}
                           value={targetKb}
                           onChange={(e) => setTargetKb(Math.max(10, parseInt(e.target.value) || 100))}
-                          className="px-3 py-1.5 rounded-xl bg-black/60 border border-white/10 text-white font-mono text-sm w-28 focus:outline-none focus:border-indigo-500"
+                          className="px-3 py-1.5 rounded-xl bg-black/60 border border-white/10 text-white font-mono tabular-nums text-sm w-28 focus:outline-none focus:border-indigo-500 shadow-inner"
                         />
-                        <span className="text-xs text-slate-400 font-mono">KB</span>
+                        <span className="text-xs text-zinc-400 font-mono">KB</span>
                       </div>
                     </div>
 
                     {/* Preset Pills */}
                     <div className="flex flex-wrap items-center gap-2 pt-1">
-                      <span className="text-xs text-slate-400">Quick Portal Limits:</span>
+                      <span className="text-xs text-zinc-400">Quick Portal Limits:</span>
                       {[100, 200, 300, 500, 1000, 2000].map((kb) => (
                         <button
                           key={kb}
                           type="button"
                           onClick={() => setTargetKb(kb)}
-                          className={`px-3 py-1 rounded-lg text-xs font-mono transition-all ${
+                          className={`px-3 py-1 rounded-xl text-xs font-mono tabular-nums transition-all cursor-pointer ${
                             targetKb === kb
-                              ? "bg-indigo-600 text-white font-semibold shadow-sm"
-                              : "bg-white/5 hover:bg-white/10 text-slate-300"
+                              ? "bg-indigo-600 text-white font-semibold shadow-md border border-indigo-400/40"
+                              : "glass-pill text-zinc-300 hover:text-white hover:bg-white/[0.08]"
                           }`}
                         >
                           {kb >= 1000 ? `${kb / 1000} MB` : `${kb} KB`}
@@ -460,7 +482,7 @@ export function CompressPdfTool() {
                         onChange={(e) => setExactBytePadding(e.target.checked)}
                         className="rounded border-white/20 bg-black/60 text-indigo-600 focus:ring-0"
                       />
-                      <span className="text-xs text-slate-300">
+                      <span className="text-xs text-zinc-300">
                         Exact KB Match Padding (Appends safe comment bytes so file hits requested KB limit)
                       </span>
                     </label>

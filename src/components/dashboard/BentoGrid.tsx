@@ -2,28 +2,88 @@
 
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
-import { TOOL_CATEGORIES, TOOLS, PDF_TOOLS, IMAGE_TOOLS, QUICK_INTENT_PRESETS } from "@/lib/constants";
-import { ToolCategory, ToolDefinition, ToolDomain } from "@/types";
+import { motion } from "framer-motion";
+import { TOOL_CATEGORIES, TOOLS } from "@/lib/constants";
+import { ToolCategory, ToolDefinition } from "@/types";
 import { ToolIcon } from "@/components/common/ToolIcon";
-import { Search, ArrowRight, Sparkles, FileText, Image as ImageIcon, LayoutGrid } from "lucide-react";
+import { SpotlightCard } from "@/components/SpotlightCard";
+import {
+  Search,
+  ChevronRight,
+  Filter,
+} from "lucide-react";
+
+// Helper to determine jewel-tone styling family
+function getToolFamilyTheme(tool: ToolDefinition) {
+  if (tool.id === "compress-pdf" || tool.id === "image-studio") {
+    return {
+      family: "emerald",
+      iconBg:
+        "bg-gradient-to-br from-emerald-500/90 to-teal-600/90 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_4px_14px_rgba(16,185,129,0.3)]",
+      badgeColor: "bg-emerald-500/10 text-emerald-300 border-emerald-500/20",
+      spotlightColor: "rgba(16, 185, 129, 0.14)",
+      borderGlowColor: "rgba(20, 184, 166, 0.45)",
+    };
+  }
+
+  if (
+    tool.id === "image-to-pdf" ||
+    tool.id === "pdf-to-image" ||
+    tool.id === "pdf-to-text" ||
+    tool.id === "markdown-to-pdf"
+  ) {
+    return {
+      family: "cyan",
+      iconBg:
+        "bg-gradient-to-br from-cyan-500/90 to-sky-600/90 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_4px_14px_rgba(6,182,212,0.3)]",
+      badgeColor: "bg-cyan-500/10 text-cyan-300 border-cyan-500/20",
+      spotlightColor: "rgba(6, 182, 212, 0.14)",
+      borderGlowColor: "rgba(56, 189, 248, 0.45)",
+    };
+  }
+
+  if (
+    tool.id === "sign-pdf" ||
+    tool.id === "redact-pdf" ||
+    tool.id === "compare-pdf" ||
+    tool.id === "watermark-pdf" ||
+    tool.id === "page-numbers" ||
+    tool.id === "grayscale-pdf" ||
+    tool.id === "metadata-pdf"
+  ) {
+    return {
+      family: "amber",
+      iconBg:
+        "bg-gradient-to-br from-amber-500/90 via-rose-500/80 to-purple-600/90 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_4px_14px_rgba(244,63,94,0.3)]",
+      badgeColor: "bg-rose-500/10 text-rose-300 border-rose-500/20",
+      spotlightColor: "rgba(244, 63, 94, 0.13)",
+      borderGlowColor: "rgba(251, 146, 60, 0.45)",
+    };
+  }
+
+  // Default: Indigo / Violet family
+  return {
+    family: "indigo",
+    iconBg:
+      "bg-gradient-to-br from-indigo-500/90 to-violet-600/90 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_4px_14px_rgba(99,102,241,0.3)]",
+    badgeColor: "bg-indigo-500/10 text-indigo-300 border-indigo-500/20",
+    spotlightColor: "rgba(99, 102, 241, 0.14)",
+    borderGlowColor: "rgba(139, 92, 246, 0.45)",
+  };
+}
 
 export function BentoGrid() {
-  const [activeDomain, setActiveDomain] = useState<ToolDomain>("all");
-  const [selectedCategory, setSelectedCategory] = useState<ToolCategory>("All Tools (19)");
+  const [selectedCategory, setSelectedCategory] = useState<ToolCategory>(
+    "All Studio Tools (19)"
+  );
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Base domain tools pool
-  const domainTools = useMemo(() => {
-    if (activeDomain === "pdf") return PDF_TOOLS;
-    if (activeDomain === "image") return IMAGE_TOOLS;
-    return TOOLS;
-  }, [activeDomain]);
-
-  // Filter tools based on category tab, active domain, and search input
+  // Filter tools based on category tab and search input
   const filteredTools = useMemo(() => {
-    return domainTools.filter((tool) => {
+    return TOOLS.filter((tool) => {
       const matchesCategory =
-        selectedCategory === "All Tools (19)" || tool.category === selectedCategory;
+        selectedCategory === "All Studio Tools (19)" ||
+        tool.category === selectedCategory;
 
       if (!matchesCategory) return false;
 
@@ -37,297 +97,165 @@ export function BentoGrid() {
         tool.inputOutputBadge.toLowerCase().includes(q)
       );
     });
-  }, [domainTools, selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery]);
 
-  // Separate PDF and Image tools from the filtered set
-  const filteredPdfTools = useMemo(() => {
-    return filteredTools.filter((t) => t.toolType === "pdf");
-  }, [filteredTools]);
-
-  const filteredImageTools = useMemo(() => {
-    return filteredTools.filter((t) => t.toolType === "image");
-  }, [filteredTools]);
-
-  // Category counts based on current domain
+  // Category counts
   const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = { "All Tools (19)": domainTools.length };
+    const counts: Record<string, number> = {
+      "All Studio Tools (19)": TOOLS.length,
+    };
     TOOL_CATEGORIES.forEach((cat) => {
-      if (cat !== "All Tools (19)") {
-        counts[cat] = domainTools.filter((t) => t.category === cat).length;
+      if (cat !== "All Studio Tools (19)") {
+        counts[cat] = TOOLS.filter((t) => t.category === cat).length;
       }
     });
     return counts;
-  }, [domainTools]);
-
-  const renderToolCard = (tool: ToolDefinition) => {
-    const isImage = tool.toolType === "image";
-
-    return (
-      <Link
-        key={tool.id}
-        href={tool.path}
-        className={`group relative p-3 sm:p-3.5 rounded-2xl bg-[#12141D] hover:bg-[#151824] border transition-all duration-200 flex flex-col justify-between h-32 overflow-hidden shadow-sm hover:shadow-[0_8px_25px_rgba(0,0,0,0.6)] hover:-translate-y-0.5 cursor-pointer ${
-          isImage
-            ? "border-pink-500/20 hover:border-pink-500/50"
-            : "border-white/[0.08] hover:border-cyan-500/40"
-        }`}
-      >
-        {/* Subtle top-corner gradient glow */}
-        <div
-          className={`absolute top-0 right-0 -mr-8 -mt-8 w-24 h-24 rounded-full blur-xl group-hover:scale-125 transition-transform duration-300 pointer-events-none bg-gradient-to-br ${tool.color} opacity-20`}
-        />
-
-        {/* TOP ROW: Compact 32x32 color-coded icon + Domain Tag + Input -> Output badge */}
-        <div className="flex items-center justify-between gap-1.5 relative z-10">
-          <div className="flex items-center gap-1.5">
-            <div
-              className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-br ${tool.color} text-white flex items-center justify-center shadow-md group-hover:scale-105 transition-transform flex-shrink-0`}
-            >
-              <ToolIcon name={tool.icon} className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            </div>
-            <span
-              className={`text-[9px] font-bold px-1.5 py-0.2 rounded uppercase tracking-wider ${
-                isImage
-                  ? "bg-pink-500/10 text-pink-300 border border-pink-500/20"
-                  : "bg-cyan-500/10 text-cyan-300 border border-cyan-500/20"
-              }`}
-            >
-              {isImage ? "IMG" : "PDF"}
-            </span>
-          </div>
-
-          <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300 truncate max-w-[120px]">
-            {tool.inputOutputBadge}
-          </span>
-        </div>
-
-        {/* MIDDLE: Title + 6-word plain-English description */}
-        <div className="relative z-10 space-y-0.5">
-          <h3 className="text-xs sm:text-sm font-bold text-white tracking-tight group-hover:text-cyan-200 transition-colors truncate">
-            {tool.name}
-          </h3>
-          <p className="text-[11px] text-zinc-400 line-clamp-1 group-hover:text-slate-300 transition-colors">
-            {tool.shortDesc}
-          </p>
-        </div>
-
-        {/* BOTTOM: Subdued footer strip */}
-        <div className="relative z-10 flex items-center justify-between text-[10px] font-mono text-slate-500 border-t border-white/[0.04] pt-1.5">
-          <span className="truncate">
-            {Object.values(tool.acceptedFileTypes).flat().slice(0, 2).join(", ").toUpperCase()}
-          </span>
-          <span className="text-emerald-400/80 font-medium">Local Engine</span>
-        </div>
-      </Link>
-    );
-  };
-
-  const showSplitSections = activeDomain === "all" && !searchQuery.trim() && selectedCategory === "All Tools (19)";
+  }, []);
 
   return (
-    <section id="tools" className="w-full space-y-6 scroll-mt-20">
-      {/* 1. PRIMARY DOMAIN SWITCHER (ALL / PDF / IMAGE) */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-2 rounded-2xl bg-[#0D0F16] border border-white/10 shadow-2xl">
-        <div className="grid grid-cols-3 gap-1 p-1 rounded-xl bg-black/60 border border-white/5 sm:w-auto">
-          <button
-            type="button"
-            onClick={() => setActiveDomain("all")}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${
-              activeDomain === "all"
-                ? "bg-gradient-to-r from-indigo-500 to-cyan-500 text-white shadow-md"
-                : "text-slate-400 hover:text-white hover:bg-white/5"
-            }`}
-          >
-            <LayoutGrid className="w-3.5 h-3.5" />
-            <span>All Tools</span>
-            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-black/30">
-              19
-            </span>
-          </button>
+    <div id="all-tools" className="space-y-4">
+      {/* Category Tabs & Search Bar Strip */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-3 pt-2">
+        {/* Sliding Pill Category Filter */}
+        <div className="relative flex items-center gap-1 p-1 rounded-full glass-pill overflow-x-auto max-w-full scrollbar-none">
+          {TOOL_CATEGORIES.map((category) => {
+            const isSelected = selectedCategory === category;
+            const count = categoryCounts[category] || 0;
 
-          <button
-            type="button"
-            onClick={() => setActiveDomain("pdf")}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${
-              activeDomain === "pdf"
-                ? "bg-cyan-600 text-white shadow-md shadow-cyan-600/30"
-                : "text-slate-400 hover:text-cyan-300 hover:bg-white/5"
-            }`}
-          >
-            <FileText className="w-3.5 h-3.5 text-cyan-400" />
-            <span>PDF Tools</span>
-            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-black/30">
-              16
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveDomain("image")}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${
-              activeDomain === "image"
-                ? "bg-pink-600 text-white shadow-md shadow-pink-600/30"
-                : "text-slate-400 hover:text-pink-300 hover:bg-white/5"
-            }`}
-          >
-            <ImageIcon className="w-3.5 h-3.5 text-pink-400" />
-            <span>Image Tools</span>
-            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-black/30">
-              3
-            </span>
-          </button>
+            return (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`relative px-3 py-1.5 rounded-full text-xs font-medium transition-colors shrink-0 flex items-center gap-1.5 cursor-pointer z-10 ${
+                  isSelected
+                    ? "text-white font-semibold"
+                    : "text-zinc-400 hover:text-zinc-200"
+                }`}
+              >
+                {isSelected && (
+                  <motion.div
+                    layoutId="activeCategory"
+                    className="absolute inset-0 rounded-full bg-white/[0.08] border border-white/[0.16] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.22),0_4px_16px_rgba(0,0,0,0.5)] backdrop-blur-md"
+                    transition={{
+                      type: "spring",
+                      stiffness: 420,
+                      damping: 32,
+                    }}
+                  />
+                )}
+                <span className="relative z-10">{category}</span>
+                <span
+                  className={`relative z-10 text-[10px] font-mono px-1.5 py-0.2 rounded-full tabular-nums ${
+                    isSelected
+                      ? "bg-indigo-500/20 text-indigo-300 font-bold"
+                      : "bg-white/[0.05] text-zinc-500"
+                  }`}
+                >
+                  {count}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
-        {/* Instant Search Bar */}
-        <div className="relative w-full sm:w-72">
-          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+        {/* Live Filter Search Input */}
+        <div className="relative w-full md:w-64 shrink-0">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search all 19 tools (e.g. compress, merge)..."
-            className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-black/50 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-medium"
+            placeholder="Filter 19 tools..."
+            className="w-full pl-8 pr-3 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.09] focus:border-indigo-500/60 focus:bg-white/[0.07] text-xs text-white placeholder-zinc-500 outline-none transition-all shadow-inner"
           />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white text-xs px-1"
+            >
+              ✕
+            </button>
+          )}
         </div>
       </div>
 
-      {/* 2. SECONDARY CATEGORY FILTER PILLS */}
-      <div className="flex flex-wrap items-center gap-1.5 p-2 rounded-xl bg-[#12141D]/60 border border-white/5">
-        {TOOL_CATEGORIES.map((cat) => {
-          const isActive = selectedCategory === cat;
-          const count = categoryCounts[cat] ?? 0;
-          if (count === 0 && cat !== "All Tools (19)") return null;
+      {/* High-Density 5-Column Responsive Spotlight Bento Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+        {filteredTools.map((tool) => {
+          const theme = getToolFamilyTheme(tool);
 
           return (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
-                isActive
-                  ? "bg-white/10 text-white border border-white/20 shadow-sm"
-                  : "text-slate-400 hover:text-white hover:bg-white/5"
-              }`}
+            <Link
+              key={tool.id}
+              href={tool.path}
+              className="block group focus:outline-none"
             >
-              <span>{cat.replace(/ \(\d+\)/, "")}</span>
-              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-white/5 text-slate-400">
-                {count}
-              </span>
-            </button>
+              <SpotlightCard
+                spotlightColor={theme.spotlightColor}
+                borderGlowColor={theme.borderGlowColor}
+                spotlightRadius={280}
+                className="premium-card p-3.5 flex flex-col justify-between h-[134px] hover:-translate-y-0.5 active:translate-y-0"
+              >
+                {/* TOP ROW: 34x34 glowing glass icon + Input -> Output micro-badge */}
+                <div className="flex items-center justify-between gap-1.5">
+                  <div
+                    className={`w-[34px] h-[34px] rounded-xl ${theme.iconBg} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-200`}
+                  >
+                    <ToolIcon
+                      name={tool.icon}
+                      className="w-4 h-4 text-white"
+                    />
+                  </div>
+
+                  <span
+                    className={`text-[10px] font-mono font-medium px-2 py-0.5 rounded-md border tracking-tight truncate max-w-[130px] ${theme.badgeColor}`}
+                  >
+                    {tool.inputOutputBadge}
+                  </span>
+                </div>
+
+                {/* MIDDLE ROW: Bold tool title + subtle hover chevron arrow */}
+                <div className="pt-2 flex items-center justify-between gap-1">
+                  <h3 className="text-[13px] sm:text-[14px] font-semibold text-white tracking-[-0.02em] group-hover:text-indigo-200 transition-colors truncate">
+                    {tool.name}
+                  </h3>
+                  <ChevronRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-indigo-300 group-hover:translate-x-0.5 transition-all shrink-0" />
+                </div>
+
+                {/* BOTTOM ROW: Plain-English 1-line explanation */}
+                <p className="text-[11.5px] text-zinc-400 leading-snug line-clamp-1 group-hover:text-zinc-300 transition-colors">
+                  {tool.shortDesc}
+                </p>
+              </SpotlightCard>
+            </Link>
           );
         })}
       </div>
 
-      {/* 3. QUICK HELPER PILLS FOR EVERYDAY TASKS */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs no-scrollbar">
-        <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1 shrink-0">
-          <Sparkles className="w-3 h-3 text-cyan-400" />
-          <span>Everyday Tasks:</span>
-        </span>
-        {QUICK_INTENT_PRESETS.map((preset) => (
-          <Link
-            key={preset.id}
-            href={preset.path}
-            className="px-3 py-1 rounded-full bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-cyan-500/40 text-slate-300 hover:text-white text-xs font-medium shrink-0 flex items-center gap-1.5 transition-all shadow-sm group"
-          >
-            <span>{preset.label}</span>
-            <ArrowRight className="w-3 h-3 text-slate-500 group-hover:text-cyan-400 transition-transform group-hover:translate-x-0.5" />
-          </Link>
-        ))}
-      </div>
-
-      {/* 4. SEPARATED TOOL DISPLAY */}
-      {showSplitSections ? (
-        <div className="space-y-8">
-          {/* SECTION A: PDF TOOLS */}
-          <div id="pdf-tools" className="space-y-3.5 scroll-mt-24">
-            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
-                  <FileText className="w-5 h-5" />
-                </div>
-                <div>
-                  <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-                    <span>PDF Document Studio</span>
-                    <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300">
-                      {PDF_TOOLS.length} Dedicated PDF Tools
-                    </span>
-                  </h2>
-                  <p className="text-xs text-slate-400">
-                    Client-side vector merging, Bates stamping, compression, signing, metadata, and page rearrangement
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 sm:gap-3">
-              {filteredPdfTools.map(renderToolCard)}
-            </div>
-          </div>
-
-          {/* SECTION B: IMAGE TOOLS */}
-          <div id="image-tools" className="space-y-3.5 scroll-mt-24 pt-4">
-            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-pink-500/10 border border-pink-500/20 text-pink-400">
-                  <ImageIcon className="w-5 h-5" />
-                </div>
-                <div>
-                  <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-                    <span>Image Studio &amp; Multi-Format Suite</span>
-                    <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-300">
-                      {IMAGE_TOOLS.length} Dedicated Image Tools
-                    </span>
-                  </h2>
-                  <p className="text-xs text-slate-400">
-                    Exact-target photo resizing, batch format transcoding (WebP/PNG/JPG), and multi-image compiling
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 sm:gap-3">
-              {filteredImageTools.map(renderToolCard)}
-            </div>
-          </div>
-        </div>
-      ) : (
-        /* Single grid when filtered or searched */
-        <div className="space-y-3">
-          <div className="flex items-center justify-between text-xs text-slate-400 px-1">
-            <span>
-              Showing {filteredTools.length} {activeDomain === "pdf" ? "PDF" : activeDomain === "image" ? "Image" : ""} tool{filteredTools.length !== 1 ? "s" : ""}
-            </span>
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="text-cyan-400 hover:underline"
-              >
-                Clear filter
-              </button>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 sm:gap-3">
-            {filteredTools.map(renderToolCard)}
-          </div>
-        </div>
-      )}
-
+      {/* Empty Search Fallback */}
       {filteredTools.length === 0 && (
-        <div className="p-12 text-center text-slate-400 space-y-2">
-          <p className="text-sm">No tools match &quot;{searchQuery}&quot;</p>
+        <div className="premium-card p-8 text-center space-y-3 rounded-2xl">
+          <div className="w-10 h-10 rounded-2xl bg-white/[0.05] border border-white/10 flex items-center justify-center mx-auto text-zinc-400">
+            <Filter className="w-5 h-5" />
+          </div>
+          <h4 className="text-sm font-semibold text-white">
+            No tools matched &ldquo;{searchQuery}&rdquo;
+          </h4>
+          <p className="text-xs text-zinc-400 max-w-sm mx-auto">
+            Try adjusting your search terms or select another category from the
+            filter bar above.
+          </p>
           <button
             onClick={() => {
               setSearchQuery("");
-              setActiveDomain("all");
-              setSelectedCategory("All Tools (19)");
+              setSelectedCategory("All Studio Tools (19)");
             }}
-            className="text-xs text-cyan-400 underline"
+            className="px-4 py-1.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition-colors"
           >
-            Reset all filters
+            Reset Filters
           </button>
         </div>
       )}
-    </section>
+    </div>
   );
 }

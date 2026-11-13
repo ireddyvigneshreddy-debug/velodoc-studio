@@ -66,9 +66,9 @@ export function ThumbnailGrid({
     <div className="w-full space-y-4">
       {/* Top Helper Toolbar (Select/Deselect/Range selection for Remove & Split) */}
       {(mode === "remove" || mode === "select") && (
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-[#12141D] border border-white/10 text-xs">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3.5 rounded-2xl premium-card text-xs">
           <div className="flex items-center gap-2">
-            <span className="text-slate-400">
+            <span className="text-zinc-400 font-mono tabular-nums">
               {mode === "remove"
                 ? `${selectedIndices.size} of ${thumbnails.length} pages marked for removal`
                 : `${selectedIndices.size} of ${thumbnails.length} pages selected`}
@@ -77,14 +77,14 @@ export function ThumbnailGrid({
               <button
                 type="button"
                 onClick={selectAll}
-                className="px-2.5 py-1 rounded-md bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
+                className="px-2.5 py-1 rounded-xl glass-pill hover:bg-white/[0.08] text-zinc-300 hover:text-white transition-colors cursor-pointer"
               >
                 Select All
               </button>
               <button
                 type="button"
                 onClick={deselectAll}
-                className="px-2.5 py-1 rounded-md bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
+                className="px-2.5 py-1 rounded-xl glass-pill hover:bg-white/[0.08] text-zinc-300 hover:text-white transition-colors cursor-pointer"
               >
                 Deselect All
               </button>
@@ -93,17 +93,17 @@ export function ThumbnailGrid({
 
           {onApplyRange && (
             <form onSubmit={handleApplyRange} className="flex items-center gap-2">
-              <span className="text-slate-400 hidden md:inline">Select range:</span>
+              <span className="text-zinc-400 hidden md:inline font-mono text-[11px]">Select range:</span>
               <input
                 type="text"
                 value={rangeInput}
                 onChange={(e) => setRangeInput(e.target.value)}
                 placeholder="e.g. 1, 3-5, 8"
-                className="px-2.5 py-1 rounded-lg bg-black/40 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-xs w-32 font-mono"
+                className="px-2.5 py-1 rounded-xl bg-black/40 border border-white/10 text-white placeholder-zinc-500 focus:outline-none focus:border-indigo-500 text-xs w-32 font-mono tabular-nums shadow-inner"
               />
               <button
                 type="submit"
-                className="px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition-colors"
+                className="px-3 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition-colors cursor-pointer"
               >
                 Apply
               </button>
@@ -125,7 +125,7 @@ export function ThumbnailGrid({
                   onToggleSelect?.(index);
                 }
               }}
-              className={`group relative rounded-xl overflow-hidden border transition-all duration-200 bg-[#12141D] flex flex-col ${
+              className={`group relative rounded-2xl overflow-hidden border transition-all duration-200 premium-card flex flex-col ${
                 mode === "remove" && isSelected
                   ? "border-rose-500 shadow-[0_0_20px_rgba(244,63,94,0.3)] ring-2 ring-rose-500/50"
                   : mode === "select" && isSelected

@@ -244,26 +244,26 @@ export function ResultPreviewStudio({
   const hasMultipleBatch = batchItems.length > 1;
 
   return (
-    <div className="w-full bg-[#10121A] border border-white/10 rounded-2xl overflow-hidden shadow-2xl space-y-0 relative animate-in fade-in zoom-in-95 duration-200">
+    <div className="w-full premium-card rounded-3xl overflow-hidden shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
       {/* 1. TOP TELEMETRY & ACCURACY METRICS BAR */}
-      <div className="p-4 sm:p-5 bg-gradient-to-r from-[#141622] via-[#10121A] to-[#141622] border-b border-white/10">
+      <div className="p-4 sm:p-5 bg-gradient-to-r from-white/[0.04] via-white/[0.02] to-white/[0.04] border-b border-white/[0.08]">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
           {/* Title & Editable Filename */}
           <div className="space-y-1.5">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <span className="p-1.5 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 shadow-sm">
                 <Sparkles className="w-4 h-4" />
               </span>
-              <h3 className="text-sm sm:text-base font-bold text-white tracking-tight">
+              <h3 className="text-sm sm:text-base font-bold text-white tracking-[-0.02em]">
                 {title}
               </h3>
               {hasMultipleBatch && (
-                <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                <span className="text-[11px] font-mono tabular-nums px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                   {batchItems.length}-Document Batch
                 </span>
               )}
               {activeMetrics.targetAccuracy && (
-                <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                <span className="text-[11px] font-mono tabular-nums px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/25">
                   {activeMetrics.targetAccuracy}
                 </span>
               )}
@@ -282,19 +282,19 @@ export function ResultPreviewStudio({
                   />
                   <button
                     onClick={() => setIsEditingName(false)}
-                    className="p-1 rounded bg-indigo-600 text-white hover:bg-indigo-500"
+                    className="p-1 rounded bg-indigo-600 text-white hover:bg-indigo-500 cursor-pointer"
                   >
                     <Check className="w-3 h-3" />
                   </button>
                 </div>
               ) : (
                 <div className="flex items-center gap-2 group">
-                  <span className="text-xs text-slate-300 font-mono truncate max-w-[280px] sm:max-w-md">
+                  <span className="text-xs text-zinc-300 font-mono truncate max-w-[280px] sm:max-w-md">
                     {filename}
                   </span>
                   <button
                     onClick={() => setIsEditingName(true)}
-                    className="text-slate-500 hover:text-white transition-colors"
+                    className="text-zinc-500 hover:text-white transition-colors cursor-pointer"
                     title="Rename Output File"
                   >
                     <Edit2 className="w-3 h-3" />
@@ -304,46 +304,52 @@ export function ResultPreviewStudio({
             </div>
           </div>
 
-          {/* Telemetry Metric Badges */}
+          {/* Telemetry Metric Badges with Monospace Tabular Figures */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full lg:w-auto">
-            <div className="px-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/5">
-              <span className="text-[10px] text-slate-400 block uppercase font-medium">
+            <div className="px-3.5 py-2 rounded-2xl glass-pill">
+              <span className="text-[10px] text-zinc-400 block uppercase font-medium">
                 Original Size
               </span>
-              <span className="text-xs sm:text-sm font-semibold text-white font-mono block">
+              <span className="text-xs sm:text-sm font-semibold text-white font-mono tabular-nums block">
                 {formatFileSize(activeMetrics.originalSize)}
               </span>
             </div>
 
-            <div className="px-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/5">
-              <span className="text-[10px] text-slate-400 block uppercase font-medium">
+            <div className="px-3.5 py-2 rounded-2xl glass-pill">
+              <span className="text-[10px] text-zinc-400 block uppercase font-medium">
                 Output Size
               </span>
-              <span className="text-xs sm:text-sm font-semibold text-indigo-300 font-mono block">
+              <span className="text-xs sm:text-sm font-semibold text-indigo-300 font-mono tabular-nums block">
                 {formatFileSize(activeMetrics.processedSize)}
               </span>
             </div>
 
-            <div className="px-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/5">
-              <span className="text-[10px] text-slate-400 block uppercase font-medium flex items-center gap-1">
+            {/* Animated Savings Ring / Badge */}
+            <div className="px-3.5 py-2 rounded-2xl glass-pill relative overflow-hidden">
+              <span className="text-[10px] text-zinc-400 block uppercase font-medium flex items-center gap-1">
                 <TrendingDown className="w-3 h-3 text-emerald-400" />
                 {isSaving ? "Saved" : "Ratio"}
               </span>
-              <span
-                className={`text-xs sm:text-sm font-semibold font-mono block ${
-                  isSaving ? "text-emerald-400" : "text-slate-300"
-                }`}
-              >
-                {isSaving ? `-${activeMetrics.savedPercentage}%` : "Optimized"}
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span
+                  className={`text-xs sm:text-sm font-bold font-mono tabular-nums block ${
+                    isSaving ? "text-emerald-400" : "text-zinc-300"
+                  }`}
+                >
+                  {isSaving ? `-${activeMetrics.savedPercentage}%` : "Optimized"}
+                </span>
+                {isSaving && (
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                )}
+              </div>
             </div>
 
-            <div className="px-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/5">
-              <span className="text-[10px] text-slate-400 block uppercase font-medium flex items-center gap-1">
+            <div className="px-3.5 py-2 rounded-2xl glass-pill">
+              <span className="text-[10px] text-zinc-400 block uppercase font-medium flex items-center gap-1">
                 <Clock className="w-3 h-3 text-cyan-400" />
                 Speed
               </span>
-              <span className="text-xs sm:text-sm font-semibold text-cyan-300 font-mono block">
+              <span className="text-xs sm:text-sm font-semibold text-cyan-300 font-mono tabular-nums block">
                 {formatTimeMs(activeMetrics.durationMs)}
               </span>
             </div>
@@ -351,111 +357,47 @@ export function ResultPreviewStudio({
         </div>
       </div>
 
-      {/* 2. VIEWER TOOLBAR */}
-      <div className="px-4 py-2.5 bg-[#0C0E15] border-b border-white/5 flex flex-wrap items-center justify-between gap-3 text-xs">
-        {/* Page navigation */}
-        {isPdf && totalPages > 1 ? (
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage <= 1}
-              className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white disabled:opacity-30"
-            >
-              <ChevronLeft className="w-3.5 h-3.5" />
-            </button>
-            <span className="font-mono text-slate-300 text-xs">
-              Page {currentPage} of {totalPages}
-            </span>
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage >= totalPages}
-              className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white disabled:opacity-30"
-            >
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        ) : (
-          <span className="text-slate-400 text-xs">Preview Viewport</span>
-        )}
-
-        {/* Zoom Controls */}
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => setZoomLevel((z) => Math.max(0.5, z - 0.25))}
-            className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white"
-            title="Zoom Out"
-          >
-            <ZoomOut className="w-3.5 h-3.5" />
-          </button>
-          <span className="px-1.5 font-mono text-slate-300 text-[11px]">
-            {Math.round(zoomLevel * 100)}%
-          </span>
-          <button
-            onClick={() => setZoomLevel((z) => Math.min(2.5, z + 0.25))}
-            className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white"
-            title="Zoom In"
-          >
-            <ZoomIn className="w-3.5 h-3.5" />
-          </button>
-          <button
-            onClick={() => setZoomLevel(1.0)}
-            className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white ml-0.5"
-            title="Fit to Screen"
-          >
-            <Maximize2 className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        {/* Before vs. After Split Toggle */}
-        {currentOriginalBytes && isPdf && (
-          <button
-            type="button"
-            onClick={() => setCompareMode(!compareMode)}
-            className={`px-2.5 py-1 rounded-lg font-medium flex items-center gap-1.5 transition-all text-xs ${
-              compareMode
-                ? "bg-indigo-600 text-white shadow-md border border-indigo-500"
-                : "bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10"
-            }`}
-          >
-            <Columns className="w-3.5 h-3.5" />
-            <span>{compareMode ? "Single View" : "Split Before/After"}</span>
-          </button>
-        )}
-      </div>
-
-      {/* 3. WORKSPACE CONTAINER (WITH BATCH SWITCHER SIDEBAR) */}
-      <div className="flex flex-col md:flex-row bg-[#07080C] min-h-[360px] max-h-[550px]">
+      {/* 2. CINEMA CANVAS CONTAINER WITH FLOATING HUD CONTROLS */}
+      <div className="relative flex flex-col md:flex-row bg-[#05060B] min-h-[380px] max-h-[580px] overflow-hidden">
         {/* Optional Left Batch Switcher Sidebar */}
         {hasMultipleBatch && (
-          <div className="w-full md:w-64 border-b md:border-b-0 md:border-r border-white/10 bg-[#0B0D14] flex flex-col max-h-48 md:max-h-[550px] overflow-hidden flex-shrink-0">
-            <div className="p-2.5 border-b border-white/5 flex items-center justify-between text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+          <div className="w-full md:w-64 border-b md:border-b-0 md:border-r border-white/[0.08] bg-black/40 flex flex-col max-h-48 md:max-h-[580px] overflow-hidden shrink-0 z-10 backdrop-blur-md">
+            <div className="p-3 border-b border-white/[0.06] flex items-center justify-between text-[11px] font-semibold text-zinc-400 uppercase tracking-wider font-mono">
               <span>Batch Queue ({batchItems.length})</span>
-              <span className="text-emerald-400 font-mono">100% Done</span>
+              <span className="text-emerald-400">100% Done</span>
             </div>
-            <div className="divide-y divide-white/5 overflow-y-auto flex-1">
+            <div className="divide-y divide-white/[0.04] overflow-y-auto flex-1">
               {batchItems.map((item, idx) => {
                 const isSelected = idx === selectedBatchIdx;
                 return (
                   <button
                     key={item.id || idx}
                     onClick={() => setSelectedBatchIdx(idx)}
-                    className={`w-full text-left p-2.5 flex items-center gap-2 transition-all ${
+                    className={`w-full text-left p-3 flex items-center gap-2.5 transition-all cursor-pointer ${
                       isSelected
-                        ? "bg-indigo-600/20 text-white border-l-2 border-indigo-500"
-                        : "hover:bg-white/5 text-slate-400 hover:text-slate-200"
+                        ? "bg-indigo-600/20 text-white border-l-2 border-indigo-500 shadow-inner"
+                        : "hover:bg-white/[0.03] text-zinc-400 hover:text-zinc-200"
                     }`}
                   >
-                    <FileText className={`w-3.5 h-3.5 flex-shrink-0 ${isSelected ? "text-indigo-400" : "text-slate-500"}`} />
+                    <FileText
+                      className={`w-3.5 h-3.5 shrink-0 ${
+                        isSelected ? "text-indigo-400" : "text-zinc-500"
+                      }`}
+                    />
                     <div className="truncate flex-1 min-w-0">
-                      <div className="text-xs font-medium truncate">{item.name}</div>
-                      <div className="text-[10px] text-slate-500 font-mono flex items-center gap-1.5 mt-0.5">
+                      <div className="text-xs font-semibold truncate">
+                        {item.name}
+                      </div>
+                      <div className="text-[10px] text-zinc-500 font-mono tabular-nums flex items-center gap-1.5 mt-0.5">
                         <span>{formatFileSize(item.originalSize)}</span>
                         <span>→</span>
-                        <span className="text-indigo-300">{formatFileSize(item.processedSize)}</span>
+                        <span className="text-indigo-300">
+                          {formatFileSize(item.processedSize)}
+                        </span>
                       </div>
                     </div>
                     {item.savedPercentage > 0 && (
-                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 flex-shrink-0">
+                      <span className="text-[10px] font-mono tabular-nums px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 shrink-0">
                         -{item.savedPercentage}%
                       </span>
                     )}
@@ -466,41 +408,112 @@ export function ResultPreviewStudio({
           </div>
         )}
 
-        {/* Main Canvas Workspace */}
-        <div className="p-4 sm:p-6 flex-1 overflow-auto flex items-center justify-center">
+        {/* Floating HUD Zoom & Page Navigation Controls */}
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full glass-pill shadow-2xl backdrop-blur-2xl">
+          {isPdf && totalPages > 1 && (
+            <div className="flex items-center gap-1 pr-2 border-r border-white/10">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage <= 1}
+                className="p-1 rounded-lg text-zinc-300 hover:text-white hover:bg-white/10 disabled:opacity-20 cursor-pointer"
+                title="Previous Page"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </button>
+              <span className="font-mono tabular-nums text-zinc-300 text-xs px-1">
+                {currentPage} / {totalPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage >= totalPages}
+                className="p-1 rounded-lg text-zinc-300 hover:text-white hover:bg-white/10 disabled:opacity-20 cursor-pointer"
+                title="Next Page"
+              >
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
+          {/* Zoom Level HUD */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setZoomLevel((z) => Math.max(0.5, z - 0.25))}
+              className="p-1 rounded-lg text-zinc-300 hover:text-white hover:bg-white/10 cursor-pointer"
+              title="Zoom Out"
+            >
+              <ZoomOut className="w-3.5 h-3.5" />
+            </button>
+            <span className="px-1.5 font-mono tabular-nums text-zinc-200 text-xs font-medium">
+              {Math.round(zoomLevel * 100)}%
+            </span>
+            <button
+              onClick={() => setZoomLevel((z) => Math.min(2.5, z + 0.25))}
+              className="p-1 rounded-lg text-zinc-300 hover:text-white hover:bg-white/10 cursor-pointer"
+              title="Zoom In"
+            >
+              <ZoomIn className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => setZoomLevel(1.0)}
+              className="p-1 rounded-lg text-zinc-300 hover:text-white hover:bg-white/10 cursor-pointer"
+              title="Reset Zoom"
+            >
+              <Maximize2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Before vs. After Split Comparison Toggle */}
+          {currentOriginalBytes && isPdf && (
+            <button
+              type="button"
+              onClick={() => setCompareMode(!compareMode)}
+              className={`ml-1 px-2.5 py-0.5 rounded-full font-medium flex items-center gap-1 text-[11px] transition-all cursor-pointer ${
+                compareMode
+                  ? "bg-indigo-600 text-white shadow-md border border-indigo-400/40"
+                  : "bg-white/[0.08] hover:bg-white/[0.14] text-zinc-300 hover:text-white"
+              }`}
+            >
+              <Columns className="w-3 h-3" />
+              <span>{compareMode ? "Single" : "Split Before/After"}</span>
+            </button>
+          )}
+        </div>
+
+        {/* Main Cinema Canvas Workspace */}
+        <div className="p-4 sm:p-8 flex-1 overflow-auto flex items-center justify-center pt-14">
           {isPdf ? (
             compareMode && currentOriginalBytes ? (
               /* Side-by-Side Split View */
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-5xl">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full max-w-5xl">
                 {/* Left: Original */}
                 <div className="flex flex-col items-center">
-                  <span className="text-[11px] uppercase font-bold text-slate-400 mb-1.5 tracking-wider">
+                  <span className="text-[11px] uppercase font-bold text-zinc-400 mb-2 tracking-wider font-mono tabular-nums">
                     Original ({formatFileSize(activeMetrics.originalSize)})
                   </span>
-                  <div className="p-2 rounded-xl bg-black/40 border border-white/10 shadow-2xl max-w-full overflow-hidden">
+                  <div className="p-2 rounded-2xl bg-black/60 border border-white/10 shadow-2xl max-w-full overflow-hidden">
                     <canvas
                       ref={originalCanvasRef}
-                      className="max-w-full h-auto rounded shadow-lg"
+                      className="max-w-full h-auto rounded-lg shadow-lg"
                     />
                   </div>
                 </div>
 
                 {/* Right: Output */}
                 <div className="flex flex-col items-center">
-                  <span className="text-[11px] uppercase font-bold text-indigo-400 mb-1.5 tracking-wider">
+                  <span className="text-[11px] uppercase font-bold text-indigo-400 mb-2 tracking-wider font-mono tabular-nums">
                     Processed Output ({formatFileSize(activeMetrics.processedSize)})
                   </span>
-                  <div className="p-2 rounded-xl bg-black/40 border border-indigo-500/30 shadow-[0_0_30px_rgba(99,102,241,0.2)] max-w-full overflow-hidden">
+                  <div className="p-2 rounded-2xl bg-black/60 border border-indigo-500/40 shadow-[0_0_36px_rgba(99,102,241,0.25)] max-w-full overflow-hidden">
                     <canvas
                       ref={outputCanvasRef}
-                      className="max-w-full h-auto rounded shadow-lg"
+                      className="max-w-full h-auto rounded-lg shadow-lg"
                     />
                   </div>
                 </div>
               </div>
             ) : (
               /* Single Output View */
-              <div className="p-2 rounded-xl bg-black/40 border border-white/10 shadow-2xl max-w-full overflow-hidden">
+              <div className="p-2.5 rounded-2xl bg-black/60 border border-white/[0.12] shadow-2xl max-w-full overflow-hidden shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
                 <canvas
                   ref={outputCanvasRef}
                   className="max-w-full h-auto rounded-lg shadow-lg"
@@ -508,28 +521,28 @@ export function ResultPreviewStudio({
               </div>
             )
           ) : (
-            /* Non-PDF outputs (e.g. ZIP or text) */
-            <div className="p-6 text-center space-y-2">
-              <div className="p-3.5 rounded-2xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 inline-block">
-                <Layers className="w-7 h-7" />
+            /* Non-PDF outputs */
+            <div className="p-8 text-center space-y-2">
+              <div className="p-4 rounded-2xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 inline-block shadow-lg">
+                <Layers className="w-8 h-8" />
               </div>
               <h4 className="text-white font-semibold text-sm">{filename}</h4>
-              <p className="text-xs text-slate-400 max-w-md">
-                Output packaged successfully. Click below to download or chain into another tool.
+              <p className="text-xs text-zinc-400 max-w-md">
+                Output packaged successfully in local browser memory.
               </p>
             </div>
           )}
         </div>
       </div>
 
-      {/* 4. BOTTOM ACTION & CHAINING TOOLBAR */}
-      <div className="p-4 bg-[#0E1017] border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
+      {/* 3. BOTTOM ACTION & CHAINING TOOLBAR */}
+      <div className="p-4 bg-white/[0.02] border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-3">
         {/* Left: Adjust Settings & Re-Run */}
         <div className="flex items-center gap-2.5 w-full sm:w-auto">
           <button
             type="button"
             onClick={onAdjustSettings}
-            className="w-full sm:w-auto px-3.5 py-2 rounded-xl border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm"
+            className="w-full sm:w-auto px-4 py-2 rounded-xl glass-pill hover:bg-white/[0.08] text-zinc-300 hover:text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Adjust Settings &amp; Re-Run</span>
@@ -544,9 +557,9 @@ export function ResultPreviewStudio({
               <button
                 type="button"
                 onClick={() => setShowChainMenu(!showChainMenu)}
-                className="w-full sm:w-auto px-3 py-2 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 hover:text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
+                className="w-full sm:w-auto px-4 py-2 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 hover:text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
               >
-                <span>Chain Tool</span>
+                <span>Chain Output to Next Tool</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
 
@@ -556,8 +569,8 @@ export function ResultPreviewStudio({
                     className="fixed inset-0 z-30"
                     onClick={() => setShowChainMenu(false)}
                   />
-                  <div className="absolute right-0 bottom-full mb-2 w-60 max-h-64 overflow-y-auto rounded-xl bg-[#12141D] border border-white/10 shadow-2xl z-40 p-1.5 divide-y divide-white/5 animate-in fade-in zoom-in-95 duration-150">
-                    <div className="px-2.5 py-1 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+                  <div className="absolute right-0 bottom-full mb-2 w-64 max-h-64 overflow-y-auto rounded-2xl bg-[#0F111A] border border-white/[0.12] shadow-2xl z-40 p-2 divide-y divide-white/5 animate-in fade-in zoom-in-95 duration-150 backdrop-blur-xl">
+                    <div className="px-2.5 py-1 text-[10px] font-semibold text-zinc-400 uppercase tracking-wider font-mono">
                       Pass Output Directly To:
                     </div>
                     <div className="space-y-0.5 pt-1">
@@ -567,10 +580,10 @@ export function ResultPreviewStudio({
                         <button
                           key={tool.id}
                           onClick={() => handleChainToTool(tool.path)}
-                          className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left text-xs text-slate-300 hover:text-white hover:bg-white/5 transition-all"
+                          className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left text-xs text-zinc-300 hover:text-white hover:bg-white/[0.08] transition-all cursor-pointer"
                         >
                           <span className="truncate">{tool.name}</span>
-                          <ArrowRight className="w-3 h-3 text-slate-500" />
+                          <ArrowRight className="w-3 h-3 text-zinc-500" />
                         </button>
                       ))}
                     </div>
@@ -586,7 +599,7 @@ export function ResultPreviewStudio({
               type="button"
               onClick={handleDownloadAllZip}
               disabled={isZipping}
-              className="w-full sm:w-auto px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all border border-white/10"
+              className="w-full sm:w-auto px-4 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all border border-white/[0.1] cursor-pointer"
             >
               <Archive className="w-3.5 h-3.5 text-cyan-400" />
               <span>{isZipping ? "Creating ZIP..." : `Download All (${batchItems.length} ZIP)`}</span>
@@ -597,7 +610,7 @@ export function ResultPreviewStudio({
           <button
             type="button"
             onClick={handleDownloadSingle}
-            className="w-full sm:w-auto px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-cyan-500 hover:from-indigo-600 hover:to-cyan-600 text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-[0_0_20px_rgba(99,102,241,0.4)] hover:shadow-[0_0_30px_rgba(99,102,241,0.6)] hover:scale-[1.01] active:scale-[0.98] transition-all"
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-cyan-500 hover:from-indigo-600 hover:to-cyan-600 text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-[0_0_24px_rgba(99,102,241,0.45)] hover:shadow-[0_0_32px_rgba(99,102,241,0.65)] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Download {filename}</span>

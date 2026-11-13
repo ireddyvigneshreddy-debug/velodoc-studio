@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
+import { motion } from "framer-motion";
 import { DropZone } from "@/components/common/DropZone";
 import { ResultPreviewStudio } from "@/components/ResultPreviewStudio";
 import { UploadedFileItem, ProcessingMetrics } from "@/types";
@@ -246,8 +247,8 @@ export function ImageStudioTool() {
 
           {images.length > 0 && (
             <div className="space-y-6">
-              {/* Mode Switcher */}
-              <div className="p-1.5 rounded-2xl bg-[#12141D] border border-white/10 grid grid-cols-3 gap-2">
+              {/* Segmented Hardware Mode Switcher */}
+              <div className="p-1.5 rounded-2xl glass-pill grid grid-cols-1 sm:grid-cols-3 gap-2 relative">
                 {[
                   {
                     id: "exact-kb",
@@ -264,25 +265,35 @@ export function ImageStudioTool() {
                     label: "Manual Pro Controls",
                     desc: "Dimensions & quality",
                   },
-                ].map((m) => (
-                  <button
-                    key={m.id}
-                    type="button"
-                    onClick={() => setMode(m.id as "exact-kb" | "percentage" | "manual")}
-                    className={`py-2.5 px-3 rounded-xl text-left transition-all ${
-                      mode === m.id
-                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
-                        : "text-slate-400 hover:text-white hover:bg-white/5"
-                    }`}
-                  >
-                    <div className="text-xs font-semibold">{m.label}</div>
-                    <div className="text-[10px] opacity-75">{m.desc}</div>
-                  </button>
-                ))}
+                ].map((m) => {
+                  const isSelected = mode === m.id;
+                  return (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => setMode(m.id as "exact-kb" | "percentage" | "manual")}
+                      className={`relative py-3 px-3.5 rounded-xl text-left transition-all cursor-pointer z-10 ${
+                        isSelected
+                          ? "text-white font-semibold"
+                          : "text-zinc-400 hover:text-zinc-200"
+                      }`}
+                    >
+                      {isSelected && (
+                        <motion.div
+                          layoutId="imageStudioMode"
+                          className="absolute inset-0 rounded-xl bg-teal-600/25 border border-teal-500/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_4px_16px_rgba(20,184,166,0.25)] backdrop-blur-md"
+                          transition={{ type: "spring", stiffness: 420, damping: 32 }}
+                        />
+                      )}
+                      <div className="relative z-10 text-xs font-semibold">{m.label}</div>
+                      <div className="relative z-10 text-[10px] text-zinc-400 mt-0.5">{m.desc}</div>
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Mode-Specific Settings */}
-              <div className="p-5 rounded-2xl bg-[#12141D] border border-white/10 space-y-4">
+              <div className="p-5 sm:p-6 rounded-3xl premium-card space-y-4">
                 {mode === "exact-kb" && (
                   <div className="space-y-4">
                     <div>

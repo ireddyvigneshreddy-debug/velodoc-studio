@@ -213,12 +213,12 @@ export function RemovePagesTool() {
           ) : (
             <div className="space-y-6">
               {/* Document Banner & Batch Actions */}
-              <div className="p-5 rounded-3xl bg-[#12141D] border border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
+              <div className="p-5 sm:p-6 rounded-3xl premium-card flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
                 <div>
                   <h3 className="font-semibold text-white text-base">
                     {fileItem.name}
                   </h3>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <p className="text-xs text-zinc-400 mt-0.5 font-mono tabular-nums">
                     {isLoadingThumbnails
                       ? `Generating visual thumbnails (${renderProgress.current}/${renderProgress.total})...`
                       : `${thumbnails.length} total pages • ${deleteIndices.size} marked for removal • ${remainingPagesCount} pages remaining`}
@@ -229,21 +229,21 @@ export function RemovePagesTool() {
                   <button
                     type="button"
                     onClick={handleSelectOdd}
-                    className="px-2.5 py-1.5 rounded-lg text-xs bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
+                    className="px-3 py-1.5 rounded-xl text-xs glass-pill hover:bg-white/[0.08] text-zinc-300 hover:text-white transition-colors cursor-pointer"
                   >
                     Select Odd
                   </button>
                   <button
                     type="button"
                     onClick={handleSelectEven}
-                    className="px-2.5 py-1.5 rounded-lg text-xs bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
+                    className="px-3 py-1.5 rounded-xl text-xs glass-pill hover:bg-white/[0.08] text-zinc-300 hover:text-white transition-colors cursor-pointer"
                   >
                     Select Even
                   </button>
                   <button
                     type="button"
                     onClick={handleInvert}
-                    className="px-2.5 py-1.5 rounded-lg text-xs bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
+                    className="px-3 py-1.5 rounded-xl text-xs glass-pill hover:bg-white/[0.08] text-zinc-300 hover:text-white transition-colors cursor-pointer"
                   >
                     Invert
                   </button>
@@ -256,7 +256,7 @@ export function RemovePagesTool() {
                       isProcessing
                     }
                     onClick={handleRemovePages}
-                    className="ml-2 px-5 py-2 rounded-xl bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 disabled:opacity-40 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 shadow-[0_0_20px_rgba(244,63,94,0.35)] transition-all"
+                    className="ml-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 disabled:opacity-40 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 shadow-[0_0_24px_rgba(244,63,94,0.4)] hover:shadow-[0_0_32px_rgba(244,63,94,0.6)] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
                   >
                     {isProcessing ? (
                       <>

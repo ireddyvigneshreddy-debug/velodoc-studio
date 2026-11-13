@@ -111,6 +111,7 @@ export function CameraScannerModal({
 
   // Editor Adjustment Controls (for the actively selected page)
   const [editorAdjustments, setEditorAdjustments] = useState<ScanAdjustments>(DEFAULT_ADJUSTMENTS);
+  const [viewfinderFilter, setViewfinderFilter] = useState<DocumentFilterType>("magic-color");
   const [isApplyingAdjustment, setIsApplyingAdjustment] = useState(false);
   const [activeCropPreset, setActiveCropPreset] = useState<CropPreset>("full");
 
@@ -337,12 +338,23 @@ export function CameraScannerModal({
       const thumbBlob = await canvasToBlob(thumbCanvas, "image/jpeg", 0.7);
       const thumbnailUrl = URL.createObjectURL(thumbBlob);
 
-      // 5. Apply default enhancement (Magic Color preset)
+      // 5. Apply default enhancement (Magic Color, Crisp B&W, or Clean Grayscale)
+      const baseAdjustments: ScanAdjustments = {
+        ...DEFAULT_ADJUSTMENTS,
+        filter: viewfinderFilter,
+        contrast:
+          viewfinderFilter === "bw-threshold"
+            ? 45
+            : viewfinderFilter === "grayscale"
+            ? 15
+            : DEFAULT_ADJUSTMENTS.contrast,
+      };
+
       const enhancedCanvas = await processScannedImage(
         snapCanvas,
         vidW,
         vidH,
-        DEFAULT_ADJUSTMENTS
+        baseAdjustments
       );
       const processedBlob = await canvasToBlob(enhancedCanvas, "image/jpeg", 0.94);
       const processedDataUrl = URL.createObjectURL(processedBlob);
@@ -356,7 +368,7 @@ export function CameraScannerModal({
         thumbnailUrl,
         width: vidW,
         height: vidH,
-        adjustments: { ...DEFAULT_ADJUSTMENTS },
+        adjustments: { ...baseAdjustments },
         createdAt: Date.now(),
       };
 
@@ -375,7 +387,7 @@ export function CameraScannerModal({
     } finally {
       setIsCapturing(false);
     }
-  }, [isCapturing, isMirrorActive, supportsHardwareZoom, zoomLevel, captureMode]);
+  }, [isCapturing, isMirrorActive, supportsHardwareZoom, zoomLevel, captureMode, viewfinderFilter]);
 
   // Trigger capture with optional countdown timer
   const handleShutterClick = useCallback(() => {
@@ -856,11 +868,11 @@ export function CameraScannerModal({
                         : "aspect-[8.5/11] max-h-[85%] max-w-[85%]"
                     }`}
                   >
-                    {/* Glowing neon corner brackets */}
-                    <div className="absolute -top-1.5 -left-1.5 w-6 h-6 border-t-4 border-l-4 border-cyan-400 rounded-tl-lg" />
-                    <div className="absolute -top-1.5 -right-1.5 w-6 h-6 border-t-4 border-r-4 border-cyan-400 rounded-tr-lg" />
-                    <div className="absolute -bottom-1.5 -left-1.5 w-6 h-6 border-b-4 border-l-4 border-cyan-400 rounded-bl-lg" />
-                    <div className="absolute -bottom-1.5 -right-1.5 w-6 h-6 border-b-4 border-r-4 border-cyan-400 rounded-br-lg" />
+                    {/* Glowing neon corner brackets (Leica/iOS Pro HUD style) */}
+                    <div className="absolute -top-2 -left-2 w-7 h-7 border-t-4 border-l-4 border-cyan-400 rounded-tl-xl shadow-[0_0_16px_rgba(6,182,212,0.95)]" />
+                    <div className="absolute -top-2 -right-2 w-7 h-7 border-t-4 border-r-4 border-cyan-400 rounded-tr-xl shadow-[0_0_16px_rgba(6,182,212,0.95)]" />
+                    <div className="absolute -bottom-2 -left-2 w-7 h-7 border-b-4 border-l-4 border-cyan-400 rounded-bl-xl shadow-[0_0_16px_rgba(6,182,212,0.95)]" />
+                    <div className="absolute -bottom-2 -right-2 w-7 h-7 border-b-4 border-r-4 border-cyan-400 rounded-br-xl shadow-[0_0_16px_rgba(6,182,212,0.95)]" />
 
                     <div className="absolute top-3 left-3 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-sm text-[10px] font-mono font-bold text-cyan-300 border border-cyan-500/30">
                       {alignmentGuide.toUpperCase()} DOCUMENT ALIGNMENT
@@ -1067,15 +1079,42 @@ export function CameraScannerModal({
               </div>
             </div>
 
-            {/* BOTTOM VIEWFINDER SHUTTER & ZOOM DOCK */}
-            <div className="absolute bottom-4 inset-x-0 z-20 flex flex-col items-center justify-center space-y-3 pointer-events-auto">
+            {/* BOTTOM VIEWFINDER SHUTTER & ZOOM DOCK (Leica / iOS Pro Camera HUD) */}
+            <div className="absolute bottom-4 inset-x-0 z-20 flex flex-col items-center justify-center space-y-2.5 pointer-events-auto">
+              {/* Live Filter Preset Switcher Pills */}
+              <div className="flex items-center gap-1.5 p-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 shadow-xl">
+                {[
+                  { id: "magic-color", label: "Magic Color", icon: Sparkles },
+                  { id: "bw-threshold", label: "Crisp B&W", icon: FileText },
+                  { id: "grayscale", label: "Clean Grayscale", icon: Layers },
+                ].map((f) => {
+                  const Icon = f.icon;
+                  const isSelected = viewfinderFilter === f.id;
+                  return (
+                    <button
+                      key={f.id}
+                      type="button"
+                      onClick={() => setViewfinderFilter(f.id as DocumentFilterType)}
+                      className={`flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-semibold transition-all cursor-pointer ${
+                        isSelected
+                          ? "bg-gradient-to-r from-cyan-500 to-indigo-600 text-white shadow-md shadow-cyan-500/25 border border-cyan-400/40"
+                          : "text-zinc-400 hover:text-white hover:bg-white/[0.08]"
+                      }`}
+                    >
+                      <Icon className="w-3 h-3" />
+                      <span>{f.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
               {/* Zoom Slider Bar */}
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-xs text-slate-300 shadow-xl">
+              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-xs text-zinc-300 shadow-xl">
                 <button
                   type="button"
                   onClick={() => handleZoomChange(1.0)}
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold transition-colors ${
-                    zoomLevel === 1.0 ? "bg-white/20 text-white" : "text-slate-400 hover:text-white"
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold transition-colors cursor-pointer ${
+                    zoomLevel === 1.0 ? "bg-white/20 text-white" : "text-zinc-400 hover:text-white"
                   }`}
                 >
                   1.0x
@@ -1092,8 +1131,8 @@ export function CameraScannerModal({
                 <button
                   type="button"
                   onClick={() => handleZoomChange(2.0)}
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold transition-colors ${
-                    zoomLevel === 2.0 ? "bg-white/20 text-white" : "text-slate-400 hover:text-white"
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold transition-colors cursor-pointer ${
+                    zoomLevel === 2.0 ? "bg-white/20 text-white" : "text-zinc-400 hover:text-white"
                   }`}
                 >
                   2.0x
@@ -1104,16 +1143,16 @@ export function CameraScannerModal({
               </div>
 
               {/* Shutter Button & Capture Mode Switcher */}
-              <div className="flex items-center gap-6">
+              <div className="flex items-center gap-5 sm:gap-7">
                 {/* Capture Mode Toggle */}
-                <div className="p-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center text-xs">
+                <div className="p-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center text-xs shadow-lg">
                   <button
                     type="button"
                     onClick={() => setCaptureMode("single")}
-                    className={`px-3 py-1 rounded-full text-[11px] font-semibold transition-all ${
+                    className={`px-3 py-1 rounded-full text-[11px] font-semibold transition-all cursor-pointer ${
                       captureMode === "single"
                         ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
-                        : "text-slate-400 hover:text-white"
+                        : "text-zinc-400 hover:text-white"
                     }`}
                   >
                     Single
@@ -1121,34 +1160,34 @@ export function CameraScannerModal({
                   <button
                     type="button"
                     onClick={() => setCaptureMode("batch")}
-                    className={`px-3 py-1 rounded-full text-[11px] font-semibold transition-all ${
+                    className={`px-3 py-1 rounded-full text-[11px] font-semibold transition-all cursor-pointer ${
                       captureMode === "batch"
                         ? "bg-cyan-600 text-white shadow-md shadow-cyan-600/30"
-                        : "text-slate-400 hover:text-white"
+                        : "text-zinc-400 hover:text-white"
                     }`}
                   >
                     Rapid Batch
                   </button>
                 </div>
 
-                {/* Primary Shutter Snap Button */}
+                {/* Tactile Leica / iOS Pro Shutter Snap Button */}
                 <button
                   type="button"
                   onClick={handleShutterClick}
                   disabled={isCapturing || Boolean(cameraError)}
                   aria-label="Capture Document"
-                  className="relative group p-1.5 rounded-full border-4 border-white/80 hover:border-white transition-all transform active:scale-95 shadow-2xl cursor-pointer disabled:opacity-50"
+                  className="relative group p-1.5 rounded-full border-4 border-white/90 hover:border-white transition-all transform active:scale-90 shadow-[0_0_35px_rgba(255,255,255,0.45),inset_0_2px_4px_rgba(0,0,0,0.5)] cursor-pointer disabled:opacity-50"
                 >
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-cyan-400 to-indigo-500 group-hover:from-cyan-300 group-hover:to-indigo-400 flex items-center justify-center shadow-inner">
-                    <Camera className="w-6 h-6 text-white group-hover:scale-110 transition-transform" />
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-cyan-400 via-indigo-500 to-white/95 group-hover:scale-105 active:scale-95 transition-transform flex items-center justify-center shadow-inner">
+                    <Camera className="w-6 h-6 text-white drop-shadow-md group-hover:scale-110 transition-transform" />
                   </div>
                   {/* Subtle pulsing ring */}
-                  <div className="absolute inset-0 rounded-full border border-cyan-400/50 animate-ping pointer-events-none" />
+                  <div className="absolute inset-0 rounded-full border-2 border-cyan-400/60 animate-ping pointer-events-none" />
                 </button>
 
                 {/* Captured Pages Counter Badge */}
-                <div className="px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-xs font-mono text-slate-300">
-                  <span className="text-cyan-400 font-bold">{scannedPages.length}</span>{" "}
+                <div className="px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-xs font-mono text-zinc-300 shadow-lg">
+                  <span className="text-cyan-400 font-bold tabular-nums">{scannedPages.length}</span>{" "}
                   {scannedPages.length === 1 ? "page" : "pages"}
                 </div>
               </div>
@@ -1392,7 +1431,7 @@ export function CameraScannerModal({
       {/* BOTTOM SCANNED PAGES FILMSTRIP TRAY (UP TO 30+ PAGES) */}
       {/* ================================================================= */}
       {scannedPages.length > 0 && (
-        <div className="relative z-20 px-4 sm:px-6 py-2.5 bg-[#0A0C13] border-t border-white/10 shrink-0">
+        <div className="relative z-20 px-4 sm:px-6 py-2.5 backdrop-blur-2xl bg-black/85 border-t border-white/[0.12] shadow-[0_-12px_40px_rgba(0,0,0,0.85)] shrink-0">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
               <span>Scanned Pages Tray ({scannedPages.length})</span>
