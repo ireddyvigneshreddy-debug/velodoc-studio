@@ -165,7 +165,7 @@ export function Footer() {
                 </li>
               ))}
               <li className="pt-2 text-zinc-500 font-mono text-[11px]">
-                19 Core Native Tools
+                29 Core Native Tools
               </li>
             </ul>
           </div>

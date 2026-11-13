@@ -1,6 +1,8 @@
 export type ToolCategory =
+  | "All Studio Tools (29)"
   | "All Studio Tools (19)"
-  | "All Tools (19)"
+  | "All Studio Tools"
+  | "All Tools"
   | "Shrink & Exact KB"
   | "Shrink & Compress"
   | "Merge & Split"
@@ -8,7 +10,8 @@ export type ToolCategory =
   | "Edit Pages"
   | "Convert & Camera Scan"
   | "Convert Formats"
-  | "Sign, Redact & Compare";
+  | "Sign, Redact & Compare"
+  | "Extreme & Smart Pro";
 
 export type ToolDomain = "all" | "pdf" | "image";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { SessionHistoryItem } from "@/types";
-import { createSafeFile } from "@/lib/utils";
+import { createSafeFile, createPdfBlob } from "@/lib/utils";
 
 // In-memory session store (persists across page navigations in current browser session)
 class SessionHistoryManager {
@@ -21,6 +21,30 @@ class SessionHistoryManager {
     }
     this.notify();
     return newItem;
+  }
+
+  recordExecution(params: {
+    toolId: string;
+    toolName: string;
+    inputFiles: string[];
+    outputFileName: string;
+    outputSizeBytes: number;
+    durationMs: number;
+    outputData?: Uint8Array;
+  }): SessionHistoryItem {
+    const data = params.outputData || new Uint8Array();
+    const blob = createPdfBlob(data);
+    return this.addItem({
+      toolId: params.toolId,
+      toolName: params.toolName,
+      filename: params.outputFileName,
+      blob,
+      data,
+      mimeType: "application/pdf",
+      originalSize: params.outputSizeBytes,
+      processedSize: params.outputSizeBytes,
+      pageCount: 1,
+    });
   }
 
   getItems(): SessionHistoryItem[] {

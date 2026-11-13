@@ -18,7 +18,7 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "VeloDoc Pro — Ultra-Premium Client-Side Document & PDF Studio",
   description:
-    "100% private, on-device document studio with exact KB/MB binary-search compression, 30-document zero-crash batch engine, and 19 precision PDF tools. Zero server uploads.",
+    "100% private, on-device document studio with exact KB/MB binary-search compression, 30-document zero-crash batch engine, and 29 precision PDF & document tools. Zero server uploads.",
   keywords: [
     "PDF editor",
     "exact size PDF compressor",

@@ -61,6 +61,17 @@ function getToolFamilyTheme(tool: ToolDefinition) {
     };
   }
 
+  if (tool.category === "Extreme & Smart Pro") {
+    return {
+      family: "fuchsia",
+      iconBg:
+        "bg-gradient-to-br from-fuchsia-500/90 via-purple-600/90 to-indigo-600/90 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_4px_14px_rgba(217,70,239,0.35)]",
+      badgeColor: "bg-fuchsia-500/10 text-fuchsia-300 border-fuchsia-500/20",
+      spotlightColor: "rgba(217, 70, 239, 0.15)",
+      borderGlowColor: "rgba(192, 38, 211, 0.45)",
+    };
+  }
+
   // Default: Indigo / Violet family
   return {
     family: "indigo",
@@ -73,16 +84,15 @@ function getToolFamilyTheme(tool: ToolDefinition) {
 }
 
 export function BentoGrid() {
-  const [selectedCategory, setSelectedCategory] = useState<ToolCategory>(
-    "All Studio Tools (19)"
-  );
+  const defaultCategory = TOOL_CATEGORIES[0];
+  const [selectedCategory, setSelectedCategory] = useState<ToolCategory>(defaultCategory);
   const [searchQuery, setSearchQuery] = useState("");
 
   // Filter tools based on category tab and search input
   const filteredTools = useMemo(() => {
     return TOOLS.filter((tool) => {
       const matchesCategory =
-        selectedCategory === "All Studio Tools (19)" ||
+        selectedCategory === defaultCategory ||
         tool.category === selectedCategory;
 
       if (!matchesCategory) return false;
@@ -97,20 +107,20 @@ export function BentoGrid() {
         tool.inputOutputBadge.toLowerCase().includes(q)
       );
     });
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery, defaultCategory]);
 
   // Category counts
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {
-      "All Studio Tools (19)": TOOLS.length,
+      [defaultCategory]: TOOLS.length,
     };
     TOOL_CATEGORIES.forEach((cat) => {
-      if (cat !== "All Studio Tools (19)") {
+      if (cat !== defaultCategory) {
         counts[cat] = TOOLS.filter((t) => t.category === cat).length;
       }
     });
     return counts;
-  }, []);
+  }, [defaultCategory]);
 
   return (
     <div id="all-tools" className="space-y-4">
@@ -165,7 +175,7 @@ export function BentoGrid() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Filter 19 tools..."
+            placeholder={`Filter ${TOOLS.length} precision tools...`}
             className="w-full pl-8 pr-3 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.09] focus:border-indigo-500/60 focus:bg-white/[0.07] text-xs text-white placeholder-zinc-500 outline-none transition-all shadow-inner"
           />
           {searchQuery && (
@@ -248,7 +258,7 @@ export function BentoGrid() {
           <button
             onClick={() => {
               setSearchQuery("");
-              setSelectedCategory("All Studio Tools (19)");
+              setSelectedCategory(defaultCategory);
             }}
             className="px-4 py-1.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition-colors"
           >

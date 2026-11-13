@@ -15,7 +15,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 
-// Tool components (All 19 native tools)
+// Tool components (All 29 native tools)
 import { MergePdfTool } from "./MergePdfTool";
 import { RemovePagesTool } from "./RemovePagesTool";
 import { AddPagesTool } from "./AddPagesTool";
@@ -35,6 +35,16 @@ import { PdfToTextTool } from "./PdfToTextTool";
 import { MarkdownToPdfTool } from "./MarkdownToPdfTool";
 import { MetadataPdfTool } from "./MetadataPdfTool";
 import { ComparePdfTool } from "./ComparePdfTool";
+import { FlattenPdfTool } from "./FlattenPdfTool";
+import { NUpPdfTool } from "./NUpPdfTool";
+import { PassportPhotoTool } from "./PassportPhotoTool";
+import { QrBarcodePdfTool } from "./QrBarcodePdfTool";
+import { InvoiceGeneratorTool } from "./InvoiceGeneratorTool";
+import { CertificateGeneratorTool } from "./CertificateGeneratorTool";
+import { PdfDiffTextTool } from "./PdfDiffTextTool";
+import { HtmlToPdfTool } from "./HtmlToPdfTool";
+import { PdfFormFillerTool } from "./PdfFormFillerTool";
+import { PresentationPdfTool } from "./PresentationPdfTool";
 
 interface ToolWorkspaceViewProps {
   tool: ToolDefinition;
@@ -84,6 +94,26 @@ export function ToolWorkspaceView({ tool }: ToolWorkspaceViewProps) {
         return <ImageToPdfTool />;
       case "image-studio":
         return <ImageStudioTool />;
+      case "flatten-pdf":
+        return <FlattenPdfTool />;
+      case "nup-pdf":
+        return <NUpPdfTool />;
+      case "passport-photo":
+        return <PassportPhotoTool />;
+      case "qr-barcode-pdf":
+        return <QrBarcodePdfTool />;
+      case "invoice-generator":
+        return <InvoiceGeneratorTool />;
+      case "certificate-generator":
+        return <CertificateGeneratorTool />;
+      case "pdf-diff-text":
+        return <PdfDiffTextTool />;
+      case "html-to-pdf":
+        return <HtmlToPdfTool />;
+      case "pdf-form-filler":
+        return <PdfFormFillerTool />;
+      case "presentation-pdf":
+        return <PresentationPdfTool />;
       default:
         return (
           <div className="p-8 text-center text-zinc-400">

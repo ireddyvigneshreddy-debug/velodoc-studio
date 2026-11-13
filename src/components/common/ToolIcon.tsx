@@ -20,6 +20,14 @@ import {
   GitCompare,
   FileSearch,
   Camera,
+  ShieldCheck,
+  LayoutGrid,
+  QrCode,
+  FileSpreadsheet,
+  Award,
+  Presentation,
+  FileEdit,
+  Code,
   LucideProps,
 } from "lucide-react";
 
@@ -44,6 +52,14 @@ export const TOOL_ICON_MAP: Record<string, React.ComponentType<LucideProps>> = {
   GitCompare,
   FileSearch,
   Camera,
+  ShieldCheck,
+  LayoutGrid,
+  QrCode,
+  FileSpreadsheet,
+  Award,
+  Presentation,
+  FileEdit,
+  Code,
 };
 
 interface ToolIconProps {

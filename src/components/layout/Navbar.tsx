@@ -83,7 +83,7 @@ export function Navbar() {
               title="Open command palette"
             >
               <Search className="w-3.5 h-3.5 text-indigo-400 group-hover:text-cyan-300 transition-colors" />
-              <span className="hidden sm:inline text-zinc-300 font-medium">Search 19 Tools</span>
+              <span className="hidden sm:inline text-zinc-300 font-medium">Search 29 Tools</span>
               <kbd className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono font-semibold bg-white/[0.08] border border-white/[0.14] rounded-md text-zinc-200 shadow-inner">
                 {isMac ? "⌘K" : "Ctrl+K"}
               </kbd>
