@@ -1,5 +1,9 @@
 export type SlideLayoutType =
   | "title"
+  | "index"
+  | "paragraph"
+  | "bullets"
+  | "thank-you"
   | "two-column"
   | "three-card"
   | "process-flow"
@@ -16,11 +20,11 @@ export type PptThemeId =
   | "paper";
 
 export type IareAssessmentType =
-  | "AAT-I Tech Talk"
-  | "AAT-II Tech Talk"
-  | "Concept Video Presentation"
-  | "Open-Ended Experiment"
-  | "Project Review";
+  | "AAT - TECH TALK"
+  | "AAT - I"
+  | "AAT - II"
+  | "CONCEPT VIDEO"
+  | "SEMINAR";
 
 export type IareDepartment =
   | "Computer Science and Engineering (CSE)"
@@ -39,9 +43,10 @@ export interface IareMetadata {
   isIareMode: boolean;
   assessmentType: IareAssessmentType;
   department: string;
-  semesterRegulation: string;
-  courseName: string;
-  courseCode: string;
+  semesterRegulation?: string;
+  courseName?: string;
+  courseCode?: string;
+  subject: string;
   rollNumber: string;
   studentName: string;
   facultyName?: string;
@@ -104,6 +109,7 @@ export interface TechTalkSlide {
   subtitle?: string;
   category?: string; // e.g. "PROBLEM STATEMENT", "SYSTEM ARCHITECTURE"
   bulletPoints?: string[];
+  paragraph?: string; // One 4-5 sentence academic paragraph (for INTRODUCTION and CONCLUSION)
   columns?: SlideColumn[];
   cards?: SlideCard[];
   processSteps?: SlideProcessStep[];

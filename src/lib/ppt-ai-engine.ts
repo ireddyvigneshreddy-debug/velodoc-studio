@@ -15,25 +15,20 @@ export interface GenerateTechTalkOptions {
   iareMetadata?: IareMetadata;
 }
 
-const SYSTEM_PROMPT = `You are a distinguished Computer Science Professor and Principal Systems Architect.
-Your task is to generate a complete, high-impact, professional College Tech-Talk slide deck with exact slide counts.
+const SYSTEM_PROMPT = `You are a distinguished Computer Science Professor and Principal Systems Architect at Institute of Aeronautical Engineering (IARE Autonomous).
+Your task is to generate a complete, high-impact, professional College AAT Tech-Talk slide deck with exact slide counts (defaulting to 13 slides).
 Return ONLY a valid JSON object with the key "slides" containing an array of slide objects.
 Do NOT include markdown fences, backticks, or preamble. Return pure JSON.
 
 Each slide object must have:
 - "id": unique string
 - "slideNumber": number (1 to N)
-- "layout": one of "title", "two-column", "three-card", "process-flow", "comparison-table", "code-algorithm", "metric-highlight"
-- "title": concise, punchy slide title
+- "layout": one of "title", "index", "paragraph", "bullets", "thank-you", "two-column", "three-card", "process-flow", "comparison-table", "code-algorithm", "metric-highlight"
+- "title": concise, punchy slide title (For core technical slides, MUST be in ALL CAPS, e.g. "1. CORE FOUNDATIONS", "2. ARCHITECTURAL MECHANISM")
 - "subtitle": optional subtitle
-- "category": e.g. "OVERVIEW", "ARCHITECTURE", "EVALUATION"
-- "bulletPoints": optional array of strings
-- "columns": optional array of { "title": string, "bullets": string[] } (for two-column)
-- "cards": optional array of { "title": string, "text": string, "tag"?: string } (for three-card)
-- "processSteps": optional array of { "step": number, "title": string, "desc": string } (for process-flow)
-- "table": optional { "headers": string[], "rows": string[][] } (for comparison-table)
-- "codeSnippet": optional { "language": string, "code": string, "caption"?: string } (for code-algorithm)
-- "metric": optional { "value": string, "label": string, "context": string } (for metric-highlight)
+- "category": e.g. "AAT - TECH TALK", "INDEX", "INTRODUCTION", "CORE CONCEPTS", "CONCLUSION"
+- "bulletPoints": optional array of strings (For core technical slides, exactly 5 detailed, substantive 1-2 sentence bullets)
+- "paragraph": optional 4-5 sentence academic paragraph (Used for Slide 3 INTRODUCTION and Slide N-1 CONCLUSION)
 - "speakerNotes": exactly 3 to 4 complete, conversational sentences explaining this slide out loud to an academic seminar audience.`;
 
 /**
@@ -234,37 +229,55 @@ function buildUserPrompt(options: GenerateTechTalkOptions): string {
   const iare = options.iareMetadata;
 
   if (isIare && iare) {
+    const totalSlides = options.slideCount || 13;
+    const coreCount = Math.max(5, totalSlides - 5);
+
     return `Generate an official Institute of Aeronautical Engineering (IARE Autonomous) academic presentation for:
 Topic: "${options.topic}"
-Assessment Type: "${iare.assessmentType}"
-Department: "${iare.department}"
-Course Name: "${iare.courseName}"
-Course Code: "${iare.courseCode}"
-Semester & Regulation: "${iare.semesterRegulation}"
+Assessment Type: "${iare.assessmentType || "AAT - TECH TALK"}"
 Student Name: "${iare.studentName}"
 Roll Number: "${iare.rollNumber}"
-Faculty / Coordinator: "${iare.facultyName || "Course Coordinator"}"
-Reference Notes / Syllabus / Abstract: "${options.details || "In-depth engineering curriculum overview"}"
-Target Slide Count: Exactly ${options.slideCount} slides (Numbered 1 to ${options.slideCount})
+Branch: "${iare.department}"
+Subject: "${iare.subject || iare.courseName || ""}"
+Reference Notes / Syllabus / Abstract: "${options.details || "Comprehensive technical overview"}"
+Target Slide Count: Exactly ${totalSlides} slides (Numbered 1 to ${totalSlides})
 
-Follow IARE's Outcome-Based Education (OBE) and Continuous Internal Assessment (CIA/AAT) evaluation structure:
-1. Slide 1: Official IARE Title & Student/Course Metadata Cover (layout: "title", category: "${iare.assessmentType.toUpperCase()}")
-2. Slide 2: Presentation Outline / Contents (layout: "two-column")
-3. Slide 3: Learning Objectives & Course Outcome (CO) Mapping (layout: "three-card", linking topic to CO1, CO2, CO3 and Bloom's Taxonomy levels)
-4. Slide 4: Key Definitions & Fundamental Terminology (layout: "three-card")
-5. Slide 5: Introduction, Background & Technological Motivation (layout: "two-column")
-6. Slide 6: Problem Statement & Existing Engineering Bottlenecks (layout: "two-column")
-7. Slide 7: Core Theoretical Concept & Mathematical/Logical Foundation (layout: "metric-highlight")
-8. Slide 8: System Architecture & Block Diagram / Component Workflow (layout: "process-flow")
-9. Slide 9: Step-by-Step Working Mechanism / Algorithmic Execution (layout: "process-flow")
-10. Slide 10: Practical Implementation / Code Example / Numerical Case Study (layout: "code-algorithm")
-11. Slide 11: Comparative Analysis Table: Traditional vs. Modern Approach (layout: "comparison-table")
-12. Slide 12: Advantages, Limitations & Engineering Trade-offs (layout: "two-column")
-13. Slide 13: Real-World Industrial & Engineering Applications (layout: "three-card")
-14. Slide 14: Conclusion, Future Scope & Summary Takeaways (layout: "two-column")
-15. Slide 15: References (Standard Textbooks, IEEE Transactions, NPTEL) & Thank You / Q&A (layout: "two-column")
+Follow the EXACT IARE "AAT - TECH TALK" structure:
+1. Slide 1 (Cover Slide):
+   - layout: "title"
+   - category: "${(iare.assessmentType || "AAT - TECH TALK").toUpperCase()}"
+   - title: "Topic - ${options.topic}"
+   - subtitle: "Name: ${iare.studentName} | Roll No: ${iare.rollNumber} | Branch: ${iare.department} | Subject: ${iare.subject || iare.courseName || ""}"
 
-If slideCount is less than 15 (e.g. 10 to 14), condense middle technical slides cleanly to equal exactly ${options.slideCount} slides.
+2. Slide 2 (INDEX):
+   - layout: "index"
+   - title: "INDEX"
+   - category: "ROADMAP"
+   - bulletPoints: Exactly ${coreCount} numbered titles matching the core slides in ALL CAPS! (e.g. ["1. CORE THEORETICAL FOUNDATIONS", "2. ARCHITECTURAL MECHANISMS", ..., "${coreCount}. APPLICATIONS & FUTURE DIRECTIONS"])
+
+3. Slide 3 (INTRODUCTION):
+   - layout: "paragraph"
+   - title: "INTRODUCTION"
+   - category: "DOMAIN OVERVIEW"
+   - paragraph: One well-structured, academic 4–5 sentence introductory paragraph defining the domain, explaining the core concepts in "${options.topic}", and stating what the presentation covers.
+
+4. Slides 4 to ${totalSlides - 2} (${coreCount} Core Technical Slides):
+   - layout: "bullets"
+   - title: Formatted in ALL CAPS matching the exact INDEX items (e.g., "1. CORE THEORETICAL FOUNDATIONS", "2. ARCHITECTURAL MECHANISMS", etc.)
+   - bulletPoints: Exactly 5 detailed, substantive technical bullet points per slide (1–2 complete sentences per bullet, including technical parameters, trade-offs, and real-world context — never shallow 3-word bullets).
+
+5. Slide ${totalSlides - 1} (CONCLUSION):
+   - layout: "paragraph"
+   - title: "CONCLUSION"
+   - category: "SUMMARY"
+   - paragraph: One cohesive 4–5 sentence academic summary paragraph synthesizing the key mechanisms, optimization strategies, comparative takeaways, and real-world impact.
+
+6. Slide ${totalSlides} (THANK YOU):
+   - layout: "thank-you"
+   - title: "THANK YOU"
+   - subtitle: "Questions & Discussion"
+   - category: "Q&A"
+
 Ensure every single slide includes 3-4 complete, articulate conversational sentences in "speakerNotes" for what the student should say out loud on stage to the evaluators and faculty.`;
   }
 
@@ -299,7 +312,6 @@ function parseSlidesFromJson(
 ): TechTalkSlide[] {
   if (!rawText) throw new Error("Empty response from AI engine");
 
-  // Clean markdown wrappers if any
   let cleaned = rawText.trim();
   if (cleaned.startsWith("```json")) {
     cleaned = cleaned.replace(/^```json\s*/, "").replace(/\s*```$/, "");
@@ -308,7 +320,7 @@ function parseSlidesFromJson(
   }
 
   const parsed = JSON.parse(cleaned);
-  let slidesArray: TechTalkSlide[] = [];
+  let slidesArray: (TechTalkSlide & { content?: string })[] = [];
 
   if (Array.isArray(parsed)) {
     slidesArray = parsed;
@@ -318,544 +330,431 @@ function parseSlidesFromJson(
     throw new Error("Invalid slides JSON structure");
   }
 
-  // Normalize IDs and slide numbers
-  return slidesArray.map((s, idx) => ({
-    id: s.id || `slide-${idx + 1}`,
-    slideNumber: idx + 1,
-    layout: s.layout || (idx === 0 ? "title" : "two-column"),
-    title: s.title || `Slide ${idx + 1}`,
-    subtitle: s.subtitle,
-    category: s.category || "TECH TALK",
-    bulletPoints: s.bulletPoints,
-    columns: s.columns,
-    cards: s.cards,
-    processSteps: s.processSteps,
-    table: s.table,
-    codeSnippet: s.codeSnippet,
-    metric: s.metric,
-    speakerNotes:
-      s.speakerNotes ||
-      `On this slide, we delve into the core architectural principles of ${options.topic}. Notice how the components decouple high-throughput compute from persistence. This delivers significant latency and reliability benefits in production environments.`,
-  }));
+  const iare = options.iareMetadata;
+  const isIare = Boolean(iare?.isIareMode);
+
+  return slidesArray.map((s, idx) => {
+    let layout = s.layout || "two-column";
+    if (idx === 0) layout = "title";
+    else if (idx === 1 && (s.title.toLowerCase().includes("index") || s.title.toLowerCase().includes("agenda"))) layout = "index";
+    else if (idx === 2 && s.title.toLowerCase().includes("intro")) layout = "paragraph";
+    else if (idx === slidesArray.length - 2 && s.title.toLowerCase().includes("conclu")) layout = "paragraph";
+    else if (idx === slidesArray.length - 1 && (s.title.toLowerCase().includes("thank") || s.title.toLowerCase().includes("q&a"))) layout = "thank-you";
+    else if (!s.layout) layout = "bullets";
+
+    const paragraph = s.paragraph || s.content;
+
+    return {
+      id: s.id || `slide-${idx + 1}`,
+      slideNumber: idx + 1,
+      layout,
+      title: s.title || `Slide ${idx + 1}`,
+      subtitle: s.subtitle,
+      category: s.category || (isIare ? iare?.assessmentType || "AAT - TECH TALK" : "TECH TALK"),
+      bulletPoints: s.bulletPoints,
+      paragraph,
+      columns: s.columns,
+      cards: s.cards,
+      processSteps: s.processSteps,
+      table: s.table,
+      codeSnippet: s.codeSnippet,
+      metric: s.metric,
+      speakerNotes:
+        s.speakerNotes ||
+        `On this slide, we examine key technical and architectural mechanisms of ${options.topic}. Notice how the data models and algorithmic pipelines maintain high throughput while strictly conforming to Course Outcome attainment standards.`,
+    };
+  });
 }
 
 // ============================================================================
-// IARE OFFICIAL TECH TALK & AAT OBE SYNTHESIS ENGINE
+// IARE OFFICIAL 13-SLIDE AAT TECH-TALK SYNTHESIS ENGINE
 // ============================================================================
 
 export function synthesizeIarePresentation(options: GenerateTechTalkOptions): TechTalkSlide[] {
   const { topic, details, slideCount, iareMetadata } = options;
-  const titleTopic = topic.trim() || "Design and Analysis of Algorithms";
-  const iare = iareMetadata || {
-    isIareMode: true,
-    assessmentType: "AAT-I Tech Talk",
-    department: "Computer Science and Engineering (CSE)",
-    semesterRegulation: "II B.Tech I Semester (BT24 / BT25)",
-    courseName: "Design and Analysis of Algorithms",
-    courseCode: "ACSD08",
-    studentName: "Vignesh Reddy",
-    rollNumber: "24951A0501",
-    facultyName: "Dr. K. Srinivas Rao, Professor",
-  };
+  const titleTopic = topic.trim() || "Technical Presentation";
+  const assessment = iareMetadata?.assessmentType || "AAT - TECH TALK";
+  const studentName = iareMetadata?.studentName?.trim() || options.presenterName?.trim() || "Student";
+  const rollNo = iareMetadata?.rollNumber?.trim() || "";
+  const branch = iareMetadata?.department?.trim() || "";
+  const subject = iareMetadata?.subject?.trim() || iareMetadata?.courseName?.trim() || "";
 
-  const lower = (topic + " " + (details || "")).toLowerCase();
-  const isAi = lower.includes("ai") || lower.includes("llm") || lower.includes("model") || lower.includes("neural") || lower.includes("agent") || lower.includes("learn");
-  const isCrypto = lower.includes("crypto") || lower.includes("security") || lower.includes("quantum") || lower.includes("tls") || lower.includes("cipher") || lower.includes("block");
-  const isAero = lower.includes("aero") || lower.includes("uav") || lower.includes("flight") || lower.includes("propulsion") || lower.includes("drone") || lower.includes("avionics");
+  const totalSlides = slideCount || 13;
+  const coreCount = Math.max(5, totalSlides - 5); // Default 8 core slides for 13-slide deck
 
-  const domainName = isAi
-    ? "Artificial Intelligence & Computational Systems"
-    : isCrypto
-    ? "Network Security & Cryptography"
-    : isAero
-    ? "Aeronautical & Autonomous Systems"
-    : "Computer Science & Engineering";
+  const lower = (titleTopic + " " + (details || "")).toLowerCase();
+  const isEnsemble =
+    lower.includes("bagg") ||
+    lower.includes("boost") ||
+    lower.includes("ensembl") ||
+    lower.includes("random forest") ||
+    lower.includes("adaboost") ||
+    lower.includes("xgboost");
+  const isAiMl =
+    isEnsemble ||
+    lower.includes("ai") ||
+    lower.includes("machine learn") ||
+    lower.includes("neural") ||
+    lower.includes("deep") ||
+    lower.includes("llm") ||
+    lower.includes("vision") ||
+    lower.includes("transformer");
+  const _isCrypto =
+    lower.includes("crypto") ||
+    lower.includes("security") ||
+    lower.includes("quantum") ||
+    lower.includes("tls") ||
+    lower.includes("rsa") ||
+    lower.includes("cipher") ||
+    lower.includes("blockchain");
+  const _isSystems =
+    lower.includes("cloud") ||
+    lower.includes("os") ||
+    lower.includes("kernel") ||
+    lower.includes("network") ||
+    lower.includes("distribut") ||
+    lower.includes("microservice") ||
+    lower.includes("kafka") ||
+    lower.includes("database");
 
-  const iareSlideTemplates: TechTalkSlide[] = [
-    // 1. Cover Slide
-    {
-      id: "iare-s1",
-      slideNumber: 1,
-      layout: "title",
-      title: titleTopic,
-      subtitle: `${iare.courseName} (${iare.courseCode}) — ${iare.semesterRegulation}`,
-      category: `${iare.assessmentType.toUpperCase()} PRESENTATION`,
-      columns: [
-        {
-          title: "Presented By",
-          bullets: [
-            `Student: ${iare.studentName}`,
-            `Roll No: ${iare.rollNumber}`,
-            `Dept: ${iare.department}`,
-          ],
-        },
-        {
-          title: "Course Coordinator / Evaluated By",
-          bullets: [
-            `Faculty: ${iare.facultyName || "Course Coordinator"}`,
-            `Department of ${iare.department}`,
-            `IARE (Autonomous), Hyderabad`,
-          ],
-        },
+  // Generate K core technical slide titles in ALL CAPS
+  let coreTitles: string[] = [];
+  let coreBulletsMatrix: string[][] = [];
+
+  if (isEnsemble) {
+    coreTitles = [
+      "1. ENSEMBLE LEARNING PRINCIPLES & INDUCTIVE BIAS",
+      "2. BAGGING & BOOTSTRAP AGGREGATION MECHANICS",
+      "3. VARIANCE REDUCTION & RANDOM FORESTS ARCHITECTURE",
+      "4. BOOSTING MECHANISMS & SEQUENTIAL ERROR CORRECTION",
+      "5. GRADIENT BOOSTING & ADAPTIVE RESIDUAL MINIMIZATION",
+      "6. HYPERPARAMETER FINE-TUNING & LEARNING RATE SCHEDULES",
+      "7. REGULARIZATION STRATEGIES & OVERFITTING MITIGATION",
+      "8. COMPARATIVE BENCHMARKS & REAL-WORLD DEPLOYMENT",
+    ];
+
+    coreBulletsMatrix = [
+      // 1. Principles
+      [
+        "Combines multiple weak base learners to construct a robust aggregate hypothesis with strictly superior generalization bounds.",
+        "Decomposes generalization error into bias, variance, and irreducible noise using formal bias-variance trade-off formulations.",
+        "Inductive bias is mitigated by exploring multiple diverse regions of the underlying hypothesis space concurrently.",
+        "Guarantees that when individual classifiers make independent errors, aggregate majority voting error approaches zero exponentially.",
+        "Forms the theoretical foundation for high-performance tabular learning pipelines across production industry benchmarks.",
       ],
-      speakerNotes: `Respected Course Coordinator and dear peers, I am ${iare.studentName}, bearing Hall Ticket Number ${iare.rollNumber} from ${iare.department}. Today, I am presenting our ${iare.assessmentType} on "${titleTopic}" under the course ${iare.courseName} (${iare.courseCode}). In this technical presentation, we will walk through theoretical foundations, system architecture, working mechanisms, benchmark matrices, and real-world engineering deployments.`,
-    },
-
-    // 2. Presentation Outline
-    {
-      id: "iare-s2",
-      slideNumber: 2,
-      layout: "two-column",
-      title: "Presentation Outline & Structure",
-      subtitle: "Systematic academic traversal aligned with IARE CIA / AAT evaluation rubrics",
-      category: "OUTLINE",
-      columns: [
-        {
-          title: "Module I: Theoretical Foundations",
-          bullets: [
-            "Learning Objectives & Course Outcome (CO) Mapping",
-            "Key Definitions, Nomenclature & Primitives",
-            "Introduction, Motivation & Technological Context",
-            "Problem Statement & Critical Legacy Bottlenecks",
-          ],
-        },
-        {
-          title: "Module II: Engineering Execution & Results",
-          bullets: [
-            "Theoretical Models & Mathematical Formulation",
-            "System Architecture & End-to-End Block Diagram",
-            "Step-by-Step Algorithm & Working Mechanism",
-            "Comparative Benchmarks, Industrial Applications & Future Scope",
-          ],
-        },
+      // 2. Bagging
+      [
+        "Draws multiple bootstrap replacement subsets (B samples of size N) uniformly from the empirical training distribution.",
+        "Trains independent, fully grown high-variance base estimators (e.g., unpruned decision trees) in parallel across compute cores.",
+        "Aggregates predictions via uniform arithmetic averaging for continuous regression or hard/soft majority voting for classification.",
+        "Leaves approximately 36.8% of training observations out-of-bag (OOB), enabling built-in unbiased cross-validation error estimation.",
+        "Maintains invariant expected bias while systematically attenuating variance by a factor roughly proportional to 1/B.",
       ],
-      speakerNotes: `On this roadmap slide, we outline the systematic progression of our tech talk. We begin with Outcome-Based Education course mapping and fundamental definitions in Module One, before delving into system architecture, algorithmic mechanics, and benchmark matrices in Module Two.`,
-    },
-
-    // 3. Learning Objectives & CO Mapping
-    {
-      id: "iare-s3",
-      slideNumber: 3,
-      layout: "three-card",
-      title: "Learning Objectives & CO Mapping",
-      subtitle: "Direct alignment with Autonomous Course Outcomes and Bloom's Taxonomy Cognitive Levels",
-      category: "OUTCOME-BASED EDUCATION (OBE)",
-      cards: [
-        {
-          tag: "CO 1 • UNDERSTAND (L2)",
-          title: "Foundational Comprehension",
-          text: `Understand foundational primitives, architectural paradigms, and design constraints governing ${titleTopic}.`,
-        },
-        {
-          tag: "CO 2 • APPLY (L3)",
-          title: "System Modeling & Design",
-          text: `Apply mathematical models, block diagram workflows, and algorithmic routines to solve computational engineering tasks.`,
-        },
-        {
-          tag: "CO 3 • ANALYZE (L4)",
-          title: "Quantitative Evaluation",
-          text: `Analyze comparative performance, time/space complexity trade-offs, and industrial scalability benchmarks against legacy methods.`,
-        },
+      // 3. Random Forests
+      [
+        "Introduces random feature sub-sampling (mtry = sqrt(p)) at every internal node split to decorrelate individual tree architectures.",
+        "Decorrelation directly diminishes pairwise tree correlation (rho), driving aggregate ensemble variance toward its absolute minimum.",
+        "Demonstrates near-complete immunity to sample outliers and monotonic feature transformations without requiring feature normalization.",
+        "Computes Mean Decrease in Impurity (MDI) and permutation feature importances for interpretability in safety-critical applications.",
+        "Scales effortlessly across multi-core CPUs and GPU-accelerated gradient tree libraries like cuML with linear speedup.",
       ],
-      speakerNotes: `Here we establish our Outcome-Based Education alignment with the course syllabus. This presentation directly maps to Course Outcome 1 for foundational understanding, Course Outcome 2 for algorithmic design and application, and Course Outcome 3 for quantitative comparative evaluation.`,
-    },
-
-    // 4. Key Definitions & Terminology
-    {
-      id: "iare-s4",
-      slideNumber: 4,
-      layout: "three-card",
-      title: "Key Definitions & Nomenclature",
-      subtitle: "Core technical definitions required for CIA & AAT evaluation",
-      category: "TERMINOLOGY",
-      cards: [
-        {
-          tag: "PRIMITIVE 1",
-          title: "Core Mechanism",
-          text: `The central operating protocol that coordinates state transitions, data transformations, and synchronization under deterministic boundaries.`,
-        },
-        {
-          tag: "PRIMITIVE 2",
-          title: "Invariance & Safety",
-          text: `Mathematical guarantee ensuring data integrity, non-repudiation, and error containment across distributed operating nodes.`,
-        },
-        {
-          tag: "PRIMITIVE 3",
-          title: "Throughput Efficiency",
-          text: `The quantitative metric defining processing rate per unit resource, minimizing latency and computational overhead.`,
-        },
+      // 4. Boosting
+      [
+        "Constructs an additive ensemble sequentially where each successive base learner focuses directly on previously misclassified samples.",
+        "AdaBoost dynamically updates instance distribution weights, assigning exponentially higher penalties to mispredicted observations.",
+        "Computes learner stage weights (alpha_m) proportional to the logarithm of their empirical classification accuracy.",
+        "Converts weak learners possessing accuracy only slightly better than random guessing into an arbitrarily strong predictor.",
+        "Substantially drives down training bias within early iterations, though sensitive to noisy labels and extreme outliers without tuning.",
       ],
-      speakerNotes: `To ensure absolute technical clarity, this slide establishes the three foundational terms. Understanding these primitives is vital because the subsequent architecture relies directly on these mathematical invariants and throughput boundaries.`,
-    },
-
-    // 5. Introduction & Technological Context
-    {
-      id: "iare-s5",
-      slideNumber: 5,
-      layout: "two-column",
-      title: "Introduction & Technological Context",
-      subtitle: `Evolutionary computing paradigm shifts driving modern engineering adoption`,
-      category: "BACKGROUND",
-      columns: [
-        {
-          title: "Historical Context & Precedents",
-          bullets: [
-            "Legacy systems relied on monolithic, single-threaded processing loops with centralized state.",
-            "Exponential data growth exposed severe computational bottlenecks and linear latency degradations.",
-            "Monolithic synchronization creates single points of failure across enterprise infrastructures.",
-          ],
-        },
-        {
-          title: "Catalysts for Modern Engineering",
-          bullets: [
-            `Modern ${domainName} mandates microsecond response times and zero-downtime resilience.`,
-            "Transition toward modular, decoupled architectures with distributed consensus primitives.",
-            "Hardware-accelerated processing pipelines achieving order-of-magnitude energy efficiency.",
-          ],
-        },
+      // 5. Gradient Boosting
+      [
+        "Formulates ensemble optimization as functional gradient descent over an arbitrary differentiable convex or non-convex loss function.",
+        "Each consecutive weak tree fits directly to negative pseudo-residuals computed from the preceding ensemble stage.",
+        "Supports versatile task objectives including Squared Error, Log-Loss, Huber Loss for outlier dampening, and Quantile Loss.",
+        "Modern implementations (XGBoost, LightGBM, CatBoost) leverage second-order Taylor approximations (Hessian matrices) for split scoring.",
+        "Histogram-based feature binning reduces continuous split-finding complexity from O(N log N) to O(bin_count).",
       ],
-      speakerNotes: `Looking at the introduction, traditional architectures struggled with monolithic bottlenecks and single points of failure when subjected to high data volumes. Modern engineering demands distributed fault tolerance, decoupled execution, and hardware acceleration, which sparked the evolution of this technology.`,
-    },
-
-    // 6. Problem Statement & Existing Challenges
-    {
-      id: "iare-s6",
-      slideNumber: 6,
-      layout: "two-column",
-      title: "Problem Statement & Critical Bottlenecks",
-      subtitle: "Why conventional implementations fail to meet contemporary production scale",
-      category: "PROBLEM STATEMENT",
-      columns: [
-        {
-          title: "Critical Legacy Vulnerabilities",
-          bullets: [
-            "Severe I/O and Memory Thrashing under concurrent high-throughput workloads.",
-            "Quadratic O(N²) scaling overhead in synchronization and communication barriers.",
-            "Fragile error recovery resulting in cascading system failures and silent data corruption.",
-          ],
-        },
-        {
-          title: "Engineering Constraints to Overcome",
-          bullets: [
-            "Strict Sub-10ms P99 latency bounds across heterogenous edge and cloud networks.",
-            "Zero tolerance for state inconsistency during unexpected hardware fault transients.",
-            "Energy and memory footprint constraints for embedded and autonomous deployments.",
-          ],
-        },
+      // 6. Hyperparameter Fine-Tuning
+      [
+        "Learning rate shrinkage (eta in [0.01, 0.1]) scales newly added tree contributions, preventing step overshoots and improving test error.",
+        "Calibrates maximum tree depth (depth 3 to 6) to constrain interaction orders while preventing exponential leaf explosion.",
+        "Subsample ratios (stochastic gradient boosting row/column subsampling in [0.7, 0.9]) introduce stochastic regularization.",
+        "Minimum child weight and gamma thresholds enforce strict partition purity before allowing further leaf splitting.",
+        "Early stopping monitoring validation loss curves prevents unnecessary boosting iterations and minimizes inference latency.",
       ],
-      speakerNotes: `This problem statement highlights why we cannot simply scale conventional solutions. Under high concurrency, legacy systems suffer severe memory thrashing and quadratic scaling overhead. Our objective is to achieve sub-ten-millisecond P99 latency while preserving absolute state consistency.`,
-    },
-
-    // 7. Core Theoretical Concept & Mathematical Model
-    {
-      id: "iare-s7",
-      slideNumber: 7,
-      layout: "metric-highlight",
-      title: "Theoretical & Mathematical Foundation",
-      subtitle: "Formal analytical model governing state transitions and asymptotic bounds",
-      category: "THEORETICAL FOUNDATION",
-      metric: {
-        value: "O(log N)",
-        label: "Asymptotic Upper Bound",
-        context: "Logarithmic execution complexity achieved via partitioned balanced DAG trees",
-      },
-      bulletPoints: [
-        "State space modeled as a directed acyclic graph (DAG) with guaranteed acyclic convergence.",
-        "Formal mathematical invariant: ∀ S_t, H(S_t) = Hash(S_{t-1} || Input_t) ensuring immutability.",
-        "Proved bounds: Worst-case search complexity reduced from linear O(N) to logarithmic O(log N).",
-        "Probabilistic error bounds strictly bounded by ε < 2^(-128) using cryptographic entropy roots.",
+      // 7. Regularization & Overfitting
+      [
+        "L1 (Lasso) and L2 (Ridge) leaf weight penalties constrain magnitude coefficients, smoothing decision boundaries across noisy margins.",
+        "Post-pruning cost-complexity pruning (ccp_alpha) removes statistically insignificant leaf branches after full tree construction.",
+        "Feature sub-sampling prevents dominant high-variance features from masking subtle, predictive secondary variables.",
+        "Categorical target encoding with target leakage regularization preserves high-cardinality signal without one-hot dimensionality explosion.",
+        "Cross-validation stability checks ensure hyperparameters generalize across temporal out-of-time splits in production pipelines.",
       ],
-      speakerNotes: `Turning to the theoretical foundation, the system models state transitions through a directed acyclic graph. By enforcing cryptographic hashing invariants between consecutive states, we reduce worst-case operational complexity from linear O(N) to logarithmic O(log N).`,
-    },
-
-    // 8. System Architecture & Block Diagram
-    {
-      id: "iare-s8",
-      slideNumber: 8,
-      layout: "process-flow",
-      title: "System Architecture & Block Flow Diagram",
-      subtitle: "End-to-end component decomposition from client ingestion to durable persistence",
-      category: "SYSTEM ARCHITECTURE",
-      processSteps: [
-        {
-          step: 1,
-          title: "Ingestion & Filter Gate",
-          desc: "Validates incoming payload schema, applies rate limiting, and normalizes byte streams.",
-        },
-        {
-          step: 2,
-          title: "Orchestration Engine",
-          desc: "Dispatches workloads to parallel compute kernels with dynamic load rebalancing.",
-        },
-        {
-          step: 3,
-          title: "State & Memory Mesh",
-          desc: "Maintains atomic in-memory cache synchronized with distributed consensus quorums.",
-        },
-        {
-          step: 4,
-          title: "Verification & Persistence",
-          desc: "Applies cryptographically signed commits, logs telemetry, and returns verifiable output.",
-        },
+      // 8. Comparative Benchmarks
+      [
+        "Empirical benchmarks across Kaggle and Tabular benchmarks demonstrate GBDT architectures consistently outperform deep neural nets on tabular data.",
+        "Bagging excels in noisy, high-variance domains with rapid parallel training; Boosting dominates in low-noise, structured prediction tasks.",
+        "Inference latency optimized using TreeLite and ONNX compilation into compiled C routines for sub-millisecond scoring.",
+        "Deployed widely in credit risk assessment, algorithmic trading, search ranking, fraud detection, and medical diagnostics.",
+        "Emerging research focuses on Neuro-Tree hybrids and differentiable decision trees compatible with end-to-end deep learning pipelines.",
       ],
-      speakerNotes: `This block flow diagram illustrates the end-to-end system architecture. Inputs first arrive at the Ingestion and Filter Gate for schema validation, pass into the Orchestration Engine for load-balanced execution, synchronize through the State Mesh, and finalize with verified cryptographic commits.`,
-    },
+    ];
+  } else if (isAiMl) {
+    coreTitles = [
+      "1. FOUNDATIONAL ARCHITECTURE & MATHEMATICAL FORMULATION",
+      "2. FEATURE REPRESENTATION & EMBEDDING SPACES",
+      "3. MODEL TRAINING DYNAMICS & GRADIENT PROPAGATION",
+      "4. HYPERPARAMETER FINE-TUNING & ADAPTIVE OPTIMIZATION",
+      "5. INFERENCE ACCELERATION & MODEL QUANTIZATION",
+      "6. QUANTITATIVE BENCHMARK EVALUATION & ERROR METRICS",
+      "7. ROBUSTNESS, GENERALIZATION & REGULARIZATION",
+      "8. PRODUCTION DEPLOYMENT & INDUSTRIAL APPLICATIONS",
+    ];
 
-    // 9. Step-by-Step Working Mechanism / Algorithm
-    {
-      id: "iare-s9",
-      slideNumber: 9,
-      layout: "process-flow",
-      title: "Algorithmic Execution & Process Logic",
-      subtitle: "Step-by-step state machine transition flow during live runtime execution",
-      category: "WORKING MECHANISM",
-      processSteps: [
-        {
-          step: 1,
-          title: "Handshake & Init",
-          desc: "Initializes internal registers, verifies peer certificates, and allocates contiguous memory buffers.",
-        },
-        {
-          step: 2,
-          title: "Iterative Transformation",
-          desc: "Executes SIMD-accelerated transform rounds over partitioned tensor/packet chunks.",
-        },
-        {
-          step: 3,
-          title: "Integrity Assertion",
-          desc: "Computes checksum parity vectors; verifies invariant correctness before state commitment.",
-        },
-        {
-          step: 4,
-          title: "State Commit & Ack",
-          desc: "Atomically commits updated state index and broadcasts confirmation packets to listening sinks.",
-        },
+    coreBulletsMatrix = [
+      [
+        "Formulates the core analytical problem space into continuous vector representations governed by formal loss objectives.",
+        "Establishes structural invariants and inductive biases designed to mirror natural symmetries within the problem domain.",
+        "Decomposes system input tensors through multi-layered linear and non-linear parametric activation functions.",
+        "Maintains mathematically bounded gradients across deep computational graphs to prevent vanishing and exploding transitions.",
+        "Enables end-to-end differentiability across all intermediate feature transformation layers during runtime execution.",
       ],
-      speakerNotes: `Examining the algorithmic execution flow, the engine begins with register initialization and memory buffer reservation. It then executes parallelized transform rounds, verifies mathematical invariant integrity through parity checks, and atomically commits state without race conditions.`,
-    },
+      [
+        "Projects high-dimensional raw observations into dense, low-dimensional Riemannian embedding manifolds.",
+        "Preserves semantic similarity metrics using learned cosine distances and geometric contrastive objectives.",
+        "Applies positional and contextual token encodings to capture intricate long-range sequence dependencies.",
+        "Applies normalization layers (LayerNorm, RMSNorm) to stabilize internal covariate shift across training epochs.",
+        "Enables cross-modal semantic mapping between unstructured text, numerical signals, and perceptual modalities.",
+      ],
+      [
+        "Executes mini-batch stochastic optimization using backpropagation to compute analytical partial derivatives.",
+        "Employs adaptive moment estimation (AdamW) with decoupled weight decay for disciplined parameter convergence.",
+        "Implements mixed-precision FP16/BF16 arithmetic pipelines to double memory throughput and minimize hardware stall cycles.",
+        "Applies gradient clipping thresholds to maintain stable parameter step updates during steep loss curvature transitions.",
+        "Monitors learning curves continuously using validation checkpoints to prevent empirical training divergence.",
+      ],
+      [
+        "Implements cosine annealing learning rate schedules with linear warmup to ensure smooth basin exploration.",
+        "Tunes critical hyperparameters including batch size, weight decay, dropout probability, and layer width.",
+        "Utilizes Bayesian optimization and Tree-structured Parzen Estimators (TPE) for automated search space traversal.",
+        "Balances computational budget against convergence speed to identify the Pareto-optimal parameter frontier.",
+        "Enforces deterministic seed control across all random generators to guarantee strict scientific reproducibility.",
+      ],
+      [
+        "Compresses full-precision FP32 parameters into INT8/INT4 representations using Post-Training Quantization (PTQ).",
+        "Prunes redundant weight connections and attention heads without incurring statistically significant accuracy penalties.",
+        "Fuses adjacent kernel operations (e.g., convolution + bias + activation) into unified compiled hardware primitives.",
+        "Utilizes KV-caching and memory-paged attention blocks to achieve linear memory scaling during sequential generation.",
+        "Reduces end-to-end P99 inference latency by up to 4.5x while conserving GPU/NPU memory bandwidth.",
+      ],
+      [
+        "Evaluates quantitative performance using rigorous holdout test suites and stratified k-fold cross-validation.",
+        "Measures domain-specific metrics including Precision, Recall, F1-Score, ROC-AUC, and Mean Squared Error.",
+        "Benchmarks empirical throughput in queries-per-second (QPS) and validates cold-start operational latency.",
+        "Compares empirical accuracy against strong baseline algorithms under identical hardware and computational limits.",
+        "Conducts comprehensive ablation studies to isolate and quantify the marginal gain of each architectural component.",
+      ],
+      [
+        "Applies data augmentation strategies and stochastic perturbation to improve out-of-distribution resilience.",
+        "Mitigates overfitting through dropout, spectral regularization, and early stopping on validation loss inflection points.",
+        "Examines adversarial vulnerability by evaluating model stability against engineered input perturbations.",
+        "Enforces calibration techniques (temperature scaling) to align predicted probabilities with empirical frequencies.",
+        "Ensures fairness, demographic parity, and robustness across edge cases in high-stakes operational environments.",
+      ],
+      [
+        "Packages validated models into containerized microservices utilizing Docker, Triton Inference Server, and ONNX.",
+        "Implements real-time telemetry pipelines to monitor data drift, concept drift, and prediction latency in production.",
+        "Employs canary deployments and blue-green release strategies to guarantee zero downtime during model updates.",
+        "Deploys into autonomous systems, smart manufacturing, financial surveillance, and enterprise analytics platforms.",
+        "Outlines prospective research directions including neuromorphic execution and self-supervised continuous adaptation.",
+      ],
+    ];
+  } else {
+    coreTitles = [
+      "1. CORE THEORETICAL FOUNDATIONS & ARCHITECTURE",
+      "2. SYSTEM ARCHITECTURE & DATA FLOW MECHANICS",
+      "3. ALGORITHMIC EXECUTION & PROCESS STATE TRANSITIONS",
+      "4. PARAMETER FINE-TUNING & OPTIMIZATION METHODOLOGIES",
+      "5. SCALABILITY, CONCURRENCY & MEMORY MANAGEMENT",
+      "6. COMPARATIVE BENCHMARK ANALYSIS & PERFORMANCE METRICS",
+      "7. SYSTEM TRADE-OFFS, RESILIENCE & FAILURE RECOVERY",
+      "8. INDUSTRIAL APPLICATIONS & FUTURE ENGINEERING TRENDS",
+    ];
 
-    // 10. Practical Implementation & Code Routine
-    {
-      id: "iare-s10",
-      slideNumber: 10,
-      layout: "code-algorithm",
-      title: "Practical Implementation & Code Routine",
-      subtitle: "Production-grade reference implementation demonstrating core processing logic",
-      category: "IMPLEMENTATION",
-      codeSnippet: {
-        language: "typescript",
-        caption: `${iare.courseCode} Lab Implementation: Parallel Pipeline Routine`,
-        code: `// High-Throughput Processing Routine for ${titleTopic.slice(0, 32)}
-async function executeModularPipeline<T>(workload: T[]): Promise<PipelineResult> {
-  const context = new ExecutionContext({ timeoutMs: 5000 });
-  const memoryPool = allocateDirectBuffer(workload.length * 64);
-  
-  try {
-    // Stage 1: Parallel asynchronous map transformation
-    const mapped = await Promise.all(workload.map(item => transformKernel(item, context)));
-    
-    // Stage 2: Consensus reduction & invariant verification
-    const reduced = foldQuorum(mapped, (acc, cur) => acc.merge(cur));
-    assertIntegrityInvariant(reduced);
-    
-    return { success: true, processedCount: mapped.length, digest: reduced.checksum };
-  } finally {
-    memoryPool.release(); // Prevent heap leaks
+    coreBulletsMatrix = [
+      [
+        `Establishes the foundational theoretical principles governing ${titleTopic} within modern computing systems.`,
+        "Formulates the core computational problem through rigorous mathematical models and deterministic state constraints.",
+        "Decomposes system responsibilities into modular, loosely coupled architectural subsystems with well-defined APIs.",
+        "Ensures architectural decoupling between high-throughput ingest layers, business compute, and durable storage.",
+        "Provides the theoretical guarantees required for dependable, fault-tolerant execution under heavy production load.",
+      ],
+      [
+        "End-to-end data pipeline routes incoming transactions through validation gates, normalization filters, and queues.",
+        "Leverages asynchronous non-blocking event loops to maximize hardware utilization and eliminate thread starvation.",
+        "Employs zero-copy buffer handoffs across internal socket layers to conserve system memory bandwidth.",
+        "Maintains consistent internal state indices utilizing distributed consensus protocols and atomic memory barriers.",
+        "Integrates real-time telemetry hooks to track per-packet serialization, deserialization, and transit latencies.",
+      ],
+      [
+        "Executes discrete state machine transitions with formal verification to eliminate race conditions and deadlocks.",
+        "Processes partitioned data blocks in parallel utilizing vectorized SIMD instructions and multi-core thread pools.",
+        "Applies continuous checkpointing to persist incremental state snapshots without halting runtime execution loops.",
+        "Validates computational intermediate results against mathematical invariant assertions before final commit.",
+        "Ensures exact-once processing semantics through deterministic sequence numbering and deduplication windows.",
+      ],
+      [
+        "Fine-tunes operational parameters including buffer capacities, thread pool allocations, and batch flush timeouts.",
+        "Applies adaptive throttling and backpressure signaling to safeguard downstream services during load spikes.",
+        "Calibrates timeout thresholds and exponential backoff retry schedules based on live empirical latency profiles.",
+        "Conducts systematic sensitivity analysis to isolate the optimal operating envelope across varying workload profiles.",
+        "Automates dynamic parameter reconfiguration through runtime control planes without requiring process restarts.",
+      ],
+      [
+        "Implements horizontal partitioning (sharding) to scale throughput linearly across heterogeneous compute nodes.",
+        "Optimizes CPU cache locality (L1/L2/L3) by aligning internal data structures along cache line boundaries.",
+        "Controls memory fragmentation utilizing custom slab allocators, avoiding erratic garbage collection pauses.",
+        "Demonstrates sub-10ms P99 latency guarantees under concurrent transaction volumes exceeding 50,000 requests/sec.",
+        "Employs read-replicas and distributed caching layers (Redis/Memcached) to offload repetitive analytical queries.",
+      ],
+      [
+        "Comprehensive empirical benchmarks validate performance advantages against conventional legacy architectures.",
+        "Achieves up to 4x throughput amplification while simultaneously reducing per-transaction CPU cycle consumption.",
+        "Demonstrates negligible memory footprint growth during sustained 72-hour stress test runs at peak load.",
+        "Maintains flat, predictable response time curves across increasing concurrency levels where legacy solutions saturate.",
+        "Publishes reproducible measurement methodology and telemetry logs conforming to standard academic benchmarks.",
+      ],
+      [
+        "Examines foundational engineering trade-offs between consistency, availability, and partition tolerance (CAP theorem).",
+        "Balances the performance benefits of aggressive in-memory caching against the overhead of synchronous write durability.",
+        "Implements automated circuit breakers and failover mechanisms to isolate and recover from node failures instantaneously.",
+        "Ensures zero data loss during simulated catastrophic infrastructure failures using distributed quorum replicas.",
+        "Minimizes deployment complexity through clear operational runbooks, declarative infrastructure, and automated health probes.",
+      ],
+      [
+        "Widely adopted across mission-critical sectors including financial trading, telecommunications, aerospace, and cloud scale.",
+        "Powers real-time mission telemetry processing, fraud prevention pipelines, and distributed ledger networks.",
+        "Reduces operational infrastructure costs through superior hardware efficiency and automated elastic scaling.",
+        "Identifies open research challenges including post-quantum security integration and edge neuromorphic compilation.",
+        "Establishes a resilient foundation for the next generation of autonomous, scalable, and intelligent software systems.",
+      ],
+    ];
   }
-}`,
-      },
-      speakerNotes: `This code snippet demonstrates the practical implementation of the algorithm. Notice the explicit direct buffer allocation that avoids garbage collection overhead, followed by asynchronous parallel map transformations, consensus reduction, and deterministic resource release.`,
-    },
 
-    // 11. Comparative Analysis Table
-    {
-      id: "iare-s11",
-      slideNumber: 11,
-      layout: "comparison-table",
-      title: "Comparative Engineering Benchmark Analysis",
-      subtitle: "Quantifying architectural efficiency against conventional approaches across core metrics",
-      category: "EVALUATION MATRIX",
-      table: {
-        headers: ["Performance Metric", "Conventional Paradigm", "Proposed Architecture", "Engineering Delta"],
-        rows: [
-          ["Time Complexity (Search/Query)", "O(N) Linear Scan", "O(log N) Indexed Tree", "10x–100x Faster"],
-          ["P99 Latency (10k Concurrency)", "142.6 ms", "8.4 ms", "94.1% Latency Reduction"],
-          ["Memory Footprint", "High (Unbounded Heap)", "Bounded (Fixed Pool)", "65% RAM Conservation"],
-          ["Fault Tolerance Guarantee", "Single Point of Failure", "Byzantine Fault Tolerant", "Zero-Downtime Recovery"],
-          ["Energy Efficiency (Joules/Op)", "18.4 mJ / op", "2.1 mJ / op", "8.7x Green Computing Gain"],
+  // Adjust core arrays to match coreCount
+  while (coreTitles.length < coreCount) {
+    const idx = coreTitles.length + 1;
+    coreTitles.push(`${idx}. ADVANCED TECHNICAL SUBSYSTEM & ENGINEERING METRICS`);
+    coreBulletsMatrix.push([
+      `Examines advanced subsystem mechanics and internal execution dynamics for ${titleTopic}.`,
+      "Applies low-level profiling to identify memory bottlenecks, instruction cache misses, and pipeline stalls.",
+      "Optimizes critical code paths through loop unrolling, branch prediction hints, and vectorization.",
+      "Validates operational correctness against formal specification benchmarks under randomized fuzzing test suites.",
+      "Integrates telemetry metrics directly into production observability dashboards for proactive anomaly detection.",
+    ]);
+  }
+  coreTitles = coreTitles.slice(0, coreCount);
+  coreBulletsMatrix = coreBulletsMatrix.slice(0, coreCount);
+
+  // 1. Cover Slide
+  const s1: TechTalkSlide = {
+    id: "aat-slide-1",
+    slideNumber: 1,
+    layout: "title",
+    title: `Topic - ${titleTopic}`,
+    category: `[${assessment.toUpperCase()}]`,
+    subtitle: `Name: ${studentName} | Roll No: ${rollNo} | Branch: ${branch} | Subject: ${subject}`,
+    columns: [
+      {
+        title: "Student Credentials",
+        bullets: [
+          `Name: ${studentName}`,
+          `Roll No: ${rollNo}`,
+          `Branch: ${branch}`,
+          `Subject: ${subject}`,
         ],
       },
-      speakerNotes: `Our comparative evaluation matrix clearly demonstrates the quantitative engineering gains. Across P99 latency, the proposed architecture drops response times from over one hundred and forty milliseconds to just eight point four milliseconds, while reducing memory consumption by sixty-five percent.`,
-    },
+    ],
+    speakerNotes: `Respected Faculty and dear peers, I am ${studentName}, bearing roll number ${rollNo} from the Department of ${branch}. Today, I am presenting my ${assessment} on the topic "${titleTopic}" under the subject ${subject}. In this presentation, we will walk through the core theoretical foundations, architectural mechanisms, comparative benchmarks, and real-world engineering impact.`,
+  };
 
-    // 12. Advantages, Limitations & Engineering Trade-offs
-    {
-      id: "iare-s12",
-      slideNumber: 12,
-      layout: "two-column",
-      title: "Key Advantages & Engineering Trade-offs",
-      subtitle: "Balancing peak operational performance against deployment complexity",
-      category: "CRITICAL ANALYSIS",
-      columns: [
-        {
-          title: "Key Engineering Advantages",
-          bullets: [
-            "Extreme Throughput: Handles massive concurrent transactions without performance cliffing.",
-            "Mathematical Safety: Formally proven immutability and absence of race conditions.",
-            "Hardware Synergy: Leverages modern SIMD, GPU, and multi-core vector extensions.",
-            "Autonomous Recovery: Self-healing watchdog threads resolve failed worker nodes instantly.",
-          ],
-        },
-        {
-          title: "Engineering Limitations & Trade-offs",
-          bullets: [
-            "Initial Complexity: Steeper implementation curve and specialized protocol knowledge.",
-            "Startup Warmup: Cache pre-warming required to achieve peak microsecond throughput.",
-            "Network Bandwidth: Quorum synchronization packets increase inter-node traffic by ~12%.",
-          ],
-        },
-      ],
-      speakerNotes: `Every engineering design involves trade-offs. While the proposed approach delivers extreme throughput and formally verified safety, it introduces higher architectural complexity and requires brief initial cache warm-up cycles during cold boot.`,
-    },
+  // 2. INDEX Slide
+  const s2: TechTalkSlide = {
+    id: "aat-slide-2",
+    slideNumber: 2,
+    layout: "index",
+    title: "INDEX",
+    category: "ROADMAP",
+    subtitle: "Roadmap of Core Technical Modules",
+    bulletPoints: coreTitles,
+    speakerNotes: `On this index slide, we outline the roadmap of our technical presentation. We will methodically progress through these core modules, starting from theoretical foundations to fine-tuning, comparative evaluation, and industrial applications.`,
+  };
 
-    // 13. Real-World Industrial & Engineering Applications
-    {
-      id: "iare-s13",
-      slideNumber: 13,
-      layout: "three-card",
-      title: "Industrial & Real-World Applications",
-      subtitle: "Deployments across mission-critical, enterprise, and emerging autonomous systems",
-      category: "INDUSTRY DEPLOYMENT",
-      cards: [
-        {
-          tag: "SECTOR 1 • AEROSPACE & DEFENSE",
-          title: "Avionics & Autonomous UAVs",
-          text: `Mission-critical telemetry processing, real-time collision avoidance, and fail-safe flight trajectory calculation under strict real-time deadlines.`,
-        },
-        {
-          tag: "SECTOR 2 • FINTECH & CLOUD",
-          title: "Ultra-Low Latency Clearing",
-          text: `Financial exchange transaction ordering, distributed ledger settlement, and fraud prevention pipelines handling 500,000 operations per second.`,
-        },
-        {
-          tag: "SECTOR 3 • HEALTHCARE & IOT",
-          title: "Medical Diagnostic Edge AI",
-          text: `Real-time patient monitoring sensors and edge neural inference engines operating on low-power battery constraints with guaranteed data privacy.`,
-        },
-      ],
-      speakerNotes: `In terms of industrial applications, this technology is actively deployed in aerospace and unmanned aerial systems for real-time telemetry, in high-frequency financial exchanges for instant settlement, and in medical edge devices for secure on-device patient diagnostics.`,
-    },
+  // 3. INTRODUCTION Slide
+  const introParagraph = `${titleTopic} represents a critical cornerstone in modern computational engineering and problem-solving architectures. By transitioning away from brittle monolithic paradigms, this methodology addresses fundamental scaling, variance, and throughput limitations inherent in conventional systems. The underlying framework leverages rigorous mathematical formulations, adaptive state coordination, and iterative optimization to guarantee deterministic execution bounds under volatile production workloads. Throughout this technical seminar, we systematically unpack the architectural mechanics, algorithmic workflows, hyperparameter fine-tuning strategies, and empirical comparative benchmarks that establish its engineering superiority.`;
 
-    // 14. Conclusion & Future Research Directions
-    {
-      id: "iare-s14",
-      slideNumber: 14,
-      layout: "two-column",
-      title: "Conclusion & Future Research Directions",
-      subtitle: "Summary of technical findings and prospective innovations for 2026 and beyond",
-      category: "SUMMARY & FUTURE SCOPE",
-      columns: [
-        {
-          title: "Key Summary Conclusions",
-          bullets: [
-            `${titleTopic} successfully resolves legacy concurrency, scaling, and throughput bottlenecks.`,
-            "Achieved formal verification of system invariants alongside 94% lower P99 latencies.",
-            "Outcome-Based Education objectives CO1, CO2, and CO3 successfully fulfilled and demonstrated.",
-          ],
-        },
-        {
-          title: "2026+ Prospective Research Scope",
-          bullets: [
-            "Integration with Post-Quantum Lattice Cryptography for quantum-resistant communications.",
-            "Neuromorphic spiking neural hardware execution to achieve sub-milliwatt power draw.",
-            "Autonomous zero-shot self-tuning algorithms using localized reinforcement learning models.",
-          ],
-        },
-      ],
-      speakerNotes: `In conclusion, this presentation demonstrated how ${titleTopic} resolves legacy scalability bottlenecks, achieving verified safety and ninety-four percent lower latency. Future research will explore post-quantum cryptographic integration and neuromorphic hardware adaptation.`,
-    },
+  const s3: TechTalkSlide = {
+    id: "aat-slide-3",
+    slideNumber: 3,
+    layout: "paragraph",
+    title: "INTRODUCTION",
+    category: "DOMAIN OVERVIEW",
+    subtitle: "Conceptual Foundation & Problem Scope",
+    paragraph: introParagraph,
+    speakerNotes: `To introduce our topic, ${titleTopic} represents a pivotal paradigm in modern computing. By addressing traditional scalability and latency bottlenecks, it enables high-throughput, fault-tolerant execution. Throughout this talk, we will break down its fundamental mechanisms and practical optimization strategies.`,
+  };
 
-    // 15. References & Q&A
-    {
-      id: "iare-s15",
-      slideNumber: 15,
-      layout: "two-column",
-      title: "Academic References & Open Discussion",
-      subtitle: "Standard textbooks, IEEE peer-reviewed publications, and evaluation floor",
-      category: "REFERENCES & Q&A",
-      columns: [
-        {
-          title: "Academic References & Citations",
-          bullets: [
-            "Thomas H. Cormen, et al. 'Introduction to Algorithms' (4th Edition), MIT Press.",
-            "IEEE Transactions on Parallel and Distributed Systems (Vol. 35, 2025).",
-            "NPTEL / Swayam National Course Lecture Series on Advanced Engineering Systems.",
-            "IARE Course Curriculum & Autonomous Laboratory Manuals (Academic Year 2025-2026).",
-          ],
-        },
-        {
-          title: "Course Outcome Attainment & Q&A",
-          bullets: [
-            `Student Name: ${iare.studentName} | Roll No: ${iare.rollNumber}`,
-            `Department: ${iare.department}`,
-            `Assessment: ${iare.assessmentType} (${iare.courseCode})`,
-            "Floor is now open for Faculty Evaluation, queries, and technical discussion.",
-          ],
-        },
-      ],
-      speakerNotes: `Thank you respected faculty coordinator and dear peers for your time and attention. The academic references and NPTEL course citations are listed on the left. I am now ready for evaluation questions and technical discussion.`,
-    },
-  ];
+  // 4..N-2: Core Slides
+  const coreSlides: TechTalkSlide[] = coreTitles.map((titleText, idx) => ({
+    id: `aat-slide-${idx + 4}`,
+    slideNumber: idx + 4,
+    layout: "bullets",
+    title: titleText,
+    category: "CORE TECHNICAL MODULE",
+    subtitle: `Detailed Analysis & Engineering Metrics`,
+    bulletPoints: coreBulletsMatrix[idx] || [
+      `Applies foundational principles of ${titleTopic} to optimize operational execution.`,
+      "Decomposes data transformations across high-performance computational kernels.",
+      "Balances latency and throughput constraints through adaptive runtime calibration.",
+      "Demonstrates measurable efficiency gains over conventional baseline implementations.",
+      "Ensures robust error containment and state consistency during high concurrency bursts.",
+    ],
+    speakerNotes: `On this slide covering ${titleText}, we examine the key algorithmic dynamics and parameters. Notice how each component contributes to overall system stability and performance efficiency.`,
+  }));
 
-  const targetCount = Math.max(8, Math.min(20, slideCount));
-  if (targetCount === 15) {
-    return iareSlideTemplates;
-  }
+  // N-1: CONCLUSION Slide
+  const conclusionParagraph = `In summary, our investigation into ${titleTopic} demonstrates that combining robust theoretical foundations with disciplined hyperparameter fine-tuning yields substantial performance, resilience, and efficiency dividends. The empirical benchmarks confirm marked reductions in latency and computational overhead alongside superior generalization capability across diverse engineering constraints. By mitigating historical architectural trade-offs between accuracy and resource consumption, the proposed framework establishes a scalable standard for mission-critical deployments. As computational demands continue to accelerate, extending these methodologies into hybrid, real-time edge environments will drive the next generation of resilient engineering innovations.`;
 
-  if (targetCount < 15) {
-    const dropCandidates = [11, 3, 6, 12, 9];
-    const dropCount = 15 - targetCount;
-    const indicesToDrop = new Set(dropCandidates.slice(0, dropCount));
+  const sConclusion: TechTalkSlide = {
+    id: `aat-slide-${totalSlides - 1}`,
+    slideNumber: totalSlides - 1,
+    layout: "paragraph",
+    title: "CONCLUSION",
+    category: "SUMMARY & TAKEAWAYS",
+    subtitle: "Synthesis of Findings & Future Trajectory",
+    paragraph: conclusionParagraph,
+    speakerNotes: `In conclusion, we have systematically evaluated the core mechanisms, hyperparameter tuning techniques, and comparative trade-offs of ${titleTopic}. The empirical results affirm that this approach achieves superior throughput and computational efficiency across real-world workloads.`,
+  };
 
-    const selected = iareSlideTemplates.filter((_, idx) => !indicesToDrop.has(idx));
-    if (selected.length > 0 && selected[selected.length - 1].category !== "REFERENCES & Q&A") {
-      selected[selected.length - 1] = iareSlideTemplates[14];
-    }
-    return selected.map((s, idx) => ({ ...s, slideNumber: idx + 1, id: `iare-slide-${idx + 1}` }));
-  }
+  // N: THANK YOU Slide
+  const sThankYou: TechTalkSlide = {
+    id: `aat-slide-${totalSlides}`,
+    slideNumber: totalSlides,
+    layout: "thank-you",
+    title: "THANK YOU",
+    category: "Q&A",
+    subtitle: "Questions & Discussion",
+    bulletPoints: [
+      `Name: ${studentName}`,
+      `Roll No: ${rollNo}`,
+      `Branch: ${branch}`,
+      `Subject: ${subject}`,
+    ],
+    speakerNotes: `Thank you very much for your time and attentive listening. I would now like to open the floor for any questions, feedback, or technical discussion.`,
+  };
 
-  const expanded = [...iareSlideTemplates];
-  while (expanded.length < targetCount) {
-    const extraNum = expanded.length;
-    expanded.splice(expanded.length - 2, 0, {
-      id: `iare-extra-${extraNum}`,
-      slideNumber: extraNum,
-      layout: extraNum % 2 === 0 ? "three-card" : "two-column",
-      title: `Advanced Technical Deep-Dive ${extraNum - 13}`,
-      subtitle: `In-depth analysis of subsystem performance, fault recovery and telemetry`,
-      category: "DEEP DIVE",
-      cards: [
-        {
-          tag: "PROFILING",
-          title: "Cache Affinity & Memory Bound",
-          text: "Optimized cache locality reduces L3 misses to under 0.8% across extreme load bursts.",
-        },
-        {
-          tag: "RELIABILITY",
-          title: "Byzantine Agreement Protocol",
-          text: "Guarantees consensus across n ≥ 3f + 1 nodes despite arbitrary network drops.",
-        },
-        {
-          tag: "COMPLIANCE",
-          title: "Autonomous IEEE Standards",
-          text: "Full compliance with IEEE 802.1 / POSIX real-time deterministic standards.",
-        },
-      ],
-      speakerNotes: `On this extended deep-dive slide, we examine cache affinity profiling and Byzantine fault tolerance mechanisms, confirming strict adherence to real-time deterministic computing standards.`,
-    });
-  }
-
-  return expanded.map((s, idx) => ({ ...s, slideNumber: idx + 1, id: `iare-slide-${idx + 1}` }));
+  const allSlides = [s1, s2, s3, ...coreSlides, sConclusion, sThankYou];
+  return allSlides.map((s, i) => ({ ...s, slideNumber: i + 1, id: `aat-slide-${i + 1}` }));
 }
 
 // ============================================================================

@@ -4,12 +4,25 @@ import React from "react";
 import { IareAssessmentType, IareDepartment } from "@/types/ppt";
 
 export const IARE_ASSESSMENT_TYPES: IareAssessmentType[] = [
-  "AAT-I Tech Talk",
-  "AAT-II Tech Talk",
-  "Concept Video Presentation",
-  "Open-Ended Experiment",
-  "Project Review",
+  "AAT - TECH TALK",
+  "AAT - I",
+  "AAT - II",
+  "CONCEPT VIDEO",
+  "SEMINAR",
 ];
+
+export const BRANCH_QUICK_CHIPS = [
+  "CSE",
+  "CSD",
+  "CSM",
+  "CSC",
+  "IT",
+  "ECE",
+  "EEE",
+  "AE",
+  "ME",
+  "CE",
+] as const;
 
 export const IARE_DEPARTMENTS: IareDepartment[] = [
   "Freshman Engineering (I B.Tech)",
