@@ -8,7 +8,6 @@ import {
   IareAssessmentType,
   IareMetadata,
 } from "@/types/ppt";
-import { PPT_THEMES } from "@/lib/ppt-themes";
 import { generateTechTalkPresentation } from "@/lib/ppt-ai-engine";
 import {
   exportToPptx,
@@ -16,6 +15,7 @@ import {
   exportToSpeakerCheatSheet,
   getPresentationExportFilename,
 } from "@/lib/pptx-exporter";
+import { getIareLogoPngBase64 } from "@/lib/iare-logo";
 import { ApiKeyVaultModal } from "./ApiKeyVaultModal";
 import {
   IareEmblem,
@@ -54,6 +54,7 @@ export function TechTalkPptStudio() {
   const [slideCount, setSlideCount] = useState<number>(13);
   const selectedTheme: PptThemeId = "iare";
   const [customLogoBase64, setCustomLogoBase64] = useState<string>("");
+  const [defaultLogoBase64, setDefaultLogoBase64] = useState<string>("");
 
   // Validation state
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
@@ -66,7 +67,7 @@ export function TechTalkPptStudio() {
     provider: "zero-key",
   });
 
-  // Load vault & IARE logo preferences from localStorage
+  // Load vault & IARE logo preferences from localStorage + initialize high-DPI IARE PNG logo
   useEffect(() => {
     if (typeof window !== "undefined") {
       try {
@@ -86,8 +87,20 @@ export function TechTalkPptStudio() {
       } catch {
         // Fallback
       }
+
+      try {
+        const b64 = getIareLogoPngBase64();
+        if (b64) {
+          setDefaultLogoBase64(b64);
+        }
+      } catch {
+        // Fallback
+      }
     }
   }, []);
+
+  const activeLogo =
+    customLogoBase64 || defaultLogoBase64 || getIareLogoPngBase64();
 
   const handleSaveVaultConfig = (newConfig: ApiVaultConfig) => {
     setVaultConfig(newConfig);
@@ -160,7 +173,7 @@ export function TechTalkPptStudio() {
         subject: subject.trim(),
         rollNumber: rollNumber.trim().toUpperCase(),
         studentName: studentName.trim(),
-        customLogoBase64: customLogoBase64 || undefined,
+        customLogoBase64: customLogoBase64 || activeLogo || undefined,
       };
 
       const slides = await generateTechTalkPresentation({
@@ -310,7 +323,6 @@ export function TechTalkPptStudio() {
     a.click();
   };
 
-  const currentTheme = PPT_THEMES.iare;
   const currentSlide = presentation?.slides[activeSlideIndex];
 
   return (
@@ -588,24 +600,25 @@ export function TechTalkPptStudio() {
             {/* Row 5: Institutional Crest & Custom Logo Uploader */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
               <div className="flex items-center gap-3.5">
-                {customLogoBase64 ? (
+                {activeLogo ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
-                    src={customLogoBase64}
-                    alt="Custom College Logo"
-                    className="w-12 h-12 rounded-xl object-contain bg-white p-1 border border-amber-500/40 shrink-0"
+                    src={activeLogo}
+                    alt="IARE College Logo"
+                    className="w-14 h-14 rounded-full object-contain bg-white p-1 border-2 border-[#C59B27] shrink-0 shadow-md"
                   />
                 ) : (
-                  <IareEmblem className="w-12 h-12 shrink-0" size={48} />
+                  <IareEmblem className="w-14 h-14 shrink-0" size={56} />
                 )}
                 <div>
                   <span className="text-xs font-semibold text-white block">
                     {customLogoBase64
                       ? "Custom College Logo Active"
-                      : "Built-In IARE Autonomous Vector Crest Active"}
+                      : "Official High-DPI IARE Circular Emblem Active"}
                   </span>
                   <span className="text-[11px] text-zinc-400 block">
-                    Appears on Title Cover Slide and exported .pptx &amp; .pdf files.
+                    Rendered in pure high resolution onto Title Cover and exported
+                    .pptx &amp; .pdf files.
                   </span>
                 </div>
               </div>
@@ -624,7 +637,7 @@ export function TechTalkPptStudio() {
                   className="px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.1] text-xs text-zinc-200 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   <Upload className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Upload College Logo</span>
+                  <span>Upload Custom Logo</span>
                 </button>
 
                 {customLogoBase64 && (
@@ -632,7 +645,7 @@ export function TechTalkPptStudio() {
                     type="button"
                     onClick={handleResetLogo}
                     className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition-all cursor-pointer"
-                    title="Reset to default IARE vector crest"
+                    title="Reset to default IARE circular crest"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                   </button>
@@ -806,112 +819,115 @@ export function TechTalkPptStudio() {
               </div>
             </div>
 
-            {/* 16:9 Widescreen Visual Slide Canvas */}
+            {/* 16:9 Widescreen Visual Slide Canvas (1:1 Match with PowerPoint Template) */}
             <div
-              className="relative w-full aspect-[16/9] rounded-3xl overflow-hidden shadow-2xl border border-white/[0.15] p-5 sm:p-9 flex flex-col justify-between transition-colors select-none"
+              className="relative w-full aspect-[16/9] rounded-3xl overflow-hidden shadow-2xl border border-slate-300 p-6 sm:p-10 flex flex-col justify-between transition-colors select-none"
               style={{
-                backgroundColor: currentTheme.bgHex,
-                color: currentTheme.textHex,
+                backgroundColor: "#FFFFFF",
+                color: "#111827",
+                fontFamily: 'Calibri, Candara, "Segoe UI", Arial, sans-serif',
               }}
             >
-              {/* Top Accent Bar */}
-              <div
-                className="absolute top-0 inset-x-0 h-1.5"
-                style={{ backgroundColor: currentTheme.primaryAccentHex }}
-              />
-
-              {/* SLIDE 1: OFFICIAL IARE TITLE COVER SLIDE */}
+              {/* SLIDE 1: EXACT TITLE COVER SLIDE */}
               {currentSlide.layout === "title" ? (
                 <div className="flex-1 flex flex-col justify-between relative z-10 space-y-3">
-                  {/* Top Institutional Header Banner */}
-                  <div className="flex items-center gap-3 sm:gap-4">
-                    {presentation.iareMetadata?.customLogoBase64 ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img
-                        src={presentation.iareMetadata.customLogoBase64}
-                        alt="College Logo"
-                        className="w-14 h-14 sm:w-20 sm:h-20 object-contain rounded-xl border border-slate-200 bg-white p-1 shrink-0"
-                      />
-                    ) : (
-                      <IareEmblem
-                        className="w-14 h-14 sm:w-20 sm:h-20 shrink-0"
-                        size={76}
-                      />
-                    )}
+                  {/* Top Institutional Header: Left-aligned IARE Logo (1.05" x 1.05") + Centered Header Text */}
+                  <div className="flex items-center gap-4 sm:gap-6">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={activeLogo}
+                      alt="IARE Official Crest"
+                      className="w-16 h-16 sm:w-20 sm:h-20 object-contain rounded-full border-2 border-[#C59B27] bg-white p-1 shrink-0 shadow-sm"
+                    />
                     <div className="space-y-0.5">
-                      <h1 className="text-xs sm:text-base md:text-lg font-black text-[#8B1E24] tracking-wide uppercase font-serif">
+                      <h1
+                        className="text-sm sm:text-lg md:text-xl font-bold tracking-wide text-[#8B0000] uppercase"
+                        style={{
+                          fontFamily: '"Times New Roman", Times, Georgia, serif',
+                        }}
+                      >
                         INSTITUTE OF AERONAUTICAL ENGINEERING
                       </h1>
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] sm:text-xs font-bold text-[#0F294A] tracking-wider">
+                        <span
+                          className="text-xs sm:text-sm font-bold text-[#002147] tracking-wider"
+                          style={{
+                            fontFamily:
+                              '"Times New Roman", Times, Georgia, serif',
+                          }}
+                        >
                           (Autonomous)
                         </span>
-                        <span className="text-[9px] sm:text-[11px] text-slate-500">
+                        <span className="text-[10px] sm:text-xs text-gray-600">
                           • Dundigal, Hyderabad - 500 043, Telangana
                         </span>
                       </div>
-                      <h2 className="text-[10px] sm:text-xs font-extrabold text-[#8B1E24] tracking-widest uppercase">
-                        DEPARTMENT OF{" "}
-                        {(
-                          presentation.iareMetadata?.department || "CSE"
-                        ).toUpperCase()}
-                      </h2>
                     </div>
                   </div>
 
-                  {/* Double Horizontal Accent Rule */}
+                  {/* Horizontal Maroon + Gold Double Divider Rule across slide */}
                   <div className="space-y-0.5">
-                    <div className="h-1 bg-[#8B1E24] w-full rounded-full" />
-                    <div className="h-0.5 bg-[#D97706] w-full rounded-full" />
+                    <div className="h-1 bg-[#8B0000] w-full rounded-full" />
+                    <div className="h-0.5 bg-[#C59B27] w-full rounded-full" />
                   </div>
 
-                  {/* Assessment Pill + Topic Title */}
-                  <div className="space-y-2 my-auto">
-                    <div className="inline-flex items-center px-3 py-0.5 rounded-full bg-amber-50 border border-amber-300 text-amber-900 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
-                      [
-                      {(
-                        presentation.iareMetadata?.assessmentType ||
-                        "AAT - TECH TALK"
-                      ).toUpperCase()}
-                      ]
-                    </div>
-                    <h3 className="text-base sm:text-2xl md:text-3xl font-black text-[#0F294A] tracking-tight leading-tight">
+                  {/* Assessment Title: [ASSESSMENT TYPE] + Topic Line */}
+                  <div className="space-y-2 text-center my-auto">
+                    <h2
+                      className="text-base sm:text-lg md:text-xl font-bold text-[#002147] tracking-tight uppercase"
+                      style={{
+                        fontFamily: '"Times New Roman", Times, Georgia, serif',
+                      }}
+                    >
+                      [ {presentation.iareMetadata?.assessmentType || "AAT - TECH TALK"} ]
+                    </h2>
+                    <h3
+                      className="text-lg sm:text-2xl md:text-3xl font-bold text-[#111827] tracking-tight leading-snug"
+                      style={{
+                        fontFamily: '"Times New Roman", Times, Georgia, serif',
+                      }}
+                    >
                       {currentSlide.title.startsWith("Topic -")
                         ? currentSlide.title
                         : `Topic - ${currentSlide.title}`}
                     </h3>
                   </div>
 
-                  {/* Bottom Student Metadata Card (Cleanly Aligned) */}
-                  <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 shadow-sm space-y-2">
-                    <span className="text-[10px] sm:text-xs font-bold text-[#8B1E24] uppercase tracking-wider block">
-                      Student Credentials &amp; Assessment Details
-                    </span>
-                    <div className="grid grid-cols-2 gap-4 text-xs sm:text-sm">
-                      <div className="space-y-1">
-                        <p className="text-slate-900 font-bold">
-                          Name:{" "}
-                          <span className="font-semibold text-slate-800">
+                  {/* Student Details Block (Cleanly Aligned at Bottom Half) */}
+                  <div className="p-4 sm:p-5 rounded-2xl bg-[#F8FAFC] border border-[#CBD5E1] shadow-sm">
+                    <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-xs sm:text-sm md:text-base">
+                      <div className="space-y-2">
+                        <p>
+                          <strong className="text-[#002147] font-bold">
+                            Name:{" "}
+                          </strong>
+                          <span className="text-[#111827]">
                             {presentation.iareMetadata?.studentName}
                           </span>
                         </p>
-                        <p className="text-amber-900 font-mono font-bold">
-                          Roll No:{" "}
-                          <span className="font-semibold">
+                        <p>
+                          <strong className="text-[#002147] font-bold">
+                            Roll No:{" "}
+                          </strong>
+                          <span className="text-[#111827] font-mono">
                             {presentation.iareMetadata?.rollNumber}
                           </span>
                         </p>
                       </div>
-                      <div className="space-y-1">
-                        <p className="text-slate-900 font-bold">
-                          Branch:{" "}
-                          <span className="font-semibold text-slate-800">
+                      <div className="space-y-2">
+                        <p>
+                          <strong className="text-[#002147] font-bold">
+                            Branch:{" "}
+                          </strong>
+                          <span className="text-[#111827]">
                             {presentation.iareMetadata?.department}
                           </span>
                         </p>
-                        <p className="text-slate-900 font-bold">
-                          Subject:{" "}
-                          <span className="font-semibold text-slate-800">
+                        <p>
+                          <strong className="text-[#002147] font-bold">
+                            Subject:{" "}
+                          </strong>
+                          <span className="text-[#111827]">
                             {presentation.iareMetadata?.subject}
                           </span>
                         </p>
@@ -921,95 +937,165 @@ export function TechTalkPptStudio() {
                 </div>
               ) : currentSlide.layout === "thank-you" ? (
                 /* SLIDE N: THANK YOU SLIDE */
-                <div className="flex-1 flex flex-col justify-between items-center text-center relative z-10 py-6">
-                  <span className="text-xs sm:text-sm font-bold text-[#8B1E24] uppercase tracking-wider">
-                    Institute of Aeronautical Engineering (Autonomous)
-                  </span>
-                  <div className="space-y-2">
-                    <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-[#0F294A] tracking-tight">
+                <div className="flex-1 flex flex-col justify-between items-center text-center relative z-10 py-4">
+                  {/* Top Header Strip */}
+                  <div className="w-full flex items-center justify-between pb-2 border-b border-[#CBD5E1]">
+                    <div className="flex items-center gap-2">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={activeLogo}
+                        alt="IARE Crest"
+                        className="w-5 h-5 rounded-full object-contain shrink-0"
+                      />
+                      <span
+                        className="text-[11px] sm:text-xs font-bold text-[#8B0000]"
+                        style={{
+                          fontFamily:
+                            '"Times New Roman", Times, Georgia, serif',
+                        }}
+                      >
+                        INSTITUTE OF AERONAUTICAL ENGINEERING
+                      </span>
+                    </div>
+                    <span
+                      className="text-[11px] sm:text-xs font-bold text-[#002147]"
+                      style={{
+                        fontFamily: '"Times New Roman", Times, Georgia, serif',
+                      }}
+                    >
+                      [ {presentation.iareMetadata?.assessmentType} ]
+                    </span>
+                  </div>
+
+                  {/* Centered THANK YOU & Subtitle */}
+                  <div className="space-y-2 my-auto">
+                    <h2
+                      className="text-4xl sm:text-5xl md:text-6xl font-bold text-[#002147] tracking-tight"
+                      style={{
+                        fontFamily: '"Times New Roman", Times, Georgia, serif',
+                      }}
+                    >
                       THANK YOU
                     </h2>
-                    <p className="text-sm sm:text-lg font-medium text-slate-600">
+                    {/* Double divider rule */}
+                    <div className="w-48 sm:w-64 mx-auto space-y-0.5 pt-1">
+                      <div className="h-0.5 bg-[#8B0000] w-full" />
+                      <div className="h-0.5 bg-[#C59B27] w-full" />
+                    </div>
+                    <p
+                      className="text-sm sm:text-lg font-medium text-[#4B5563]"
+                      style={{
+                        fontFamily: '"Times New Roman", Times, Georgia, serif',
+                      }}
+                    >
                       Questions &amp; Discussion
                     </p>
                   </div>
-                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 shadow-sm max-w-lg w-full space-y-1">
-                    <p className="text-xs sm:text-sm font-bold text-slate-900">
+
+                  {/* Student Details Card */}
+                  <div className="p-4 rounded-2xl bg-[#F8FAFC] border border-[#CBD5E1] shadow-sm max-w-xl w-full space-y-1">
+                    <p className="text-xs sm:text-sm font-bold text-[#002147]">
                       Presented by: {presentation.iareMetadata?.studentName} (
                       {presentation.iareMetadata?.rollNumber})
                     </p>
-                    <p className="text-xs text-slate-600">
+                    <p className="text-xs sm:text-sm text-[#111827]">
                       Department of {presentation.iareMetadata?.department} •{" "}
                       {presentation.iareMetadata?.subject}
                     </p>
-                    <p className="text-[11px] text-slate-500">
+                    <p
+                      className="text-xs font-bold text-[#8B0000]"
+                      style={{
+                        fontFamily: '"Times New Roman", Times, Georgia, serif',
+                      }}
+                    >
+                      INSTITUTE OF AERONAUTICAL ENGINEERING (Autonomous)
+                    </p>
+                    <p className="text-[11px] text-gray-500">
                       Dundigal, Hyderabad - 500 043, Telangana
                     </p>
                   </div>
+
+                  {/* Bottom Footer Strip */}
+                  <div className="w-full pt-2 border-t border-[#CBD5E1] flex items-center justify-between text-[11px] text-[#4B5563]">
+                    <span>
+                      {presentation.iareMetadata?.rollNumber} -{" "}
+                      {presentation.iareMetadata?.studentName}
+                    </span>
+                    <span>{presentation.iareMetadata?.subject}</span>
+                    <span>
+                      Slide {currentSlide.slideNumber} of{" "}
+                      {presentation.slides.length}
+                    </span>
+                  </div>
                 </div>
               ) : (
-                /* SLIDES 2 to N-1: MASTER HEADER + BODY + FOOTER */
+                /* SLIDES 2 to N-1: MASTER HEADER + ALL CAPS SIDE-HEADING WITH UNDERLINE + BODY + FOOTER */
                 <>
-                  {/* Master Header */}
+                  {/* Top Master Header Strip */}
                   <div className="space-y-1.5 relative z-10">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-[#8B1E24]">
-                        <IareEmblem className="w-4 h-4 shrink-0" size={16} />
-                        <span>
-                          IARE (Autonomous) • Dept. of{" "}
-                          {presentation.iareMetadata?.department.replace(
-                            /\s*\(.*\)/,
-                            ""
-                          )}
+                      <div className="flex items-center gap-2">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={activeLogo}
+                          alt="IARE Crest"
+                          className="w-5 h-5 rounded-full object-contain shrink-0"
+                        />
+                        <span
+                          className="text-[11px] sm:text-xs font-bold text-[#8B0000]"
+                          style={{
+                            fontFamily:
+                              '"Times New Roman", Times, Georgia, serif',
+                          }}
+                        >
+                          INSTITUTE OF AERONAUTICAL ENGINEERING
                         </span>
                       </div>
-                      <span className="text-[10px] sm:text-xs font-semibold text-slate-500">
-                        {presentation.iareMetadata?.assessmentType} —{" "}
-                        {presentation.iareMetadata?.subject}
+                      <span
+                        className="text-[11px] sm:text-xs font-bold text-[#002147]"
+                        style={{
+                          fontFamily:
+                            '"Times New Roman", Times, Georgia, serif',
+                        }}
+                      >
+                        [ {presentation.iareMetadata?.assessmentType} ]
                       </span>
                     </div>
-                    <div className="h-px bg-slate-200 w-full" />
-                    <div className="flex items-center gap-2 pt-0.5">
-                      <div className="w-1.5 h-6 sm:h-7 bg-[#8B1E24] rounded-sm shrink-0" />
-                      <h3 className="text-base sm:text-xl md:text-2xl font-black text-[#0F294A] tracking-tight">
+                    <div className="h-px bg-[#CBD5E1] w-full" />
+
+                    {/* Left-Aligned Side-Heading in ALL CAPS + Maroon Underline Rule */}
+                    <div className="pt-1.5 space-y-1">
+                      <h3
+                        className="text-lg sm:text-xl md:text-2xl font-bold text-[#002147] tracking-tight text-left uppercase"
+                        style={{
+                          fontFamily:
+                            '"Times New Roman", Times, Georgia, serif',
+                        }}
+                      >
                         {currentSlide.title}
                       </h3>
+                      {/* Crisp Maroon (#8B0000) accent rule directly underneath heading */}
+                      <div className="h-0.5 sm:h-1 bg-[#8B0000] w-28 rounded-full" />
                     </div>
-                    {currentSlide.subtitle && (
-                      <p className="text-xs text-slate-600 line-clamp-1 pl-3.5">
-                        {currentSlide.subtitle}
-                      </p>
-                    )}
                   </div>
 
                   {/* Body Container based on Layout */}
-                  <div className="flex-1 my-3 flex flex-col justify-center relative z-10">
+                  <div className="flex-1 my-3 flex flex-col justify-center relative z-10 px-1 sm:px-2">
                     {/* INDEX LAYOUT */}
                     {currentSlide.layout === "index" && (
-                      <div className="p-4 sm:p-6 rounded-2xl bg-slate-50 border border-slate-200 shadow-sm">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
-                          {(currentSlide.bulletPoints || []).map((item, idx) => {
-                            const clean = item.replace(/^\d+\.\s*/, "");
-                            return (
-                              <div
-                                key={idx}
-                                className="flex items-center gap-2.5 text-xs sm:text-sm font-bold text-[#0F294A]"
-                              >
-                                <span className="w-5 h-5 rounded-md bg-[#8B1E24] text-white flex items-center justify-center text-[10px] font-bold shrink-0">
-                                  {idx + 1}
-                                </span>
-                                <span>{clean}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3.5 text-xs sm:text-sm md:text-base font-bold text-[#111827]">
+                        {(currentSlide.bulletPoints || []).map((item, idx) => (
+                          <div key={idx} className="flex items-center gap-2">
+                            <span>{item}</span>
+                          </div>
+                        ))}
                       </div>
                     )}
 
                     {/* PARAGRAPH LAYOUT (INTRODUCTION / CONCLUSION) */}
                     {currentSlide.layout === "paragraph" && (
-                      <div className="p-5 sm:p-7 rounded-2xl bg-slate-50 border border-slate-200 border-l-4 border-l-[#8B1E24] shadow-sm">
-                        <p className="text-xs sm:text-sm md:text-base text-slate-900 leading-relaxed font-medium">
+                      <div className="py-2">
+                        <p className="text-xs sm:text-sm md:text-base text-[#111827] leading-[1.6] sm:leading-[1.7] text-left">
                           {currentSlide.paragraph ||
                             currentSlide.bulletPoints?.join(" ")}
                         </p>
@@ -1020,30 +1106,34 @@ export function TechTalkPptStudio() {
                     {(currentSlide.layout === "bullets" ||
                       (!["index", "paragraph"].includes(currentSlide.layout) &&
                         currentSlide.bulletPoints)) && (
-                      <div className="p-4 sm:p-6 rounded-2xl bg-slate-50 border border-slate-200 shadow-sm space-y-2.5">
-                        {(currentSlide.bulletPoints || []).slice(0, 5).map((bullet, idx) => (
-                          <div
-                            key={idx}
-                            className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-900 leading-snug"
-                          >
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#8B1E24] mt-1.5 shrink-0" />
-                            <span>{bullet}</span>
-                          </div>
-                        ))}
+                      <div className="space-y-3 py-1">
+                        {(currentSlide.bulletPoints || [])
+                          .slice(0, 5)
+                          .map((bullet, idx) => (
+                            <div
+                              key={idx}
+                              className="flex items-start gap-3 text-xs sm:text-sm md:text-base text-[#111827] leading-relaxed text-left"
+                            >
+                              <span className="text-[#111827] font-bold text-base select-none shrink-0 mt-[-1px]">
+                                •
+                              </span>
+                              <span>{bullet}</span>
+                            </div>
+                          ))}
                       </div>
                     )}
                   </div>
 
-                  {/* Master Footer */}
-                  <div className="border-t border-slate-200 pt-2 flex items-center justify-between text-[11px] text-slate-500 relative z-10">
-                    <span className="font-medium text-slate-700">
-                      {presentation.iareMetadata?.rollNumber} —{" "}
+                  {/* Master Footer Strip */}
+                  <div className="border-t border-[#CBD5E1] pt-2 flex items-center justify-between text-[11px] text-[#4B5563] relative z-10">
+                    <span>
+                      {presentation.iareMetadata?.rollNumber} -{" "}
                       {presentation.iareMetadata?.studentName}
                     </span>
-                    <span className="truncate max-w-[200px] sm:max-w-xs text-slate-500">
-                      {presentation.topic}
+                    <span className="truncate max-w-[200px] sm:max-w-xs text-[#4B5563]">
+                      {presentation.iareMetadata?.subject}
                     </span>
-                    <span className="font-mono font-bold text-[#0F294A]">
+                    <span className="font-mono">
                       Slide {currentSlide.slideNumber} of{" "}
                       {presentation.slides.length}
                     </span>

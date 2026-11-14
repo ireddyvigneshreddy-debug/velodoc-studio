@@ -370,6 +370,17 @@ function parseSlidesFromJson(
 // IARE OFFICIAL 13-SLIDE AAT TECH-TALK SYNTHESIS ENGINE
 // ============================================================================
 
+export function toTitleCase(str: string): string {
+  return str
+    .replace(/^\d+\.\s*/, "")
+    .toLowerCase()
+    .split(" ")
+    .map((w) => (w.length > 0 ? w[0].toUpperCase() + w.slice(1) : ""))
+    .join(" ")
+    .replace(/: [a-z]/g, (m) => m.toUpperCase())
+    .replace(/& [a-z]/g, (m) => m.toUpperCase());
+}
+
 export function synthesizeIarePresentation(options: GenerateTechTalkOptions): TechTalkSlide[] {
   const { topic, details, slideCount, iareMetadata } = options;
   const titleTopic = topic.trim() || "Technical Presentation";
@@ -423,14 +434,14 @@ export function synthesizeIarePresentation(options: GenerateTechTalkOptions): Te
 
   if (isEnsemble) {
     coreTitles = [
-      "1. ENSEMBLE LEARNING PRINCIPLES & INDUCTIVE BIAS",
-      "2. BAGGING & BOOTSTRAP AGGREGATION MECHANICS",
-      "3. VARIANCE REDUCTION & RANDOM FORESTS ARCHITECTURE",
-      "4. BOOSTING MECHANISMS & SEQUENTIAL ERROR CORRECTION",
-      "5. GRADIENT BOOSTING & ADAPTIVE RESIDUAL MINIMIZATION",
-      "6. HYPERPARAMETER FINE-TUNING & LEARNING RATE SCHEDULES",
-      "7. REGULARIZATION STRATEGIES & OVERFITTING MITIGATION",
-      "8. COMPARATIVE BENCHMARKS & REAL-WORLD DEPLOYMENT",
+      "BAGGING: BOOTSTRAP AGGREGATING",
+      "FINE-TUNING BAGGING MODELS",
+      "RANDOM FORESTS ARCHITECTURE",
+      "BOOSTING: SEQUENTIAL RESIDUAL LEARNING",
+      "GRADIENT BOOSTING & ADAPTIVE RESIDUAL MINIMIZATION",
+      "HYPERPARAMETER TUNING & LEARNING RATE SCHEDULES",
+      "REGULARIZATION STRATEGIES & OVERFITTING MITIGATION",
+      "COMPARATIVE BENCHMARKS & REAL-WORLD DEPLOYMENT",
     ];
 
     coreBulletsMatrix = [
@@ -501,14 +512,14 @@ export function synthesizeIarePresentation(options: GenerateTechTalkOptions): Te
     ];
   } else if (isAiMl) {
     coreTitles = [
-      "1. FOUNDATIONAL ARCHITECTURE & MATHEMATICAL FORMULATION",
-      "2. FEATURE REPRESENTATION & EMBEDDING SPACES",
-      "3. MODEL TRAINING DYNAMICS & GRADIENT PROPAGATION",
-      "4. HYPERPARAMETER FINE-TUNING & ADAPTIVE OPTIMIZATION",
-      "5. INFERENCE ACCELERATION & MODEL QUANTIZATION",
-      "6. QUANTITATIVE BENCHMARK EVALUATION & ERROR METRICS",
-      "7. ROBUSTNESS, GENERALIZATION & REGULARIZATION",
-      "8. PRODUCTION DEPLOYMENT & INDUSTRIAL APPLICATIONS",
+      "FOUNDATIONAL ARCHITECTURE & MATHEMATICAL FORMULATION",
+      "FEATURE REPRESENTATION & EMBEDDING SPACES",
+      "MODEL TRAINING DYNAMICS & GRADIENT PROPAGATION",
+      "HYPERPARAMETER FINE-TUNING & ADAPTIVE OPTIMIZATION",
+      "INFERENCE ACCELERATION & MODEL QUANTIZATION",
+      "QUANTITATIVE BENCHMARK EVALUATION & ERROR METRICS",
+      "ROBUSTNESS, GENERALIZATION & REGULARIZATION",
+      "PRODUCTION DEPLOYMENT & INDUSTRIAL APPLICATIONS",
     ];
 
     coreBulletsMatrix = [
@@ -571,14 +582,14 @@ export function synthesizeIarePresentation(options: GenerateTechTalkOptions): Te
     ];
   } else {
     coreTitles = [
-      "1. CORE THEORETICAL FOUNDATIONS & ARCHITECTURE",
-      "2. SYSTEM ARCHITECTURE & DATA FLOW MECHANICS",
-      "3. ALGORITHMIC EXECUTION & PROCESS STATE TRANSITIONS",
-      "4. PARAMETER FINE-TUNING & OPTIMIZATION METHODOLOGIES",
-      "5. SCALABILITY, CONCURRENCY & MEMORY MANAGEMENT",
-      "6. COMPARATIVE BENCHMARK ANALYSIS & PERFORMANCE METRICS",
-      "7. SYSTEM TRADE-OFFS, RESILIENCE & FAILURE RECOVERY",
-      "8. INDUSTRIAL APPLICATIONS & FUTURE ENGINEERING TRENDS",
+      "CORE THEORETICAL FOUNDATIONS & ARCHITECTURE",
+      "SYSTEM ARCHITECTURE & DATA FLOW MECHANICS",
+      "ALGORITHMIC EXECUTION & PROCESS STATE TRANSITIONS",
+      "PARAMETER FINE-TUNING & OPTIMIZATION METHODOLOGIES",
+      "SCALABILITY, CONCURRENCY & MEMORY MANAGEMENT",
+      "COMPARATIVE BENCHMARK ANALYSIS & PERFORMANCE METRICS",
+      "SYSTEM TRADE-OFFS, RESILIENCE & FAILURE RECOVERY",
+      "INDUSTRIAL APPLICATIONS & FUTURE ENGINEERING TRENDS",
     ];
 
     coreBulletsMatrix = [
@@ -643,8 +654,7 @@ export function synthesizeIarePresentation(options: GenerateTechTalkOptions): Te
 
   // Adjust core arrays to match coreCount
   while (coreTitles.length < coreCount) {
-    const idx = coreTitles.length + 1;
-    coreTitles.push(`${idx}. ADVANCED TECHNICAL SUBSYSTEM & ENGINEERING METRICS`);
+    coreTitles.push("ADVANCED TECHNICAL SUBSYSTEM & ENGINEERING METRICS");
     coreBulletsMatrix.push([
       `Examines advanced subsystem mechanics and internal execution dynamics for ${titleTopic}.`,
       "Applies low-level profiling to identify memory bottlenecks, instruction cache misses, and pipeline stalls.",
@@ -678,7 +688,11 @@ export function synthesizeIarePresentation(options: GenerateTechTalkOptions): Te
     speakerNotes: `Respected Faculty and dear peers, I am ${studentName}, bearing roll number ${rollNo} from the Department of ${branch}. Today, I am presenting my ${assessment} on the topic "${titleTopic}" under the subject ${subject}. In this presentation, we will walk through the core theoretical foundations, architectural mechanisms, comparative benchmarks, and real-world engineering impact.`,
   };
 
-  // 2. INDEX Slide
+  // 2. INDEX Slide (Numbered 1 to 8 matching core titles in Title Case)
+  const indexNumberedList = coreTitles.map(
+    (t, idx) => `${idx + 1}. ${toTitleCase(t)}`
+  );
+
   const s2: TechTalkSlide = {
     id: "aat-slide-2",
     slideNumber: 2,
@@ -686,7 +700,7 @@ export function synthesizeIarePresentation(options: GenerateTechTalkOptions): Te
     title: "INDEX",
     category: "ROADMAP",
     subtitle: "Roadmap of Core Technical Modules",
-    bulletPoints: coreTitles,
+    bulletPoints: indexNumberedList,
     speakerNotes: `On this index slide, we outline the roadmap of our technical presentation. We will methodically progress through these core modules, starting from theoretical foundations to fine-tuning, comparative evaluation, and industrial applications.`,
   };
 
