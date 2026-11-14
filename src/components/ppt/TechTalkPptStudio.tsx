@@ -16,6 +16,11 @@ import {
   getPresentationExportFilename,
 } from "@/lib/pptx-exporter";
 import { getIareLogoPngBase64 } from "@/lib/iare-logo";
+import {
+  IARE_HEADER_BANNER_BASE64,
+  IARE_CORNER_LOGO_BASE64,
+  IARE_EXACT_COLORS,
+} from "@/lib/iare-template-assets";
 import { ApiKeyVaultModal } from "./ApiKeyVaultModal";
 import {
   IareEmblem,
@@ -821,165 +826,188 @@ export function TechTalkPptStudio() {
 
             {/* 16:9 Widescreen Visual Slide Canvas (1:1 Match with PowerPoint Template) */}
             <div
-              className="relative w-full aspect-[16/9] rounded-3xl overflow-hidden shadow-2xl border border-slate-300 p-6 sm:p-10 flex flex-col justify-between transition-colors select-none"
+              className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden shadow-2xl border border-slate-300 flex flex-col justify-between transition-colors select-none"
               style={{
-                backgroundColor: "#FFFFFF",
-                color: "#111827",
+                backgroundColor: `#${IARE_EXACT_COLORS.slideBg}`,
+                color: `#${IARE_EXACT_COLORS.bodyText}`,
                 fontFamily: 'Calibri, Candara, "Segoe UI", Arial, sans-serif',
               }}
             >
-              {/* Top Subtle Institutional Accent Bar across all slides */}
-              <div className="absolute top-0 left-0 right-0">
-                <div className="h-1.5 bg-[#8B0000] w-full" />
-                <div className="h-0.5 bg-[#C59B27] w-full" />
-              </div>
-
-              {/* SLIDE 1: EXACT 6-LINE TITLE COVER SLIDE */}
+              {/* SLIDE 1: EXACT COVER SLIDE (slideLayout2.xml TITLE_MASTER) */}
               {currentSlide.layout === "title" ? (
-                <div className="flex-1 flex flex-col justify-between relative z-10 pt-2 space-y-3">
-                  {/* Optional Logo at Top-Left */}
-                  {activeLogo && (
-                    <div className="flex justify-start">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={activeLogo}
-                        alt="IARE Crest"
-                        className="w-12 h-12 sm:w-14 sm:h-14 object-contain rounded-full border border-[#C59B27] bg-white p-0.5 shadow-sm"
-                      />
+                <div className="flex-1 flex flex-col justify-between relative z-10">
+                  {/* Top Header Banner Image across 100% width */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={IARE_HEADER_BANNER_BASE64}
+                    alt="IARE Header Banner"
+                    className="w-full h-auto max-h-[26%] object-cover object-top select-none pointer-events-none"
+                  />
+
+                  {/* Main Content Area */}
+                  <div className="flex-1 flex flex-col justify-between px-6 sm:px-12 py-3 sm:py-5">
+                    {/* Shape 'Text 0': Assessment Title (Centered, 28pt Arial Bold, #004170) */}
+                    <div className="text-center">
+                      <h2
+                        className="text-base sm:text-xl md:text-2xl font-bold tracking-tight uppercase"
+                        style={{
+                          color: `#${IARE_EXACT_COLORS.headerBannerBg}`,
+                          fontFamily: "Arial, sans-serif",
+                        }}
+                      >
+                        {presentation.iareMetadata?.assessmentType || "AAT - TECH TALK"}
+                      </h2>
                     </div>
-                  )}
 
-                  {/* Line 1: Centered [Assessment Type] */}
-                  <div className="text-center pt-1">
-                    <h2
-                      className="text-lg sm:text-xl md:text-2xl font-bold text-[#002147] tracking-tight uppercase"
-                      style={{
-                        fontFamily: '"Times New Roman", Times, Georgia, serif',
-                      }}
-                    >
-                      [ {presentation.iareMetadata?.assessmentType || "AAT - TECH TALK"} ]
-                    </h2>
-                  </div>
+                    {/* Shape 'Text 1': Topic - [Topic] (Left-aligned, Arial 28pt Bold + Calibri 24pt, #004170) */}
+                    <div className="text-left pt-1 sm:pt-2">
+                      <h3
+                        className="text-base sm:text-xl md:text-2xl font-bold tracking-tight leading-snug"
+                        style={{ color: `#${IARE_EXACT_COLORS.headerBannerBg}` }}
+                      >
+                        <span style={{ fontFamily: "Arial, sans-serif" }}>Topic - </span>
+                        <span
+                          className="font-normal"
+                          style={{ fontFamily: "Calibri, sans-serif" }}
+                        >
+                          {currentSlide.title.replace(/^Topic\s*-\s*/i, "").trim()}
+                        </span>
+                      </h3>
+                    </div>
 
-                  {/* Line 2: Left-aligned Topic - [Topic] */}
-                  <div className="pt-1">
-                    <h3
-                      className="text-lg sm:text-2xl md:text-3xl font-bold text-[#111827] tracking-tight leading-snug text-left"
-                      style={{
-                        fontFamily: '"Times New Roman", Times, Georgia, serif',
-                      }}
-                    >
-                      {currentSlide.title.startsWith("Topic -")
-                        ? currentSlide.title
-                        : `Topic - ${currentSlide.title}`}
-                    </h3>
-                  </div>
-
-                  {/* Line 3: Subtle horizontal Maroon rule */}
-                  <div className="h-0.5 bg-[#8B0000] w-full rounded-full" />
-
-                  {/* Lines 4-7: Cleanly stacked student metadata block */}
-                  <div className="space-y-3 text-sm sm:text-base md:text-lg text-left pb-2">
-                    <p className="flex items-center">
-                      <strong className="w-24 sm:w-28 text-[#002147] font-bold font-sans">
-                        Name:
-                      </strong>
-                      <span className="text-[#111827] font-sans font-medium">
-                        {presentation.iareMetadata?.studentName}
-                      </span>
-                    </p>
-                    <p className="flex items-center">
-                      <strong className="w-24 sm:w-28 text-[#002147] font-bold font-sans">
-                        Roll No:
-                      </strong>
-                      <span className="text-[#111827] font-sans font-mono font-medium">
-                        {presentation.iareMetadata?.rollNumber}
-                      </span>
-                    </p>
-                    <p className="flex items-center">
-                      <strong className="w-24 sm:w-28 text-[#002147] font-bold font-sans">
-                        Branch:
-                      </strong>
-                      <span className="text-[#111827] font-sans font-medium">
-                        {presentation.iareMetadata?.department}
-                      </span>
-                    </p>
-                    <p className="flex items-center">
-                      <strong className="w-24 sm:w-28 text-[#002147] font-bold font-sans">
-                        Subject:
-                      </strong>
-                      <span className="text-[#111827] font-sans font-medium">
-                        {presentation.iareMetadata?.subject}
-                      </span>
-                    </p>
+                    {/* Shapes 'Text 2-5': Stacked Student Metadata (Name, Roll No, Branch, Subject) */}
+                    <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm md:text-base text-left pt-1 sm:pt-2 pb-2">
+                      <p className="flex items-center">
+                        <strong
+                          className="w-20 sm:w-24 font-bold"
+                          style={{ color: `#${IARE_EXACT_COLORS.headerBannerBg}` }}
+                        >
+                          Name:{" "}
+                        </strong>
+                        <span style={{ color: `#${IARE_EXACT_COLORS.bodyText}` }}>
+                          {presentation.iareMetadata?.studentName}
+                        </span>
+                      </p>
+                      <p className="flex items-center">
+                        <strong
+                          className="w-20 sm:w-24 font-bold"
+                          style={{ color: `#${IARE_EXACT_COLORS.headerBannerBg}` }}
+                        >
+                          Roll No:{" "}
+                        </strong>
+                        <span style={{ color: `#${IARE_EXACT_COLORS.bodyText}` }}>
+                          {presentation.iareMetadata?.rollNumber}
+                        </span>
+                      </p>
+                      <p className="flex items-center">
+                        <strong
+                          className="w-20 sm:w-24 font-bold"
+                          style={{ color: `#${IARE_EXACT_COLORS.headerBannerBg}` }}
+                        >
+                          Branch:{" "}
+                        </strong>
+                        <span style={{ color: `#${IARE_EXACT_COLORS.bodyText}` }}>
+                          {presentation.iareMetadata?.department}
+                        </span>
+                      </p>
+                      <p className="flex items-center">
+                        <strong
+                          className="w-20 sm:w-24 font-bold"
+                          style={{ color: `#${IARE_EXACT_COLORS.headerBannerBg}` }}
+                        >
+                          Subject:{" "}
+                        </strong>
+                        <span style={{ color: `#${IARE_EXACT_COLORS.bodyText}` }}>
+                          {presentation.iareMetadata?.subject}
+                        </span>
+                      </p>
+                    </div>
                   </div>
                 </div>
               ) : currentSlide.layout === "thank-you" ? (
-                /* SLIDE 13: CLEAN CENTERED THANK YOU SLIDE (NO EXTRA CLUTTER) */
-                <div className="flex-1 flex flex-col justify-center items-center text-center relative z-10 space-y-4 my-auto">
-                  <h2
-                    className="text-4xl sm:text-5xl md:text-6xl font-bold text-[#002147] tracking-tight"
-                    style={{
-                      fontFamily: '"Times New Roman", Times, Georgia, serif',
-                    }}
-                  >
-                    THANK YOU
-                  </h2>
-                  {/* Subtle Maroon Underline Rule */}
-                  <div className="h-1 bg-[#8B0000] w-36 sm:w-48 rounded-full mx-auto" />
+                /* SLIDE 13: EXACT THANK YOU SLIDE (slideLayout2.xml TITLE_MASTER) */
+                <div className="flex-1 flex flex-col justify-between relative z-10">
+                  {/* Top Header Banner Image */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={IARE_HEADER_BANNER_BASE64}
+                    alt="IARE Header Banner"
+                    className="w-full h-auto max-h-[26%] object-cover object-top select-none pointer-events-none"
+                  />
+
+                  {/* Centered THANK YOU: 48pt Arial Bold in #51237F */}
+                  <div className="flex-1 flex flex-col justify-center items-center text-center my-auto pb-6">
+                    <h2
+                      className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight"
+                      style={{
+                        color: `#${IARE_EXACT_COLORS.thankYouText}`,
+                        fontFamily: "Arial, sans-serif",
+                      }}
+                    >
+                      THANK YOU
+                    </h2>
+                  </div>
                 </div>
               ) : (
-                /* SLIDES 2 TO 12: CONTENT SLIDE WITH SIDE-HEADING & MAROON UNDERLINE */
-                /* ZERO EXTRA ADDRESS HEADERS & ZERO FOOTER TEXT LINES */
-                <div className="flex-1 flex flex-col justify-between relative z-10 pt-2">
-                  {/* Left-Aligned Side-Heading in ALL CAPS + Maroon Underline Rule */}
-                  <div className="space-y-1 text-left">
+                /* SLIDES 2 TO 12: EXACT CONTENT SLIDES (slideLayout3.xml CONTENT_MASTER) */
+                <div className="flex-1 flex flex-col justify-between relative z-10">
+                  {/* Top Row: Left Side-Heading + Right Corner Logo */}
+                  <div className="flex items-start justify-between px-6 sm:px-10 pt-4 sm:pt-6">
+                    {/* Shape 'Text 0': Side-Heading in ALL CAPS (#003366, 22pt Calibri Bold) */}
                     <h3
-                      className="text-lg sm:text-xl md:text-2xl font-bold text-[#002147] tracking-tight text-left uppercase"
+                      className="text-base sm:text-xl md:text-2xl font-bold tracking-tight text-left uppercase max-w-[80%]"
                       style={{
-                        fontFamily: '"Times New Roman", Times, Georgia, serif',
+                        color: `#${IARE_EXACT_COLORS.sideHeading}`,
+                        fontFamily: "Calibri, sans-serif",
                       }}
                     >
                       {currentSlide.title}
                     </h3>
-                    <div className="h-0.5 sm:h-1 bg-[#8B0000] w-28 rounded-full" />
+
+                    {/* Top-Right Corner Logo */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={IARE_CORNER_LOGO_BASE64}
+                      alt="IARE Corner Logo"
+                      className="w-12 sm:w-16 h-auto object-contain shrink-0 select-none pointer-events-none mt-[-4px]"
+                    />
                   </div>
 
-                  {/* Body Container based on Layout */}
-                  <div className="flex-1 my-auto flex flex-col justify-center px-1 sm:px-2">
-                    {/* INDEX LAYOUT (1.  to 8.  in Title Case in 2 columns) */}
+                  {/* Body Content Area (Shape 'Text 1') */}
+                  <div className="flex-1 flex flex-col justify-start px-6 sm:px-10 py-3 sm:py-5">
+                    {/* INDEX LAYOUT */}
                     {currentSlide.layout === "index" && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-4 text-xs sm:text-sm md:text-base font-bold text-[#111827]">
+                      <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm md:text-base text-left text-black font-normal leading-relaxed">
                         {(currentSlide.bulletPoints || []).map((item, idx) => (
-                          <div key={idx} className="text-left font-sans">
+                          <div key={idx} className="text-left">
                             {item}
                           </div>
                         ))}
                       </div>
                     )}
 
-                    {/* PARAGRAPH LAYOUT (INTRODUCTION / CONCLUSION - STRICTLY NO BULLETS) */}
+                    {/* PARAGRAPH LAYOUT (INTRODUCTION / CONCLUSION) */}
                     {currentSlide.layout === "paragraph" && (
-                      <div className="py-2">
-                        <p className="text-xs sm:text-sm md:text-base text-[#111827] leading-[1.65] sm:leading-[1.75] text-left font-sans font-normal">
+                      <div className="py-1">
+                        <p className="text-xs sm:text-sm md:text-base text-black leading-relaxed sm:leading-[1.7] text-left font-normal">
                           {currentSlide.paragraph || currentSlide.bulletPoints?.join(" ")}
                         </p>
                       </div>
                     )}
 
-                    {/* BULLETS LAYOUT (8 CORE TECHNICAL SLIDES - STRICTLY 5 BULLETS) */}
+                    {/* BULLETS LAYOUT (8 CORE TECHNICAL SLIDES) */}
                     {(currentSlide.layout === "bullets" ||
                       (!["index", "paragraph"].includes(currentSlide.layout) &&
                         currentSlide.bulletPoints)) && (
-                      <div className="space-y-3.5 py-1">
+                      <div className="space-y-2 sm:space-y-3 py-1">
                         {(currentSlide.bulletPoints || [])
                           .slice(0, 5)
                           .map((bullet, idx) => (
                             <div
                               key={idx}
-                              className="flex items-start gap-3 text-xs sm:text-sm md:text-base text-[#111827] leading-relaxed text-left font-sans font-normal"
+                              className="flex items-start gap-2.5 text-xs sm:text-sm md:text-base text-black leading-relaxed text-left font-normal"
                             >
-                              <span className="text-[#111827] font-bold text-base select-none shrink-0 mt-[-2px]">
+                              <span className="text-black font-bold text-sm sm:text-base select-none shrink-0 mt-[-1px]">
                                 •
                               </span>
                               <span>{bullet}</span>
@@ -988,6 +1016,12 @@ export function TechTalkPptStudio() {
                       </div>
                     )}
                   </div>
+
+                  {/* Bottom Footer Bar: Shape 0 (x=0, y=5.3438", w=10.0", h=0.4", fill=#003366) */}
+                  <div
+                    className="w-full h-4 sm:h-5 shrink-0"
+                    style={{ backgroundColor: `#${IARE_EXACT_COLORS.footerBar}` }}
+                  />
                 </div>
               )}
             </div>

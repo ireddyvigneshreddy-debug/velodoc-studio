@@ -2,7 +2,11 @@ import pptxgen from "pptxgenjs";
 import { TechTalkPresentation } from "@/types/ppt";
 import { PDFDocument, StandardFonts } from "pdf-lib";
 import { hexToPdfRgb } from "@/lib/pdf-engine";
-import { getIareLogoPngBase64 } from "@/lib/iare-logo";
+import {
+  IARE_HEADER_BANNER_BASE64,
+  IARE_CORNER_LOGO_BASE64,
+  IARE_EXACT_COLORS,
+} from "@/lib/iare-template-assets";
 
 /**
  * Standardized Export Filename:
@@ -57,16 +61,15 @@ export function getPresentationExportFilename(
 
 /**
  * 1. Export 16:9 PowerPoint (.pptx) with embedded Speaker Notes
- * Exact official IARE 13.333" x 7.5" geometry, Times New Roman / Calibri
- * ZERO extra address headers and ZERO footer text lines on Slides 2–13
+ * Exact 1:1 XML geometry from reference Vigneshreddy_EPS_AAT-1.pptx (10.0" x 5.625")
  */
 export async function exportToPptx(
   presentation: TechTalkPresentation
 ): Promise<void> {
   const pptx = new pptxgen();
-  // Exact 16:9 widescreen layout (13.333" x 7.5")
-  pptx.defineLayout({ name: "IARE_16x9", width: 13.333, height: 7.5 });
-  pptx.layout = "IARE_16x9";
+  // Exact 16:9 widescreen layout matching PowerPoint template (10.0" x 5.625")
+  pptx.defineLayout({ name: "IARE_EXACT_16x9", width: 10.0, height: 5.625 });
+  pptx.layout = "IARE_EXACT_16x9";
 
   pptx.title = presentation.topic;
   pptx.subject = "IARE AAT Tech-Talk Presentation";
@@ -78,335 +81,326 @@ export async function exportToPptx(
 
   const iare = presentation.iareMetadata;
 
-  // Retrieve crisp Base64 PNG logo (custom uploaded logo or built-in 512x512 emblem)
-  const iareLogoBase64 = iare?.customLogoBase64 || getIareLogoPngBase64();
-
   const studentName =
     iare?.studentName || presentation.presenterName || "Student";
   const rollNumber = iare?.rollNumber || "";
   const branchName = iare?.department || "";
   const subjectName = iare?.subject || iare?.courseName || "";
-  const assessmentTitle = (
-    iare?.assessmentType || "AAT - TECH TALK"
-  ).toUpperCase();
+  const assessmentTitle =
+    iare?.assessmentType || "AAT - TECH TALK";
 
   for (const s of presentation.slides) {
     const slide = pptx.addSlide();
 
-    // 1. Crisp White Background
-    slide.background = { color: "FFFFFF" };
+    // 1. Exact Slide Background: #EDEDEE
+    slide.background = { color: IARE_EXACT_COLORS.slideBg };
 
-    // 2. Subtle Top Institutional Accent Bar (Maroon + Gold)
-    slide.addShape(pptx.ShapeType.rect, {
-      x: 0,
-      y: 0,
-      w: 13.333,
-      h: 0.08,
-      fill: { color: "8B0000" },
-      line: { color: "8B0000", width: 0 },
-    });
-    slide.addShape(pptx.ShapeType.rect, {
-      x: 0,
-      y: 0.08,
-      w: 13.333,
-      h: 0.02,
-      fill: { color: "C59B27" },
-      line: { color: "C59B27", width: 0 },
-    });
-
-    // 3. Embedded Stage Speaker Notes
+    // 2. Embedded Stage Speaker Notes
     if (s.speakerNotes) {
       slide.addNotes(s.speakerNotes);
     }
 
-    // 4. Layout Rendering
+    // 3. Slide Layout Rendering
     if (s.layout === "title") {
       // ======================================================================
-      // SLIDE 1: EXACT 6-LINE TITLE COVER SLIDE
+      // SLIDE 1: EXACT COVER SLIDE (slideLayout2.xml TITLE_MASTER)
       // ======================================================================
-      // Optional Logo at Top-Left (if available)
-      if (iareLogoBase64) {
-        try {
-          slide.addImage({
-            data: iareLogoBase64,
-            x: 0.9,
-            y: 0.35,
-            w: 0.95,
-            h: 0.95,
-          });
-        } catch {
-          // Fallback
-        }
+      // Header Banner Image across top: x=0, y=0, w=10.0", h=1.5"
+      try {
+        slide.addImage({
+          data: IARE_HEADER_BANNER_BASE64,
+          x: 0,
+          y: 0,
+          w: 10.0,
+          h: 1.5,
+        });
+      } catch {
+        // Fallback
       }
 
-      // Line 1: Centered [Assessment Type] (24pt Bold Times New Roman Navy #002147)
-      slide.addText(`[ ${assessmentTitle} ]`, {
-        x: 0,
-        y: 1.3,
-        w: 13.333,
+      // Shape 'Text 0': AAT - TECH TALK
+      // pos=(0.5000", 1.8000") size=(9.0000" x 0.5") font=Arial, sz=28.0pt, bold=True, clr=#004170, align=ctr
+      slide.addText(assessmentTitle, {
+        x: 0.5,
+        y: 1.8,
+        w: 9.0,
         h: 0.55,
-        fontSize: 24,
-        fontFace: "Times New Roman",
+        fontSize: 28,
+        fontFace: "Arial",
         bold: true,
-        color: "002147",
+        color: IARE_EXACT_COLORS.headerBannerBg,
         align: "center",
       });
 
-      // Line 2: Left-aligned Topic - [Topic] (22pt Bold Times New Roman #111827 at x: 0.9")
-      const topicHeading = s.title.startsWith("Topic -")
-        ? s.title
-        : `Topic - ${s.title}`;
-      slide.addText(topicHeading, {
-        x: 0.9,
-        y: 2.25,
-        w: 11.533,
-        h: 0.75,
-        fontSize: 22,
-        fontFace: "Times New Roman",
-        bold: true,
-        color: "111827",
-        align: "left",
-      });
-
-      // Line 3: Subtle horizontal Maroon rule
-      slide.addShape(pptx.ShapeType.rect, {
-        x: 0.9,
-        y: 3.15,
-        w: 11.533,
-        h: 0.035,
-        fill: { color: "8B0000" },
-        line: { color: "8B0000", width: 0 },
-      });
-
-      // Lines 4-7: Cleanly stacked student metadata block at x: 0.9" (18pt Calibri #111827, line spacing 1.4)
-      const metaProps: pptxgen.TextProps[] = [
+      // Shape 'Text 1': Topic - [Topic]
+      // pos=(1.0000", 2.5000") size=(8.0000" x 0.8") font=Arial 28pt bold + Calibri 24pt regular, clr=#004170
+      const topicText = s.title.replace(/^Topic\s*-\s*/i, "").trim();
+      const topicProps: pptxgen.TextProps[] = [
         {
-          text: "Name:     ",
+          text: "Topic - ",
           options: {
-            fontSize: 18,
-            fontFace: "Calibri",
+            fontSize: 28,
+            fontFace: "Arial",
             bold: true,
-            color: "002147",
+            color: IARE_EXACT_COLORS.headerBannerBg,
           },
         },
         {
-          text: `${studentName}\n`,
+          text: topicText,
           options: {
-            fontSize: 18,
+            fontSize: 24,
             fontFace: "Calibri",
             bold: false,
-            color: "111827",
-            paraSpaceAfter: 10,
-          },
-        },
-        {
-          text: "Roll No:  ",
-          options: {
-            fontSize: 18,
-            fontFace: "Calibri",
-            bold: true,
-            color: "002147",
-          },
-        },
-        {
-          text: `${rollNumber}\n`,
-          options: {
-            fontSize: 18,
-            fontFace: "Calibri",
-            bold: false,
-            color: "111827",
-            paraSpaceAfter: 10,
-          },
-        },
-        {
-          text: "Branch:   ",
-          options: {
-            fontSize: 18,
-            fontFace: "Calibri",
-            bold: true,
-            color: "002147",
-          },
-        },
-        {
-          text: `${branchName}\n`,
-          options: {
-            fontSize: 18,
-            fontFace: "Calibri",
-            bold: false,
-            color: "111827",
-            paraSpaceAfter: 10,
-          },
-        },
-        {
-          text: "Subject:  ",
-          options: {
-            fontSize: 18,
-            fontFace: "Calibri",
-            bold: true,
-            color: "002147",
-          },
-        },
-        {
-          text: `${subjectName}`,
-          options: {
-            fontSize: 18,
-            fontFace: "Calibri",
-            bold: false,
-            color: "111827",
+            color: IARE_EXACT_COLORS.headerBannerBg,
           },
         },
       ];
 
-      slide.addText(metaProps, {
-        x: 0.9,
-        y: 3.55,
-        w: 11.533,
-        h: 3.2,
-        valign: "top",
-        lineSpacingMultiple: 1.4,
-      });
-    } else if (s.layout === "thank-you") {
-      // ======================================================================
-      // SLIDE 13: CLEAN CENTERED THANK YOU SLIDE (NO EXTRA CLUTTER)
-      // ======================================================================
-      slide.addText("THANK YOU", {
-        x: 0,
-        y: 2.8,
-        w: 13.333,
-        h: 1.1,
-        fontSize: 42,
-        fontFace: "Times New Roman",
-        bold: true,
-        color: "002147",
-        align: "center",
-      });
-
-      // Subtle Maroon Underline Rule
-      slide.addShape(pptx.ShapeType.rect, {
-        x: 5.266,
-        y: 4.05,
-        w: 2.8,
-        h: 0.04,
-        fill: { color: "8B0000" },
-        line: { color: "8B0000", width: 0 },
-      });
-    } else {
-      // ======================================================================
-      // SLIDES 2 TO 12: CONTENT SLIDE WITH SIDE-HEADING & MAROON UNDERLINE
-      // ZERO EXTRA ADDRESS HEADERS & ZERO FOOTER TEXT LINES
-      // ======================================================================
-      const sideHeading = (s.title || "CONTENT SLIDE").toUpperCase();
-
-      // Left-Aligned Side-Heading (24pt Bold Times New Roman, Navy #002147)
-      slide.addText(sideHeading, {
-        x: 0.9,
-        y: 0.75,
-        w: 11.533,
-        h: 0.6,
-        fontSize: 24,
-        fontFace: "Times New Roman",
-        bold: true,
-        color: "002147",
-        valign: "top",
+      slide.addText(topicProps, {
+        x: 1.0,
+        y: 2.5,
+        w: 8.0,
+        h: 0.85,
         align: "left",
       });
 
-      // Crisp Maroon (#8B0000) accent rule directly underneath the heading
-      slide.addShape(pptx.ShapeType.rect, {
-        x: 0.9,
-        y: 1.4,
-        w: 2.2,
-        h: 0.04,
-        fill: { color: "8B0000" },
-        line: { color: "8B0000", width: 0 },
-      });
-
-      if (s.layout === "index") {
-        // SLIDE 2: INDEX (Numbered list 1.  to 8.  with two spaces in Title Case)
-        const items = s.bulletPoints || [];
-        const half = Math.ceil(items.length / 2);
-        const col1 = items.slice(0, half);
-        const col2 = items.slice(half);
-
-        const col1Props: pptxgen.TextProps[] = col1.map((item) => ({
-          text: `${item}\n`,
-          options: {
-            fontSize: 18,
-            fontFace: "Calibri",
-            color: "111827",
-            bold: true,
-            lineSpacingMultiple: 1.5,
-            paraSpaceAfter: 14,
-          },
-        }));
-
-        slide.addText(col1Props, {
-          x: 0.9,
-          y: 1.95,
-          w: 5.5,
-          h: 5.0,
-          valign: "top",
-        });
-
-        if (col2.length > 0) {
-          const col2Props: pptxgen.TextProps[] = col2.map((item) => ({
-            text: `${item}\n`,
+      // Shape 'Text 2': Name: [Name]
+      // pos=(1.0000", 3.5000") size=(8.0000" x 0.4")
+      slide.addText(
+        [
+          {
+            text: "Name: ",
             options: {
               fontSize: 18,
               fontFace: "Calibri",
-              color: "111827",
               bold: true,
-              lineSpacingMultiple: 1.5,
-              paraSpaceAfter: 14,
+              color: IARE_EXACT_COLORS.headerBannerBg,
             },
-          }));
+          },
+          {
+            text: studentName,
+            options: {
+              fontSize: 18,
+              fontFace: "Calibri",
+              bold: false,
+              color: IARE_EXACT_COLORS.bodyText,
+            },
+          },
+        ],
+        { x: 1.0, y: 3.5, w: 8.0, h: 0.4, align: "left" }
+      );
 
-          slide.addText(col2Props, {
-            x: 6.8,
-            y: 1.95,
-            w: 5.5,
-            h: 5.0,
-            valign: "top",
-          });
-        }
+      // Shape 'Text 3': Roll No: [Roll No]
+      // pos=(1.0000", 4.0000") size=(8.0000" x 0.4")
+      slide.addText(
+        [
+          {
+            text: "Roll No: ",
+            options: {
+              fontSize: 18,
+              fontFace: "Calibri",
+              bold: true,
+              color: IARE_EXACT_COLORS.headerBannerBg,
+            },
+          },
+          {
+            text: rollNumber,
+            options: {
+              fontSize: 18,
+              fontFace: "Calibri",
+              bold: false,
+              color: IARE_EXACT_COLORS.bodyText,
+            },
+          },
+        ],
+        { x: 1.0, y: 4.0, w: 8.0, h: 0.4, align: "left" }
+      );
+
+      // Shape 'Text 4': Branch: [Branch]
+      // pos=(1.0000", 4.5000") size=(8.0000" x 0.4")
+      slide.addText(
+        [
+          {
+            text: "Branch: ",
+            options: {
+              fontSize: 18,
+              fontFace: "Calibri",
+              bold: true,
+              color: IARE_EXACT_COLORS.headerBannerBg,
+            },
+          },
+          {
+            text: branchName,
+            options: {
+              fontSize: 18,
+              fontFace: "Calibri",
+              bold: false,
+              color: IARE_EXACT_COLORS.bodyText,
+            },
+          },
+        ],
+        { x: 1.0, y: 4.5, w: 8.0, h: 0.4, align: "left" }
+      );
+
+      // Shape 'Text 5': Subject: [Subject]
+      // pos=(1.0000", 5.0000") size=(8.0000" x 0.4")
+      slide.addText(
+        [
+          {
+            text: "Subject: ",
+            options: {
+              fontSize: 18,
+              fontFace: "Calibri",
+              bold: true,
+              color: IARE_EXACT_COLORS.headerBannerBg,
+            },
+          },
+          {
+            text: subjectName,
+            options: {
+              fontSize: 18,
+              fontFace: "Calibri",
+              bold: false,
+              color: IARE_EXACT_COLORS.bodyText,
+            },
+          },
+        ],
+        { x: 1.0, y: 5.0, w: 8.0, h: 0.4, align: "left" }
+      );
+    } else if (s.layout === "thank-you") {
+      // ======================================================================
+      // SLIDE 13: EXACT THANK YOU SLIDE (slideLayout2.xml TITLE_MASTER)
+      // ======================================================================
+      // Header Banner Image across top: x=0, y=0, w=10.0", h=1.5"
+      try {
+        slide.addImage({
+          data: IARE_HEADER_BANNER_BASE64,
+          x: 0,
+          y: 0,
+          w: 10.0,
+          h: 1.5,
+        });
+      } catch {
+        // Fallback
+      }
+
+      // Shape 'Text 0': THANK YOU
+      // pos=(0.5000", 1.5000") size=(9.0000" x 2.8125") font=Arial, sz=48.0pt, bold=True, clr=#51237F, align=ctr
+      slide.addText("THANK YOU", {
+        x: 0.5,
+        y: 2.2,
+        w: 9.0,
+        h: 1.8,
+        fontSize: 48,
+        fontFace: "Arial",
+        bold: true,
+        color: IARE_EXACT_COLORS.thankYouText,
+        align: "center",
+      });
+    } else {
+      // ======================================================================
+      // SLIDES 2 TO 12: EXACT CONTENT SLIDES (slideLayout3.xml CONTENT_MASTER)
+      // ======================================================================
+      // Top-Right Logo: pos=(8.5000", 0.0500") size=(1.2000" x 0.7000")
+      try {
+        slide.addImage({
+          data: IARE_CORNER_LOGO_BASE64,
+          x: 8.5,
+          y: 0.05,
+          w: 1.2,
+          h: 0.7,
+        });
+      } catch {
+        // Fallback
+      }
+
+      // Bottom Footer Bar: pos=(0.0000", 5.3438") size=(10.0000" x 0.4000") solidFill clr=#003366
+      slide.addShape(pptx.ShapeType.rect, {
+        x: 0,
+        y: 5.3438,
+        w: 10.0,
+        h: 0.4,
+        fill: { color: IARE_EXACT_COLORS.footerBar },
+        line: { color: IARE_EXACT_COLORS.footerBar, width: 0 },
+      });
+
+      // Shape 'Text 0': Side-Heading
+      // pos=(0.5000", 0.8200") size=(8.0000" x 0.5500") font=Calibri, sz=22.0pt, bold=True, clr=#003366, align=l
+      const sideHeading = (s.title || "CONTENT SLIDE").toUpperCase();
+      slide.addText(sideHeading, {
+        x: 0.5,
+        y: 0.82,
+        w: 8.0,
+        h: 0.55,
+        fontSize: 22,
+        fontFace: "Calibri",
+        bold: true,
+        color: IARE_EXACT_COLORS.sideHeading,
+        align: "left",
+      });
+
+      // Shape 'Text 1': Body Text
+      // pos=(0.5000", 1.5000") size=(9.0000" x 3.6500")
+      if (s.layout === "index") {
+        // INDEX SLIDE: 1.  to 8.  in Title Case (sz=16.0pt, bold=False, clr=#000000)
+        const items = s.bulletPoints || [];
+        const indexProps: pptxgen.TextProps[] = items.map((item) => ({
+          text: `${item}\n`,
+          options: {
+            fontSize: 16,
+            fontFace: "Calibri",
+            color: IARE_EXACT_COLORS.bodyText,
+            bold: false,
+            lineSpacingMultiple: 1.35,
+            paraSpaceAfter: 6,
+          },
+        }));
+
+        slide.addText(indexProps, {
+          x: 0.5,
+          y: 1.5,
+          w: 9.0,
+          h: 3.65,
+          valign: "top",
+        });
       } else if (s.layout === "paragraph") {
-        // SLIDE 3 (INTRODUCTION) & SLIDE 12 (CONCLUSION): ONE PROSE PARAGRAPH (NO BULLETS)
+        // INTRODUCTION OR CONCLUSION: One cohesive 4-sentence paragraph (sz=15.0pt, bold=False, clr=#000000)
         const paragraphText =
           s.paragraph ||
           s.bulletPoints?.join(" ") ||
           "";
 
         slide.addText(paragraphText, {
-          x: 0.9,
-          y: 1.95,
-          w: 11.533,
-          h: 4.8,
-          fontSize: 17,
+          x: 0.5,
+          y: 1.5,
+          w: 9.0,
+          h: 3.65,
+          fontSize: 15,
           fontFace: "Calibri",
-          color: "111827",
-          lineSpacingMultiple: 1.5,
+          color: IARE_EXACT_COLORS.bodyText,
+          lineSpacingMultiple: 1.4,
           valign: "top",
         });
       } else {
-        // SLIDES 4 TO 11: 8 CORE TECHNICAL SLIDES (STRICTLY 5 SUBSTANTIVE BULLETS)
+        // 8 CORE TECHNICAL SLIDES: Exactly 5 single-sentence bullet points (sz=14.0pt, bold=False, clr=#000000)
         const bullets = (s.bulletPoints || []).slice(0, 5);
         const bulletProps: pptxgen.TextProps[] = bullets.map((b) => ({
           text: b,
           options: {
             bullet: true,
-            fontSize: 16.5,
+            fontSize: 14,
             fontFace: "Calibri",
-            color: "111827",
+            color: IARE_EXACT_COLORS.bodyText,
             lineSpacingMultiple: 1.35,
-            paraSpaceAfter: 12,
+            paraSpaceAfter: 8,
           },
         }));
 
         slide.addText(bulletProps, {
-          x: 0.9,
-          y: 1.9,
-          w: 11.533,
-          h: 5.1,
+          x: 0.5,
+          y: 1.5,
+          w: 9.0,
+          h: 3.65,
           valign: "top",
         });
       }
@@ -419,30 +413,36 @@ export async function exportToPptx(
 
 /**
  * 2. Export 16:9 PDF Slide Deck via pdf-lib
- * Exact 16:9 widescreen layout matching PowerPoint template (960 x 540)
- * ZERO extra address headers and ZERO footer text lines on Slides 2–13
+ * Exact 1:1 match with PowerPoint template (960 x 540)
  */
 export async function exportToPdfDeck(
   presentation: TechTalkPresentation
 ): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.create();
-  const fontTimesRomanBold = await pdfDoc.embedFont(
-    StandardFonts.TimesRomanBold
-  );
   const fontHelvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const fontHelveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
   const iare = presentation.iareMetadata;
 
-  // Retrieve logo for embedding in PDF
-  const iareLogoDataUrl = iare?.customLogoBase64 || getIareLogoPngBase64();
-  let logoImage = null;
+  // Embed exact extracted template media assets
+  let headerBannerImage = null;
+  let cornerLogoImage = null;
   try {
-    const rawB64 = iareLogoDataUrl.replace(/^data:image\/png;base64,/, "");
-    const logoBytes = Uint8Array.from(atob(rawB64), (c) => c.charCodeAt(0));
-    logoImage = await pdfDoc.embedPng(logoBytes);
+    const b64Banner = IARE_HEADER_BANNER_BASE64.replace(/^data:image\/png;base64,/, "");
+    headerBannerImage = await pdfDoc.embedPng(
+      Uint8Array.from(atob(b64Banner), (c) => c.charCodeAt(0))
+    );
   } catch {
-    // Fallback if logo fails to decode
+    // Fallback
+  }
+
+  try {
+    const b64Logo = IARE_CORNER_LOGO_BASE64.replace(/^data:image\/png;base64,/, "");
+    cornerLogoImage = await pdfDoc.embedPng(
+      Uint8Array.from(atob(b64Logo), (c) => c.charCodeAt(0))
+    );
+  } catch {
+    // Fallback
   }
 
   const studentName =
@@ -450,15 +450,15 @@ export async function exportToPdfDeck(
   const rollNumber = iare?.rollNumber || "";
   const branchName = iare?.department || "";
   const subjectName = iare?.subject || iare?.courseName || "";
-  const assessmentTitle = (
-    iare?.assessmentType || "AAT - TECH TALK"
-  ).toUpperCase();
+  const assessmentTitle =
+    iare?.assessmentType || "AAT - TECH TALK";
 
-  const whiteRgb = hexToPdfRgb("#FFFFFF");
-  const maroonRgb = hexToPdfRgb("#8B0000");
-  const navyRgb = hexToPdfRgb("#002147");
-  const goldRgb = hexToPdfRgb("#C59B27");
-  const charcoalRgb = hexToPdfRgb("#111827");
+  const slideBgRgb = hexToPdfRgb("#" + IARE_EXACT_COLORS.slideBg);
+  const headerBgRgb = hexToPdfRgb("#" + IARE_EXACT_COLORS.headerBannerBg);
+  const sideHeadingRgb = hexToPdfRgb("#" + IARE_EXACT_COLORS.sideHeading);
+  const footerBarRgb = hexToPdfRgb("#" + IARE_EXACT_COLORS.footerBar);
+  const bodyTextRgb = hexToPdfRgb("#" + IARE_EXACT_COLORS.bodyText);
+  const thankYouRgb = hexToPdfRgb("#" + IARE_EXACT_COLORS.thankYouText);
 
   const pageWidth = 960;
   const pageHeight = 540;
@@ -466,243 +466,214 @@ export async function exportToPdfDeck(
   for (const s of presentation.slides) {
     const page = pdfDoc.addPage([pageWidth, pageHeight]);
 
-    // 1. Crisp White Background
+    // 1. Exact Slide Background: #EDEDEE
     page.drawRectangle({
       x: 0,
       y: 0,
       width: pageWidth,
       height: pageHeight,
-      color: whiteRgb,
-    });
-
-    // 2. Subtle Top Institutional Accent Bar (Maroon + Gold)
-    page.drawRectangle({
-      x: 0,
-      y: pageHeight - 6,
-      width: pageWidth,
-      height: 6,
-      color: maroonRgb,
-    });
-    page.drawRectangle({
-      x: 0,
-      y: pageHeight - 8,
-      width: pageWidth,
-      height: 2,
-      color: goldRgb,
+      color: slideBgRgb,
     });
 
     if (s.layout === "title") {
       // ======================================================================
-      // SLIDE 1: EXACT 6-LINE TITLE COVER SLIDE
+      // SLIDE 1: EXACT COVER SLIDE
       // ======================================================================
-      if (logoImage) {
-        page.drawImage(logoImage, {
-          x: 64,
-          y: pageHeight - 95,
-          width: 65,
-          height: 65,
+      // Header Banner Image across top: y = pageHeight - 144, h = 144
+      if (headerBannerImage) {
+        page.drawImage(headerBannerImage, {
+          x: 0,
+          y: pageHeight - 144,
+          width: pageWidth,
+          height: 144,
         });
       }
 
-      // Line 1: Centered [Assessment Type]
-      const assessText = `[ ${assessmentTitle} ]`;
-      const assessWidth = fontTimesRomanBold.widthOfTextAtSize(assessText, 24);
-      page.drawText(assessText, {
-        x: (pageWidth - assessWidth) / 2,
-        y: pageHeight - 140,
-        size: 24,
-        font: fontTimesRomanBold,
-        color: navyRgb,
+      // Shape 'Text 0': AAT - TECH TALK (size=27, bold, align=ctr, clr=#004170)
+      const assessW = fontHelveticaBold.widthOfTextAtSize(assessmentTitle, 27);
+      page.drawText(assessmentTitle, {
+        x: (pageWidth - assessW) / 2,
+        y: pageHeight - 173,
+        size: 27,
+        font: fontHelveticaBold,
+        color: headerBgRgb,
       });
 
-      // Line 2: Left-aligned Topic - [Topic]
-      const topicText = s.title.startsWith("Topic -")
-        ? s.title
-        : `Topic - ${s.title}`;
-      page.drawText(topicText.substring(0, 55), {
-        x: 64,
-        y: pageHeight - 205,
-        size: 22,
-        font: fontTimesRomanBold,
-        color: charcoalRgb,
+      // Shape 'Text 1': Topic - [Topic] (size=23, clr=#004170)
+      const topicText = s.title.replace(/^Topic\s*-\s*/i, "").trim();
+      const topicLine = `Topic - ${topicText}`;
+      page.drawText(topicLine.substring(0, 58), {
+        x: 96,
+        y: pageHeight - 240,
+        size: 23,
+        font: fontHelveticaBold,
+        color: headerBgRgb,
       });
 
-      // Line 3: Subtle horizontal Maroon rule
-      page.drawRectangle({
-        x: 64,
-        y: pageHeight - 225,
-        width: pageWidth - 128,
-        height: 2.5,
-        color: maroonRgb,
-      });
-
-      // Lines 4-7: Cleanly stacked student metadata block
+      // Metadata Rows at x=96
+      // Name:
       page.drawText("Name: ", {
-        x: 64,
-        y: pageHeight - 275,
+        x: 96,
+        y: pageHeight - 336,
         size: 17,
         font: fontHelveticaBold,
-        color: navyRgb,
+        color: headerBgRgb,
       });
       page.drawText(studentName, {
-        x: 155,
-        y: pageHeight - 275,
+        x: 180,
+        y: pageHeight - 336,
         size: 17,
         font: fontHelvetica,
-        color: charcoalRgb,
+        color: bodyTextRgb,
       });
 
+      // Roll No:
       page.drawText("Roll No: ", {
-        x: 64,
-        y: pageHeight - 315,
+        x: 96,
+        y: pageHeight - 384,
         size: 17,
         font: fontHelveticaBold,
-        color: navyRgb,
+        color: headerBgRgb,
       });
       page.drawText(rollNumber, {
-        x: 165,
-        y: pageHeight - 315,
+        x: 195,
+        y: pageHeight - 384,
         size: 17,
         font: fontHelvetica,
-        color: charcoalRgb,
+        color: bodyTextRgb,
       });
 
+      // Branch:
       page.drawText("Branch: ", {
-        x: 64,
-        y: pageHeight - 355,
+        x: 96,
+        y: pageHeight - 432,
         size: 17,
         font: fontHelveticaBold,
-        color: navyRgb,
+        color: headerBgRgb,
       });
       page.drawText(branchName.substring(0, 40), {
-        x: 165,
-        y: pageHeight - 355,
+        x: 190,
+        y: pageHeight - 432,
         size: 17,
         font: fontHelvetica,
-        color: charcoalRgb,
+        color: bodyTextRgb,
       });
 
+      // Subject:
       page.drawText("Subject: ", {
-        x: 64,
-        y: pageHeight - 395,
+        x: 96,
+        y: pageHeight - 480,
         size: 17,
         font: fontHelveticaBold,
-        color: navyRgb,
+        color: headerBgRgb,
       });
       page.drawText(subjectName.substring(0, 45), {
-        x: 165,
-        y: pageHeight - 395,
+        x: 195,
+        y: pageHeight - 480,
         size: 17,
         font: fontHelvetica,
-        color: charcoalRgb,
+        color: bodyTextRgb,
       });
     } else if (s.layout === "thank-you") {
       // ======================================================================
-      // SLIDE 13: CLEAN CENTERED THANK YOU SLIDE (NO EXTRA CLUTTER)
+      // SLIDE 13: EXACT THANK YOU SLIDE
       // ======================================================================
+      if (headerBannerImage) {
+        page.drawImage(headerBannerImage, {
+          x: 0,
+          y: pageHeight - 144,
+          width: pageWidth,
+          height: 144,
+        });
+      }
+
       const thankText = "THANK YOU";
-      const thankW = fontTimesRomanBold.widthOfTextAtSize(thankText, 42);
+      const thankW = fontHelveticaBold.widthOfTextAtSize(thankText, 46);
       page.drawText(thankText, {
         x: (pageWidth - thankW) / 2,
-        y: pageHeight - 250,
-        size: 42,
-        font: fontTimesRomanBold,
-        color: navyRgb,
-      });
-
-      // Subtle Maroon underline rule
-      page.drawRectangle({
-        x: (pageWidth - 200) / 2,
-        y: pageHeight - 268,
-        width: 200,
-        height: 3,
-        color: maroonRgb,
+        y: pageHeight - 280,
+        size: 46,
+        font: fontHelveticaBold,
+        color: thankYouRgb,
       });
     } else {
       // ======================================================================
-      // SLIDES 2 TO 12: CONTENT SLIDE WITH SIDE-HEADING & MAROON UNDERLINE
-      // ZERO EXTRA ADDRESS HEADERS & ZERO FOOTER TEXT LINES
+      // SLIDES 2 TO 12: EXACT CONTENT SLIDES
       // ======================================================================
-      const sideHeading = (s.title || "CONTENT SLIDE").toUpperCase();
+      // Top-Right Logo: x=816, y=pageHeight - 67.2, w=115.2, h=67.2
+      if (cornerLogoImage) {
+        page.drawImage(cornerLogoImage, {
+          x: 816,
+          y: pageHeight - 67,
+          width: 115,
+          height: 67,
+        });
+      }
 
-      page.drawText(sideHeading.substring(0, 55), {
-        x: 64,
-        y: pageHeight - 75,
-        size: 24,
-        font: fontTimesRomanBold,
-        color: navyRgb,
+      // Bottom Footer Bar: x=0, y=0, w=pageWidth, h=38.4, clr=#003366
+      page.drawRectangle({
+        x: 0,
+        y: 0,
+        width: pageWidth,
+        height: 38.4,
+        color: footerBarRgb,
       });
 
-      // Crisp Maroon (#8B0000) accent rule directly underneath the heading
-      page.drawRectangle({
-        x: 64,
-        y: pageHeight - 88,
-        width: 140,
-        height: 3,
-        color: maroonRgb,
+      // Side-Heading
+      const sideHeading = (s.title || "CONTENT SLIDE").toUpperCase();
+      page.drawText(sideHeading.substring(0, 52), {
+        x: 48,
+        y: pageHeight - 79,
+        size: 21,
+        font: fontHelveticaBold,
+        color: sideHeadingRgb,
       });
 
       if (s.layout === "index") {
-        // INDEX SLIDE (1.  to 8.  in Title Case in 2 columns)
+        // INDEX SLIDE
         const items = s.bulletPoints || [];
-        const half = Math.ceil(items.length / 2);
-        const col1 = items.slice(0, half);
-        const col2 = items.slice(half);
-
-        let y1 = pageHeight - 145;
-        col1.forEach((item) => {
-          page.drawText(item.substring(0, 48), {
-            x: 64,
-            y: y1,
-            size: 17,
-            font: fontHelveticaBold,
-            color: charcoalRgb,
+        let curY = pageHeight - 144;
+        items.forEach((item) => {
+          page.drawText(item.substring(0, 56), {
+            x: 48,
+            y: curY,
+            size: 15.5,
+            font: fontHelvetica,
+            color: bodyTextRgb,
           });
-          y1 -= 48;
-        });
-
-        let y2 = pageHeight - 145;
-        col2.forEach((item) => {
-          page.drawText(item.substring(0, 48), {
-            x: 500,
-            y: y2,
-            size: 17,
-            font: fontHelveticaBold,
-            color: charcoalRgb,
-          });
-          y2 -= 48;
+          curY -= 36;
         });
       } else if (s.layout === "paragraph") {
-        // INTRODUCTION OR CONCLUSION (STRICTLY ONE PROSE PARAGRAPH, NO BULLETS)
+        // INTRODUCTION OR CONCLUSION
         const paragraphText =
           s.paragraph ||
           s.bulletPoints?.join(" ") ||
           "";
 
         page.drawText(paragraphText, {
-          x: 64,
-          y: pageHeight - 150,
-          size: 16.5,
+          x: 48,
+          y: pageHeight - 144,
+          size: 14.5,
           font: fontHelvetica,
-          color: charcoalRgb,
-          maxWidth: pageWidth - 128,
-          lineHeight: 28,
+          color: bodyTextRgb,
+          maxWidth: pageWidth - 96,
+          lineHeight: 26,
         });
       } else {
-        // 8 CORE TECHNICAL SLIDES (STRICTLY 5 SUBSTANTIVE BULLETS)
+        // 8 CORE TECHNICAL SLIDES
         const bullets = (s.bulletPoints || []).slice(0, 5);
-        let bY = pageHeight - 145;
+        let bY = pageHeight - 144;
         bullets.forEach((b) => {
           page.drawText(`•  ${b}`, {
-            x: 64,
+            x: 48,
             y: bY,
-            size: 15.5,
+            size: 13.5,
             font: fontHelvetica,
-            color: charcoalRgb,
-            maxWidth: pageWidth - 128,
-            lineHeight: 22,
+            color: bodyTextRgb,
+            maxWidth: pageWidth - 96,
+            lineHeight: 20,
           });
-          bY -= 58;
+          bY -= 56;
         });
       }
     }
