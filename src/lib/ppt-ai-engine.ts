@@ -23,12 +23,20 @@ Do NOT include markdown fences, backticks, or preamble. Return pure JSON.
 Each slide object must have:
 - "id": unique string
 - "slideNumber": number (1 to N)
-- "layout": one of "title", "index", "paragraph", "bullets", "thank-you", "two-column", "three-card", "process-flow", "comparison-table", "code-algorithm", "metric-highlight"
-- "title": concise, punchy slide title (For core technical slides, MUST be in ALL CAPS, e.g. "1. CORE FOUNDATIONS", "2. ARCHITECTURAL MECHANISM")
+- "layout": one of "title", "index", "paragraph", "bullets", "thank-you"
+- "title": concise, punchy slide title.
+  * Slide 1: "Topic - [Topic Title]"
+  * Slide 2: "INDEX"
+  * Slide 3: "INTRODUCTION"
+  * Slides 4 to N-2 (8 Core Slides): MUST be in ALL CAPS matching the exact 8-step pedagogical progression.
+  * Slide N-1: "CONCLUSION"
+  * Slide N: "THANK YOU"
 - "subtitle": optional subtitle
-- "category": e.g. "AAT - TECH TALK", "INDEX", "INTRODUCTION", "CORE CONCEPTS", "CONCLUSION"
-- "bulletPoints": optional array of strings (For core technical slides, exactly 5 detailed, substantive 1-2 sentence bullets)
-- "paragraph": optional 4-5 sentence academic paragraph (Used for Slide 3 INTRODUCTION and Slide N-1 CONCLUSION)
+- "category": e.g. "AAT - TECH TALK", "ROADMAP", "DOMAIN OVERVIEW", "CORE TECHNICAL MODULE", "SUMMARY", "Q&A"
+- "bulletPoints": optional array of strings:
+  * Slide 2 (INDEX): Array of items formatted as "1.  [Title Case]", "2.  [Title Case]", ..., "8.  [Title Case]" (with two spaces after period).
+  * Slides 4 to N-2: Exactly 5 clean, single-sentence bullet points per slide (complete natural technical sentences without bold labels like "Overview:" or "Benefit:").
+- "paragraph": optional 4-sentence academic prose paragraph (Used strictly for Slide 3 INTRODUCTION and Slide N-1 CONCLUSION; strictly NO bullet points on these slides).
 - "speakerNotes": exactly 3 to 4 complete, conversational sentences explaining this slide out loud to an academic seminar audience.`;
 
 /**
@@ -378,7 +386,14 @@ export function toTitleCase(str: string): string {
     .map((w) => (w.length > 0 ? w[0].toUpperCase() + w.slice(1) : ""))
     .join(" ")
     .replace(/: [a-z]/g, (m) => m.toUpperCase())
-    .replace(/& [a-z]/g, (m) => m.toUpperCase());
+    .replace(/& [a-z]/g, (m) => m.toUpperCase())
+    .replace(/\bAi\b/g, "AI")
+    .replace(/\bMl\b/g, "ML")
+    .replace(/\bCpu\b/g, "CPU")
+    .replace(/\bGpu\b/g, "GPU")
+    .replace(/\bNpu\b/g, "NPU")
+    .replace(/\bVs\b/g, "vs.")
+    .replace(/\bIare\b/g, "IARE");
 }
 
 export function synthesizeIarePresentation(options: GenerateTechTalkOptions): TechTalkSlide[] {
@@ -410,186 +425,169 @@ export function synthesizeIarePresentation(options: GenerateTechTalkOptions): Te
     lower.includes("llm") ||
     lower.includes("vision") ||
     lower.includes("transformer");
-  const _isCrypto =
-    lower.includes("crypto") ||
-    lower.includes("security") ||
-    lower.includes("quantum") ||
-    lower.includes("tls") ||
-    lower.includes("rsa") ||
-    lower.includes("cipher") ||
-    lower.includes("blockchain");
-  const _isSystems =
-    lower.includes("cloud") ||
-    lower.includes("os") ||
-    lower.includes("kernel") ||
-    lower.includes("network") ||
-    lower.includes("distribut") ||
-    lower.includes("microservice") ||
-    lower.includes("kafka") ||
-    lower.includes("database");
 
-  // Generate K core technical slide titles in ALL CAPS
+  // Generate 8 core technical slide titles in ALL CAPS following exact pedagogical progression
   let coreTitles: string[] = [];
   let coreBulletsMatrix: string[][] = [];
 
   if (isEnsemble) {
     coreTitles = [
-      "BAGGING: BOOTSTRAP AGGREGATING",
-      "FINE-TUNING BAGGING MODELS",
-      "RANDOM FORESTS ARCHITECTURE",
-      "BOOSTING: SEQUENTIAL RESIDUAL LEARNING",
-      "GRADIENT BOOSTING & ADAPTIVE RESIDUAL MINIMIZATION",
-      "HYPERPARAMETER TUNING & LEARNING RATE SCHEDULES",
-      "REGULARIZATION STRATEGIES & OVERFITTING MITIGATION",
-      "COMPARATIVE BENCHMARKS & REAL-WORLD DEPLOYMENT",
+      "CORE CONCEPTS: BAGGING AND ENSEMBLE LEARNING",
+      "FIRST TECHNIQUE: BOOTSTRAP AGGREGATION (BAGGING)",
+      "FINE-TUNING BAGGING & RANDOM FORESTS",
+      "SECOND TECHNIQUE: SEQUENTIAL RESIDUAL LEARNING (BOOSTING)",
+      "FINE-TUNING GRADIENT BOOSTING & REGULARIZATION",
+      "BAGGING VS. BOOSTING: A COMPARATIVE ANALYSIS",
+      "ADVANCED TECHNIQUES & HYBRID ENSEMBLE ARCHITECTURES",
+      "APPLICATIONS AND FUTURE DIRECTIONS",
     ];
 
     coreBulletsMatrix = [
-      // 1. Principles
+      // 1. Core Concept & Definition
       [
-        "Combines multiple weak base learners to construct a robust aggregate hypothesis with strictly superior generalization bounds.",
-        "Decomposes generalization error into bias, variance, and irreducible noise using formal bias-variance trade-off formulations.",
+        "Ensemble learning combines multiple weak base learners to construct an aggregate hypothesis with strictly superior generalization bounds.",
+        "Generalization error decomposes mathematically into bias, variance, and irreducible noise using formal bias-variance trade-off formulations.",
         "Inductive bias is mitigated by exploring multiple diverse regions of the underlying hypothesis space concurrently.",
-        "Guarantees that when individual classifiers make independent errors, aggregate majority voting error approaches zero exponentially.",
-        "Forms the theoretical foundation for high-performance tabular learning pipelines across production industry benchmarks.",
+        "Aggregate majority voting reduces individual uncorrelated base learner errors toward zero at an exponential rate.",
+        "Provides the foundational theoretical framework for state-of-the-art tabular learning benchmarks across industrial production applications.",
       ],
-      // 2. Bagging
+      // 2. First Primary Technique: Bagging
       [
-        "Draws multiple bootstrap replacement subsets (B samples of size N) uniformly from the empirical training distribution.",
-        "Trains independent, fully grown high-variance base estimators (e.g., unpruned decision trees) in parallel across compute cores.",
-        "Aggregates predictions via uniform arithmetic averaging for continuous regression or hard/soft majority voting for classification.",
-        "Leaves approximately 36.8% of training observations out-of-bag (OOB), enabling built-in unbiased cross-validation error estimation.",
-        "Maintains invariant expected bias while systematically attenuating variance by a factor roughly proportional to 1/B.",
+        "Bootstrap aggregating draws multiple uniform replacement subsets of size N from the empirical training distribution.",
+        "Trains independent, fully grown high-variance base estimators such as unpruned decision trees concurrently across parallel compute cores.",
+        "Aggregates predictions via uniform arithmetic averaging for continuous regression or hard and soft majority voting for classification.",
+        "Leaves approximately thirty-six percent of training observations out-of-bag, enabling built-in unbiased cross-validation error estimation.",
+        "Maintains invariant expected bias while systematically attenuating ensemble variance by a factor proportional to subset count.",
       ],
-      // 3. Random Forests
+      // 3. Fine-Tuning First Technique
       [
-        "Introduces random feature sub-sampling (mtry = sqrt(p)) at every internal node split to decorrelate individual tree architectures.",
-        "Decorrelation directly diminishes pairwise tree correlation (rho), driving aggregate ensemble variance toward its absolute minimum.",
-        "Demonstrates near-complete immunity to sample outliers and monotonic feature transformations without requiring feature normalization.",
-        "Computes Mean Decrease in Impurity (MDI) and permutation feature importances for interpretability in safety-critical applications.",
-        "Scales effortlessly across multi-core CPUs and GPU-accelerated gradient tree libraries like cuML with linear speedup.",
+        "Introduces random feature sub-sampling at every internal node split to decorrelate individual tree architectures.",
+        "Systematic decorrelation diminishes pairwise tree correlation, driving aggregate ensemble variance toward its theoretical minimum.",
+        "Fine-tunes the maximum depth and minimum samples per split to eliminate leaf overfitting while preserving model expressive capacity.",
+        "Optimizes Mean Decrease in Impurity and permutation feature importances for interpretability across safety-critical domains.",
+        "Scales computational throughput linearly across multi-core CPUs and GPU-accelerated gradient tree libraries without memory thrashing.",
       ],
-      // 4. Boosting
+      // 4. Second Primary Technique: Boosting
       [
-        "Constructs an additive ensemble sequentially where each successive base learner focuses directly on previously misclassified samples.",
-        "AdaBoost dynamically updates instance distribution weights, assigning exponentially higher penalties to mispredicted observations.",
-        "Computes learner stage weights (alpha_m) proportional to the logarithm of their empirical classification accuracy.",
+        "Constructs an additive ensemble sequentially where each successive base learner focuses directly on previously misclassified observations.",
+        "AdaBoost dynamically updates instance distribution weights, assigning exponentially higher penalties to mispredicted samples.",
+        "Computes learner stage weights proportional to the logarithm of their empirical classification accuracy at each iteration.",
         "Converts weak learners possessing accuracy only slightly better than random guessing into an arbitrarily strong predictor.",
-        "Substantially drives down training bias within early iterations, though sensitive to noisy labels and extreme outliers without tuning.",
+        "Substantially reduces training bias within early iterations through targeted sequential error correction.",
       ],
-      // 5. Gradient Boosting
+      // 5. Fine-Tuning Second Technique
       [
-        "Formulates ensemble optimization as functional gradient descent over an arbitrary differentiable convex or non-convex loss function.",
+        "Formulates ensemble optimization as functional gradient descent over arbitrary differentiable convex or non-convex loss functions.",
         "Each consecutive weak tree fits directly to negative pseudo-residuals computed from the preceding ensemble stage.",
-        "Supports versatile task objectives including Squared Error, Log-Loss, Huber Loss for outlier dampening, and Quantile Loss.",
-        "Modern implementations (XGBoost, LightGBM, CatBoost) leverage second-order Taylor approximations (Hessian matrices) for split scoring.",
-        "Histogram-based feature binning reduces continuous split-finding complexity from O(N log N) to O(bin_count).",
+        "Learning rate shrinkage scales newly added tree contributions, preventing step overshoots and improving test error stability.",
+        "Second-order Taylor approximations compute optimal split scores efficiently within modern gradient boosting engines.",
+        "Histogram-based continuous feature binning accelerates split-finding complexity while conserving GPU memory bandwidth.",
       ],
-      // 6. Hyperparameter Fine-Tuning
+      // 6. Comparative Analysis
       [
-        "Learning rate shrinkage (eta in [0.01, 0.1]) scales newly added tree contributions, preventing step overshoots and improving test error.",
-        "Calibrates maximum tree depth (depth 3 to 6) to constrain interaction orders while preventing exponential leaf explosion.",
-        "Subsample ratios (stochastic gradient boosting row/column subsampling in [0.7, 0.9]) introduce stochastic regularization.",
-        "Minimum child weight and gamma thresholds enforce strict partition purity before allowing further leaf splitting.",
-        "Early stopping monitoring validation loss curves prevents unnecessary boosting iterations and minimizes inference latency.",
+        "Bagging reduces variance while preserving bias, whereas boosting systematically minimizes bias through sequential residual correction.",
+        "Bagging trains independent base estimators in parallel, while boosting requires sequential computation across consecutive dependency rounds.",
+        "Bagging demonstrates superior robustness against noisy labels, whereas standard boosting can overfit outliers without tuning.",
+        "Empirical benchmarks across tabular datasets confirm gradient boosted decision trees achieve top accuracy on structured data.",
+        "Computational profiling indicates bagging achieves faster training throughput while boosting delivers superior parameter compactness.",
       ],
-      // 7. Regularization & Overfitting
+      // 7. Advanced Techniques & Hybridization
       [
-        "L1 (Lasso) and L2 (Ridge) leaf weight penalties constrain magnitude coefficients, smoothing decision boundaries across noisy margins.",
-        "Post-pruning cost-complexity pruning (ccp_alpha) removes statistically insignificant leaf branches after full tree construction.",
-        "Feature sub-sampling prevents dominant high-variance features from masking subtle, predictive secondary variables.",
-        "Categorical target encoding with target leakage regularization preserves high-cardinality signal without one-hot dimensionality explosion.",
-        "Cross-validation stability checks ensure hyperparameters generalize across temporal out-of-time splits in production pipelines.",
+        "L1 and L2 leaf weight regularization terms constrain model complexity and smooth decision boundaries across noisy margins.",
+        "Stochastic gradient boosting applies row and column sub-sampling per iteration to introduce randomized regularization.",
+        "Early stopping criteria monitor holdout validation loss curves to halt training before empirical over-fitting occurs.",
+        "Categorical target encoding with ordered target statistics prevents target leakage while supporting high-cardinality features.",
+        "Hybrid stacking architectures combine gradient boosted decision trees with neural networks to maximize multi-modal predictive accuracy.",
       ],
-      // 8. Comparative Benchmarks
+      // 8. Applications and Future Directions
       [
-        "Empirical benchmarks across Kaggle and Tabular benchmarks demonstrate GBDT architectures consistently outperform deep neural nets on tabular data.",
-        "Bagging excels in noisy, high-variance domains with rapid parallel training; Boosting dominates in low-noise, structured prediction tasks.",
-        "Inference latency optimized using TreeLite and ONNX compilation into compiled C routines for sub-millisecond scoring.",
-        "Deployed widely in credit risk assessment, algorithmic trading, search ranking, fraud detection, and medical diagnostics.",
-        "Emerging research focuses on Neuro-Tree hybrids and differentiable decision trees compatible with end-to-end deep learning pipelines.",
+        "Production deployment across credit scoring, fraud detection, algorithmic trading, and medical diagnostic classification.",
+        "Compilation to optimized C code via TreeLite and ONNX runtimes achieves sub-millisecond real-time scoring latencies.",
+        "Differentiable decision trees bridge tabular tree algorithms with end-to-end deep learning neural architectures.",
+        "Neuro-tree hybrid pipelines automate feature discovery while maintaining transparent decision interpretability.",
+        "Ongoing research focuses on quantum-enhanced ensemble algorithms and privacy-preserving federated boosting across distributed devices.",
       ],
     ];
   } else if (isAiMl) {
     coreTitles = [
-      "FOUNDATIONAL ARCHITECTURE & MATHEMATICAL FORMULATION",
-      "FEATURE REPRESENTATION & EMBEDDING SPACES",
-      "MODEL TRAINING DYNAMICS & GRADIENT PROPAGATION",
-      "HYPERPARAMETER FINE-TUNING & ADAPTIVE OPTIMIZATION",
-      "INFERENCE ACCELERATION & MODEL QUANTIZATION",
-      "QUANTITATIVE BENCHMARK EVALUATION & ERROR METRICS",
-      "ROBUSTNESS, GENERALIZATION & REGULARIZATION",
-      "PRODUCTION DEPLOYMENT & INDUSTRIAL APPLICATIONS",
+      "CORE CONCEPTS & THEORETICAL FOUNDATIONS",
+      "PRIMARY ARCHITECTURAL MECHANISMS & REPRESENTATIONS",
+      "FINE-TUNING ARCHITECTURES & HYPERPARAMETER OPTIMIZATION",
+      "SECONDARY MECHANISMS & ATTENTION WORKFLOWS",
+      "FINE-TUNING REGULARIZATION & LOSS DYNAMICS",
+      "ALGORITHMIC MODELS: A COMPARATIVE ANALYSIS",
+      "ADVANCED TECHNIQUES & HYBRID ACCELERATION",
+      "APPLICATIONS AND FUTURE DIRECTIONS",
     ];
 
     coreBulletsMatrix = [
       [
-        "Formulates the core analytical problem space into continuous vector representations governed by formal loss objectives.",
-        "Establishes structural invariants and inductive biases designed to mirror natural symmetries within the problem domain.",
+        `Establishes the foundational theoretical framework and mathematical principles governing ${titleTopic}.`,
+        "Formulates the analytical problem space into continuous vector representations governed by rigorous loss objectives.",
+        "Structural invariants and inductive biases mirror natural symmetries within the problem domain.",
         "Decomposes system input tensors through multi-layered linear and non-linear parametric activation functions.",
-        "Maintains mathematically bounded gradients across deep computational graphs to prevent vanishing and exploding transitions.",
-        "Enables end-to-end differentiability across all intermediate feature transformation layers during runtime execution.",
+        "Maintains mathematically bounded gradients across deep computational graphs to prevent numerical divergence.",
       ],
       [
         "Projects high-dimensional raw observations into dense, low-dimensional Riemannian embedding manifolds.",
         "Preserves semantic similarity metrics using learned cosine distances and geometric contrastive objectives.",
         "Applies positional and contextual token encodings to capture intricate long-range sequence dependencies.",
-        "Applies normalization layers (LayerNorm, RMSNorm) to stabilize internal covariate shift across training epochs.",
-        "Enables cross-modal semantic mapping between unstructured text, numerical signals, and perceptual modalities.",
+        "Normalizes activation distributions to stabilize internal covariate shift across training iterations.",
+        "Enables cross-modal semantic mapping between unstructured text, numerical signals, and perceptual representations.",
       ],
       [
-        "Executes mini-batch stochastic optimization using backpropagation to compute analytical partial derivatives.",
-        "Employs adaptive moment estimation (AdamW) with decoupled weight decay for disciplined parameter convergence.",
-        "Implements mixed-precision FP16/BF16 arithmetic pipelines to double memory throughput and minimize hardware stall cycles.",
-        "Applies gradient clipping thresholds to maintain stable parameter step updates during steep loss curvature transitions.",
-        "Monitors learning curves continuously using validation checkpoints to prevent empirical training divergence.",
-      ],
-      [
-        "Implements cosine annealing learning rate schedules with linear warmup to ensure smooth basin exploration.",
+        "Implements cosine annealing learning rate schedules with linear warmup to ensure smooth loss basin convergence.",
         "Tunes critical hyperparameters including batch size, weight decay, dropout probability, and layer width.",
-        "Utilizes Bayesian optimization and Tree-structured Parzen Estimators (TPE) for automated search space traversal.",
+        "Utilizes Bayesian optimization and Tree-structured Parzen Estimators for automated search space traversal.",
         "Balances computational budget against convergence speed to identify the Pareto-optimal parameter frontier.",
         "Enforces deterministic seed control across all random generators to guarantee strict scientific reproducibility.",
       ],
       [
-        "Compresses full-precision FP32 parameters into INT8/INT4 representations using Post-Training Quantization (PTQ).",
-        "Prunes redundant weight connections and attention heads without incurring statistically significant accuracy penalties.",
-        "Fuses adjacent kernel operations (e.g., convolution + bias + activation) into unified compiled hardware primitives.",
-        "Utilizes KV-caching and memory-paged attention blocks to achieve linear memory scaling during sequential generation.",
-        "Reduces end-to-end P99 inference latency by up to 4.5x while conserving GPU/NPU memory bandwidth.",
+        "Processes partitioned data blocks concurrently through multi-headed attention and cross-modal projection heads.",
+        "Executes discrete state machine transitions with formal verification to eliminate race conditions.",
+        "Implements mixed-precision arithmetic pipelines to double memory throughput and minimize hardware stall cycles.",
+        "Applies gradient clipping thresholds to maintain stable parameter step updates during steep loss curvature transitions.",
+        "Integrates real-time telemetry hooks to monitor per-step gradient norms and activation magnitudes.",
       ],
       [
-        "Evaluates quantitative performance using rigorous holdout test suites and stratified k-fold cross-validation.",
-        "Measures domain-specific metrics including Precision, Recall, F1-Score, ROC-AUC, and Mean Squared Error.",
-        "Benchmarks empirical throughput in queries-per-second (QPS) and validates cold-start operational latency.",
-        "Compares empirical accuracy against strong baseline algorithms under identical hardware and computational limits.",
-        "Conducts comprehensive ablation studies to isolate and quantify the marginal gain of each architectural component.",
-      ],
-      [
-        "Applies data augmentation strategies and stochastic perturbation to improve out-of-distribution resilience.",
+        "L1 and L2 weight penalties constrain parameter magnitude coefficients, smoothing decision boundaries across noisy margins.",
         "Mitigates overfitting through dropout, spectral regularization, and early stopping on validation loss inflection points.",
         "Examines adversarial vulnerability by evaluating model stability against engineered input perturbations.",
-        "Enforces calibration techniques (temperature scaling) to align predicted probabilities with empirical frequencies.",
+        "Enforces temperature calibration techniques to align predicted probabilities with empirical frequencies.",
         "Ensures fairness, demographic parity, and robustness across edge cases in high-stakes operational environments.",
       ],
       [
-        "Packages validated models into containerized microservices utilizing Docker, Triton Inference Server, and ONNX.",
+        "Comprehensive empirical benchmarks validate performance advantages against conventional baseline architectures.",
+        "Achieves marked throughput amplification while simultaneously reducing per-inference computational cycle consumption.",
+        "Demonstrates negligible memory footprint growth during sustained long-duration stress test runs at peak load.",
+        "Maintains flat, predictable response time curves across increasing concurrency levels where legacy solutions saturate.",
+        "Publishes reproducible measurement methodology and telemetry logs conforming to standard academic benchmarks.",
+      ],
+      [
+        "Compresses full-precision parameters into low-bit representations using Post-Training Quantization.",
+        "Prunes redundant weight connections and attention heads without incurring statistically significant accuracy penalties.",
+        "Fuses adjacent kernel operations into unified compiled hardware primitives for optimal throughput.",
+        "Utilizes KV-caching and memory-paged attention blocks to achieve linear memory scaling during sequential generation.",
+        "Reduces end-to-end P99 inference latency significantly while conserving GPU and NPU memory bandwidth.",
+      ],
+      [
+        "Packages validated models into containerized microservices utilizing high-throughput inference engines.",
         "Implements real-time telemetry pipelines to monitor data drift, concept drift, and prediction latency in production.",
-        "Employs canary deployments and blue-green release strategies to guarantee zero downtime during model updates.",
         "Deploys into autonomous systems, smart manufacturing, financial surveillance, and enterprise analytics platforms.",
-        "Outlines prospective research directions including neuromorphic execution and self-supervised continuous adaptation.",
+        "Reduces operational infrastructure costs through superior hardware efficiency and automated elastic scaling.",
+        "Establishes a resilient foundation for the next generation of scalable and intelligent software systems.",
       ],
     ];
   } else {
     coreTitles = [
-      "CORE THEORETICAL FOUNDATIONS & ARCHITECTURE",
-      "SYSTEM ARCHITECTURE & DATA FLOW MECHANICS",
-      "ALGORITHMIC EXECUTION & PROCESS STATE TRANSITIONS",
-      "PARAMETER FINE-TUNING & OPTIMIZATION METHODOLOGIES",
-      "SCALABILITY, CONCURRENCY & MEMORY MANAGEMENT",
-      "COMPARATIVE BENCHMARK ANALYSIS & PERFORMANCE METRICS",
-      "SYSTEM TRADE-OFFS, RESILIENCE & FAILURE RECOVERY",
-      "INDUSTRIAL APPLICATIONS & FUTURE ENGINEERING TRENDS",
+      "CORE CONCEPTS & THEORETICAL FOUNDATIONS",
+      "PRIMARY ARCHITECTURAL PIPELINES & DATA FLOW",
+      "FINE-TUNING SYSTEM BUFFERS & RUNTIME PARAMETERS",
+      "SECONDARY SUBSYSTEMS & CONCURRENCY MECHANISMS",
+      "FINE-TUNING RESOURCE SCHEDULING & CACHE LOCALITY",
+      "ARCHITECTURAL APPROACHES: A COMPARATIVE ANALYSIS",
+      "ADVANCED TECHNIQUES & RESILIENCE HYBRIDIZATION",
+      "APPLICATIONS AND FUTURE DIRECTIONS",
     ];
 
     coreBulletsMatrix = [
@@ -608,13 +606,6 @@ export function synthesizeIarePresentation(options: GenerateTechTalkOptions): Te
         "Integrates real-time telemetry hooks to track per-packet serialization, deserialization, and transit latencies.",
       ],
       [
-        "Executes discrete state machine transitions with formal verification to eliminate race conditions and deadlocks.",
-        "Processes partitioned data blocks in parallel utilizing vectorized SIMD instructions and multi-core thread pools.",
-        "Applies continuous checkpointing to persist incremental state snapshots without halting runtime execution loops.",
-        "Validates computational intermediate results against mathematical invariant assertions before final commit.",
-        "Ensures exact-once processing semantics through deterministic sequence numbering and deduplication windows.",
-      ],
-      [
         "Fine-tunes operational parameters including buffer capacities, thread pool allocations, and batch flush timeouts.",
         "Applies adaptive throttling and backpressure signaling to safeguard downstream services during load spikes.",
         "Calibrates timeout thresholds and exponential backoff retry schedules based on live empirical latency profiles.",
@@ -622,25 +613,32 @@ export function synthesizeIarePresentation(options: GenerateTechTalkOptions): Te
         "Automates dynamic parameter reconfiguration through runtime control planes without requiring process restarts.",
       ],
       [
-        "Implements horizontal partitioning (sharding) to scale throughput linearly across heterogeneous compute nodes.",
-        "Optimizes CPU cache locality (L1/L2/L3) by aligning internal data structures along cache line boundaries.",
+        "Executes discrete state machine transitions with formal verification to eliminate race conditions and deadlocks.",
+        "Processes partitioned data blocks in parallel utilizing vectorized instructions and multi-core thread pools.",
+        "Applies continuous checkpointing to persist incremental state snapshots without halting runtime execution loops.",
+        "Validates computational intermediate results against mathematical invariant assertions before final commit.",
+        "Ensures exact-once processing semantics through deterministic sequence numbering and deduplication windows.",
+      ],
+      [
+        "Optimizes CPU cache locality by aligning internal data structures along sixty-four byte cache line boundaries.",
         "Controls memory fragmentation utilizing custom slab allocators, avoiding erratic garbage collection pauses.",
-        "Demonstrates sub-10ms P99 latency guarantees under concurrent transaction volumes exceeding 50,000 requests/sec.",
-        "Employs read-replicas and distributed caching layers (Redis/Memcached) to offload repetitive analytical queries.",
+        "Demonstrates sub-millisecond latency guarantees under concurrent transaction volumes exceeding high production thresholds.",
+        "Employs read-replicas and distributed caching layers to offload repetitive analytical queries effectively.",
+        "Dynamically rebalances query workloads across heterogeneous processor cores to prevent thermal throttling.",
       ],
       [
         "Comprehensive empirical benchmarks validate performance advantages against conventional legacy architectures.",
-        "Achieves up to 4x throughput amplification while simultaneously reducing per-transaction CPU cycle consumption.",
-        "Demonstrates negligible memory footprint growth during sustained 72-hour stress test runs at peak load.",
+        "Achieves marked throughput amplification while simultaneously reducing per-transaction CPU cycle consumption.",
+        "Demonstrates negligible memory footprint growth during sustained long-duration stress test runs at peak load.",
         "Maintains flat, predictable response time curves across increasing concurrency levels where legacy solutions saturate.",
         "Publishes reproducible measurement methodology and telemetry logs conforming to standard academic benchmarks.",
       ],
       [
-        "Examines foundational engineering trade-offs between consistency, availability, and partition tolerance (CAP theorem).",
+        "Examines foundational engineering trade-offs between consistency, availability, and partition tolerance.",
         "Balances the performance benefits of aggressive in-memory caching against the overhead of synchronous write durability.",
         "Implements automated circuit breakers and failover mechanisms to isolate and recover from node failures instantaneously.",
         "Ensures zero data loss during simulated catastrophic infrastructure failures using distributed quorum replicas.",
-        "Minimizes deployment complexity through clear operational runbooks, declarative infrastructure, and automated health probes.",
+        "Minimizes deployment complexity through declarative infrastructure, automated health probes, and self-healing nodes.",
       ],
       [
         "Widely adopted across mission-critical sectors including financial trading, telecommunications, aerospace, and cloud scale.",
@@ -654,7 +652,7 @@ export function synthesizeIarePresentation(options: GenerateTechTalkOptions): Te
 
   // Adjust core arrays to match coreCount
   while (coreTitles.length < coreCount) {
-    coreTitles.push("ADVANCED TECHNICAL SUBSYSTEM & ENGINEERING METRICS");
+    coreTitles.push("ADVANCED SUBSYSTEM ARCHITECTURE & METRICS");
     coreBulletsMatrix.push([
       `Examines advanced subsystem mechanics and internal execution dynamics for ${titleTopic}.`,
       "Applies low-level profiling to identify memory bottlenecks, instruction cache misses, and pipeline stalls.",
@@ -666,7 +664,7 @@ export function synthesizeIarePresentation(options: GenerateTechTalkOptions): Te
   coreTitles = coreTitles.slice(0, coreCount);
   coreBulletsMatrix = coreBulletsMatrix.slice(0, coreCount);
 
-  // 1. Cover Slide
+  // 1. Cover Slide (Exact 6-line structure)
   const s1: TechTalkSlide = {
     id: "aat-slide-1",
     slideNumber: 1,
@@ -688,9 +686,9 @@ export function synthesizeIarePresentation(options: GenerateTechTalkOptions): Te
     speakerNotes: `Respected Faculty and dear peers, I am ${studentName}, bearing roll number ${rollNo} from the Department of ${branch}. Today, I am presenting my ${assessment} on the topic "${titleTopic}" under the subject ${subject}. In this presentation, we will walk through the core theoretical foundations, architectural mechanisms, comparative benchmarks, and real-world engineering impact.`,
   };
 
-  // 2. INDEX Slide (Numbered 1 to 8 matching core titles in Title Case)
+  // 2. INDEX Slide (Numbered 1.  to 8.  with two spaces in Title Case)
   const indexNumberedList = coreTitles.map(
-    (t, idx) => `${idx + 1}. ${toTitleCase(t)}`
+    (t, idx) => `${idx + 1}.  ${toTitleCase(t)}`
   );
 
   const s2: TechTalkSlide = {
@@ -704,8 +702,8 @@ export function synthesizeIarePresentation(options: GenerateTechTalkOptions): Te
     speakerNotes: `On this index slide, we outline the roadmap of our technical presentation. We will methodically progress through these core modules, starting from theoretical foundations to fine-tuning, comparative evaluation, and industrial applications.`,
   };
 
-  // 3. INTRODUCTION Slide
-  const introParagraph = `${titleTopic} represents a critical cornerstone in modern computational engineering and problem-solving architectures. By transitioning away from brittle monolithic paradigms, this methodology addresses fundamental scaling, variance, and throughput limitations inherent in conventional systems. The underlying framework leverages rigorous mathematical formulations, adaptive state coordination, and iterative optimization to guarantee deterministic execution bounds under volatile production workloads. Throughout this technical seminar, we systematically unpack the architectural mechanics, algorithmic workflows, hyperparameter fine-tuning strategies, and empirical comparative benchmarks that establish its engineering superiority.`;
+  // 3. INTRODUCTION Slide (Strictly ONE cohesive 4-sentence academic paragraph, NO bullets)
+  const introParagraph = `${titleTopic} represents a pivotal paradigm in modern computational engineering, establishing rigorous mathematical principles for scalable, deterministic problem-solving. By decomposing complex analytical problem spaces into modular, structured sub-components, this framework systematically addresses longstanding variance, throughput, and latency bottlenecks. In mission-critical enterprise environments, disciplined parameter calibration and runtime optimization are essential to achieve peak algorithmic efficiency and maintain operational stability under volatile workloads. Throughout this technical presentation, we systematically unpack the underlying architectural mechanics, algorithmic workflows, comparative benchmarks, and real-world implementation strategies.`;
 
   const s3: TechTalkSlide = {
     id: "aat-slide-3",
@@ -718,7 +716,7 @@ export function synthesizeIarePresentation(options: GenerateTechTalkOptions): Te
     speakerNotes: `To introduce our topic, ${titleTopic} represents a pivotal paradigm in modern computing. By addressing traditional scalability and latency bottlenecks, it enables high-throughput, fault-tolerant execution. Throughout this talk, we will break down its fundamental mechanisms and practical optimization strategies.`,
   };
 
-  // 4..N-2: Core Slides
+  // 4..N-2: 8 Core Content Slides (Strictly 5 clean, single-sentence bullet points)
   const coreSlides: TechTalkSlide[] = coreTitles.map((titleText, idx) => ({
     id: `aat-slide-${idx + 4}`,
     slideNumber: idx + 4,
@@ -736,8 +734,8 @@ export function synthesizeIarePresentation(options: GenerateTechTalkOptions): Te
     speakerNotes: `On this slide covering ${titleText}, we examine the key algorithmic dynamics and parameters. Notice how each component contributes to overall system stability and performance efficiency.`,
   }));
 
-  // N-1: CONCLUSION Slide
-  const conclusionParagraph = `In summary, our investigation into ${titleTopic} demonstrates that combining robust theoretical foundations with disciplined hyperparameter fine-tuning yields substantial performance, resilience, and efficiency dividends. The empirical benchmarks confirm marked reductions in latency and computational overhead alongside superior generalization capability across diverse engineering constraints. By mitigating historical architectural trade-offs between accuracy and resource consumption, the proposed framework establishes a scalable standard for mission-critical deployments. As computational demands continue to accelerate, extending these methodologies into hybrid, real-time edge environments will drive the next generation of resilient engineering innovations.`;
+  // N-1: CONCLUSION Slide (Strictly ONE cohesive 4-sentence academic summary paragraph, NO bullets)
+  const conclusionParagraph = `In summary, our investigation into ${titleTopic} validates that combining robust foundational principles with disciplined fine-tuning yields decisive throughput and computational efficiency dividends. The empirical benchmarks confirm marked reductions in latency and error rates alongside superior generalization capability across demanding real-world constraints. By resolving traditional architectural trade-offs between precision and resource utilization, this framework establishes a proven standard for high-assurance engineering systems. As computational workloads continue to expand, extending these optimization methodologies into real-time distributed and edge environments represents an impactful frontier for ongoing innovation.`;
 
   const sConclusion: TechTalkSlide = {
     id: `aat-slide-${totalSlides - 1}`,
@@ -750,7 +748,7 @@ export function synthesizeIarePresentation(options: GenerateTechTalkOptions): Te
     speakerNotes: `In conclusion, we have systematically evaluated the core mechanisms, hyperparameter tuning techniques, and comparative trade-offs of ${titleTopic}. The empirical results affirm that this approach achieves superior throughput and computational efficiency across real-world workloads.`,
   };
 
-  // N: THANK YOU Slide
+  // N: THANK YOU Slide (Clean centered THANK YOU, no extra clutter)
   const sThankYou: TechTalkSlide = {
     id: `aat-slide-${totalSlides}`,
     slideNumber: totalSlides,
@@ -758,12 +756,6 @@ export function synthesizeIarePresentation(options: GenerateTechTalkOptions): Te
     title: "THANK YOU",
     category: "Q&A",
     subtitle: "Questions & Discussion",
-    bulletPoints: [
-      `Name: ${studentName}`,
-      `Roll No: ${rollNo}`,
-      `Branch: ${branch}`,
-      `Subject: ${subject}`,
-    ],
     speakerNotes: `Thank you very much for your time and attentive listening. I would now like to open the floor for any questions, feedback, or technical discussion.`,
   };
 

@@ -828,61 +828,43 @@ export function TechTalkPptStudio() {
                 fontFamily: 'Calibri, Candara, "Segoe UI", Arial, sans-serif',
               }}
             >
-              {/* SLIDE 1: EXACT TITLE COVER SLIDE */}
+              {/* Top Subtle Institutional Accent Bar across all slides */}
+              <div className="absolute top-0 left-0 right-0">
+                <div className="h-1.5 bg-[#8B0000] w-full" />
+                <div className="h-0.5 bg-[#C59B27] w-full" />
+              </div>
+
+              {/* SLIDE 1: EXACT 6-LINE TITLE COVER SLIDE */}
               {currentSlide.layout === "title" ? (
-                <div className="flex-1 flex flex-col justify-between relative z-10 space-y-3">
-                  {/* Top Institutional Header: Left-aligned IARE Logo (1.05" x 1.05") + Centered Header Text */}
-                  <div className="flex items-center gap-4 sm:gap-6">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={activeLogo}
-                      alt="IARE Official Crest"
-                      className="w-16 h-16 sm:w-20 sm:h-20 object-contain rounded-full border-2 border-[#C59B27] bg-white p-1 shrink-0 shadow-sm"
-                    />
-                    <div className="space-y-0.5">
-                      <h1
-                        className="text-sm sm:text-lg md:text-xl font-bold tracking-wide text-[#8B0000] uppercase"
-                        style={{
-                          fontFamily: '"Times New Roman", Times, Georgia, serif',
-                        }}
-                      >
-                        INSTITUTE OF AERONAUTICAL ENGINEERING
-                      </h1>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="text-xs sm:text-sm font-bold text-[#002147] tracking-wider"
-                          style={{
-                            fontFamily:
-                              '"Times New Roman", Times, Georgia, serif',
-                          }}
-                        >
-                          (Autonomous)
-                        </span>
-                        <span className="text-[10px] sm:text-xs text-gray-600">
-                          • Dundigal, Hyderabad - 500 043, Telangana
-                        </span>
-                      </div>
+                <div className="flex-1 flex flex-col justify-between relative z-10 pt-2 space-y-3">
+                  {/* Optional Logo at Top-Left */}
+                  {activeLogo && (
+                    <div className="flex justify-start">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={activeLogo}
+                        alt="IARE Crest"
+                        className="w-12 h-12 sm:w-14 sm:h-14 object-contain rounded-full border border-[#C59B27] bg-white p-0.5 shadow-sm"
+                      />
                     </div>
-                  </div>
+                  )}
 
-                  {/* Horizontal Maroon + Gold Double Divider Rule across slide */}
-                  <div className="space-y-0.5">
-                    <div className="h-1 bg-[#8B0000] w-full rounded-full" />
-                    <div className="h-0.5 bg-[#C59B27] w-full rounded-full" />
-                  </div>
-
-                  {/* Assessment Title: [ASSESSMENT TYPE] + Topic Line */}
-                  <div className="space-y-2 text-center my-auto">
+                  {/* Line 1: Centered [Assessment Type] */}
+                  <div className="text-center pt-1">
                     <h2
-                      className="text-base sm:text-lg md:text-xl font-bold text-[#002147] tracking-tight uppercase"
+                      className="text-lg sm:text-xl md:text-2xl font-bold text-[#002147] tracking-tight uppercase"
                       style={{
                         fontFamily: '"Times New Roman", Times, Georgia, serif',
                       }}
                     >
                       [ {presentation.iareMetadata?.assessmentType || "AAT - TECH TALK"} ]
                     </h2>
+                  </div>
+
+                  {/* Line 2: Left-aligned Topic - [Topic] */}
+                  <div className="pt-1">
                     <h3
-                      className="text-lg sm:text-2xl md:text-3xl font-bold text-[#111827] tracking-tight leading-snug"
+                      className="text-lg sm:text-2xl md:text-3xl font-bold text-[#111827] tracking-tight leading-snug text-left"
                       style={{
                         fontFamily: '"Times New Roman", Times, Georgia, serif',
                       }}
@@ -893,228 +875,111 @@ export function TechTalkPptStudio() {
                     </h3>
                   </div>
 
-                  {/* Student Details Block (Cleanly Aligned at Bottom Half) */}
-                  <div className="p-4 sm:p-5 rounded-2xl bg-[#F8FAFC] border border-[#CBD5E1] shadow-sm">
-                    <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-xs sm:text-sm md:text-base">
-                      <div className="space-y-2">
-                        <p>
-                          <strong className="text-[#002147] font-bold">
-                            Name:{" "}
-                          </strong>
-                          <span className="text-[#111827]">
-                            {presentation.iareMetadata?.studentName}
-                          </span>
-                        </p>
-                        <p>
-                          <strong className="text-[#002147] font-bold">
-                            Roll No:{" "}
-                          </strong>
-                          <span className="text-[#111827] font-mono">
-                            {presentation.iareMetadata?.rollNumber}
-                          </span>
-                        </p>
-                      </div>
-                      <div className="space-y-2">
-                        <p>
-                          <strong className="text-[#002147] font-bold">
-                            Branch:{" "}
-                          </strong>
-                          <span className="text-[#111827]">
-                            {presentation.iareMetadata?.department}
-                          </span>
-                        </p>
-                        <p>
-                          <strong className="text-[#002147] font-bold">
-                            Subject:{" "}
-                          </strong>
-                          <span className="text-[#111827]">
-                            {presentation.iareMetadata?.subject}
-                          </span>
-                        </p>
-                      </div>
-                    </div>
+                  {/* Line 3: Subtle horizontal Maroon rule */}
+                  <div className="h-0.5 bg-[#8B0000] w-full rounded-full" />
+
+                  {/* Lines 4-7: Cleanly stacked student metadata block */}
+                  <div className="space-y-3 text-sm sm:text-base md:text-lg text-left pb-2">
+                    <p className="flex items-center">
+                      <strong className="w-24 sm:w-28 text-[#002147] font-bold font-sans">
+                        Name:
+                      </strong>
+                      <span className="text-[#111827] font-sans font-medium">
+                        {presentation.iareMetadata?.studentName}
+                      </span>
+                    </p>
+                    <p className="flex items-center">
+                      <strong className="w-24 sm:w-28 text-[#002147] font-bold font-sans">
+                        Roll No:
+                      </strong>
+                      <span className="text-[#111827] font-sans font-mono font-medium">
+                        {presentation.iareMetadata?.rollNumber}
+                      </span>
+                    </p>
+                    <p className="flex items-center">
+                      <strong className="w-24 sm:w-28 text-[#002147] font-bold font-sans">
+                        Branch:
+                      </strong>
+                      <span className="text-[#111827] font-sans font-medium">
+                        {presentation.iareMetadata?.department}
+                      </span>
+                    </p>
+                    <p className="flex items-center">
+                      <strong className="w-24 sm:w-28 text-[#002147] font-bold font-sans">
+                        Subject:
+                      </strong>
+                      <span className="text-[#111827] font-sans font-medium">
+                        {presentation.iareMetadata?.subject}
+                      </span>
+                    </p>
                   </div>
                 </div>
               ) : currentSlide.layout === "thank-you" ? (
-                /* SLIDE N: THANK YOU SLIDE */
-                <div className="flex-1 flex flex-col justify-between items-center text-center relative z-10 py-4">
-                  {/* Top Header Strip */}
-                  <div className="w-full flex items-center justify-between pb-2 border-b border-[#CBD5E1]">
-                    <div className="flex items-center gap-2">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={activeLogo}
-                        alt="IARE Crest"
-                        className="w-5 h-5 rounded-full object-contain shrink-0"
-                      />
-                      <span
-                        className="text-[11px] sm:text-xs font-bold text-[#8B0000]"
-                        style={{
-                          fontFamily:
-                            '"Times New Roman", Times, Georgia, serif',
-                        }}
-                      >
-                        INSTITUTE OF AERONAUTICAL ENGINEERING
-                      </span>
-                    </div>
-                    <span
-                      className="text-[11px] sm:text-xs font-bold text-[#002147]"
-                      style={{
-                        fontFamily: '"Times New Roman", Times, Georgia, serif',
-                      }}
-                    >
-                      [ {presentation.iareMetadata?.assessmentType} ]
-                    </span>
-                  </div>
-
-                  {/* Centered THANK YOU & Subtitle */}
-                  <div className="space-y-2 my-auto">
-                    <h2
-                      className="text-4xl sm:text-5xl md:text-6xl font-bold text-[#002147] tracking-tight"
-                      style={{
-                        fontFamily: '"Times New Roman", Times, Georgia, serif',
-                      }}
-                    >
-                      THANK YOU
-                    </h2>
-                    {/* Double divider rule */}
-                    <div className="w-48 sm:w-64 mx-auto space-y-0.5 pt-1">
-                      <div className="h-0.5 bg-[#8B0000] w-full" />
-                      <div className="h-0.5 bg-[#C59B27] w-full" />
-                    </div>
-                    <p
-                      className="text-sm sm:text-lg font-medium text-[#4B5563]"
-                      style={{
-                        fontFamily: '"Times New Roman", Times, Georgia, serif',
-                      }}
-                    >
-                      Questions &amp; Discussion
-                    </p>
-                  </div>
-
-                  {/* Student Details Card */}
-                  <div className="p-4 rounded-2xl bg-[#F8FAFC] border border-[#CBD5E1] shadow-sm max-w-xl w-full space-y-1">
-                    <p className="text-xs sm:text-sm font-bold text-[#002147]">
-                      Presented by: {presentation.iareMetadata?.studentName} (
-                      {presentation.iareMetadata?.rollNumber})
-                    </p>
-                    <p className="text-xs sm:text-sm text-[#111827]">
-                      Department of {presentation.iareMetadata?.department} •{" "}
-                      {presentation.iareMetadata?.subject}
-                    </p>
-                    <p
-                      className="text-xs font-bold text-[#8B0000]"
-                      style={{
-                        fontFamily: '"Times New Roman", Times, Georgia, serif',
-                      }}
-                    >
-                      INSTITUTE OF AERONAUTICAL ENGINEERING (Autonomous)
-                    </p>
-                    <p className="text-[11px] text-gray-500">
-                      Dundigal, Hyderabad - 500 043, Telangana
-                    </p>
-                  </div>
-
-                  {/* Bottom Footer Strip */}
-                  <div className="w-full pt-2 border-t border-[#CBD5E1] flex items-center justify-between text-[11px] text-[#4B5563]">
-                    <span>
-                      {presentation.iareMetadata?.rollNumber} -{" "}
-                      {presentation.iareMetadata?.studentName}
-                    </span>
-                    <span>{presentation.iareMetadata?.subject}</span>
-                    <span>
-                      Slide {currentSlide.slideNumber} of{" "}
-                      {presentation.slides.length}
-                    </span>
-                  </div>
+                /* SLIDE 13: CLEAN CENTERED THANK YOU SLIDE (NO EXTRA CLUTTER) */
+                <div className="flex-1 flex flex-col justify-center items-center text-center relative z-10 space-y-4 my-auto">
+                  <h2
+                    className="text-4xl sm:text-5xl md:text-6xl font-bold text-[#002147] tracking-tight"
+                    style={{
+                      fontFamily: '"Times New Roman", Times, Georgia, serif',
+                    }}
+                  >
+                    THANK YOU
+                  </h2>
+                  {/* Subtle Maroon Underline Rule */}
+                  <div className="h-1 bg-[#8B0000] w-36 sm:w-48 rounded-full mx-auto" />
                 </div>
               ) : (
-                /* SLIDES 2 to N-1: MASTER HEADER + ALL CAPS SIDE-HEADING WITH UNDERLINE + BODY + FOOTER */
-                <>
-                  {/* Top Master Header Strip */}
-                  <div className="space-y-1.5 relative z-10">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={activeLogo}
-                          alt="IARE Crest"
-                          className="w-5 h-5 rounded-full object-contain shrink-0"
-                        />
-                        <span
-                          className="text-[11px] sm:text-xs font-bold text-[#8B0000]"
-                          style={{
-                            fontFamily:
-                              '"Times New Roman", Times, Georgia, serif',
-                          }}
-                        >
-                          INSTITUTE OF AERONAUTICAL ENGINEERING
-                        </span>
-                      </div>
-                      <span
-                        className="text-[11px] sm:text-xs font-bold text-[#002147]"
-                        style={{
-                          fontFamily:
-                            '"Times New Roman", Times, Georgia, serif',
-                        }}
-                      >
-                        [ {presentation.iareMetadata?.assessmentType} ]
-                      </span>
-                    </div>
-                    <div className="h-px bg-[#CBD5E1] w-full" />
-
-                    {/* Left-Aligned Side-Heading in ALL CAPS + Maroon Underline Rule */}
-                    <div className="pt-1.5 space-y-1">
-                      <h3
-                        className="text-lg sm:text-xl md:text-2xl font-bold text-[#002147] tracking-tight text-left uppercase"
-                        style={{
-                          fontFamily:
-                            '"Times New Roman", Times, Georgia, serif',
-                        }}
-                      >
-                        {currentSlide.title}
-                      </h3>
-                      {/* Crisp Maroon (#8B0000) accent rule directly underneath heading */}
-                      <div className="h-0.5 sm:h-1 bg-[#8B0000] w-28 rounded-full" />
-                    </div>
+                /* SLIDES 2 TO 12: CONTENT SLIDE WITH SIDE-HEADING & MAROON UNDERLINE */
+                /* ZERO EXTRA ADDRESS HEADERS & ZERO FOOTER TEXT LINES */
+                <div className="flex-1 flex flex-col justify-between relative z-10 pt-2">
+                  {/* Left-Aligned Side-Heading in ALL CAPS + Maroon Underline Rule */}
+                  <div className="space-y-1 text-left">
+                    <h3
+                      className="text-lg sm:text-xl md:text-2xl font-bold text-[#002147] tracking-tight text-left uppercase"
+                      style={{
+                        fontFamily: '"Times New Roman", Times, Georgia, serif',
+                      }}
+                    >
+                      {currentSlide.title}
+                    </h3>
+                    <div className="h-0.5 sm:h-1 bg-[#8B0000] w-28 rounded-full" />
                   </div>
 
                   {/* Body Container based on Layout */}
-                  <div className="flex-1 my-3 flex flex-col justify-center relative z-10 px-1 sm:px-2">
-                    {/* INDEX LAYOUT */}
+                  <div className="flex-1 my-auto flex flex-col justify-center px-1 sm:px-2">
+                    {/* INDEX LAYOUT (1.  to 8.  in Title Case in 2 columns) */}
                     {currentSlide.layout === "index" && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3.5 text-xs sm:text-sm md:text-base font-bold text-[#111827]">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-4 text-xs sm:text-sm md:text-base font-bold text-[#111827]">
                         {(currentSlide.bulletPoints || []).map((item, idx) => (
-                          <div key={idx} className="flex items-center gap-2">
-                            <span>{item}</span>
+                          <div key={idx} className="text-left font-sans">
+                            {item}
                           </div>
                         ))}
                       </div>
                     )}
 
-                    {/* PARAGRAPH LAYOUT (INTRODUCTION / CONCLUSION) */}
+                    {/* PARAGRAPH LAYOUT (INTRODUCTION / CONCLUSION - STRICTLY NO BULLETS) */}
                     {currentSlide.layout === "paragraph" && (
                       <div className="py-2">
-                        <p className="text-xs sm:text-sm md:text-base text-[#111827] leading-[1.6] sm:leading-[1.7] text-left">
-                          {currentSlide.paragraph ||
-                            currentSlide.bulletPoints?.join(" ")}
+                        <p className="text-xs sm:text-sm md:text-base text-[#111827] leading-[1.65] sm:leading-[1.75] text-left font-sans font-normal">
+                          {currentSlide.paragraph || currentSlide.bulletPoints?.join(" ")}
                         </p>
                       </div>
                     )}
 
-                    {/* BULLETS LAYOUT (8 CORE TECHNICAL SLIDES) */}
+                    {/* BULLETS LAYOUT (8 CORE TECHNICAL SLIDES - STRICTLY 5 BULLETS) */}
                     {(currentSlide.layout === "bullets" ||
                       (!["index", "paragraph"].includes(currentSlide.layout) &&
                         currentSlide.bulletPoints)) && (
-                      <div className="space-y-3 py-1">
+                      <div className="space-y-3.5 py-1">
                         {(currentSlide.bulletPoints || [])
                           .slice(0, 5)
                           .map((bullet, idx) => (
                             <div
                               key={idx}
-                              className="flex items-start gap-3 text-xs sm:text-sm md:text-base text-[#111827] leading-relaxed text-left"
+                              className="flex items-start gap-3 text-xs sm:text-sm md:text-base text-[#111827] leading-relaxed text-left font-sans font-normal"
                             >
-                              <span className="text-[#111827] font-bold text-base select-none shrink-0 mt-[-1px]">
+                              <span className="text-[#111827] font-bold text-base select-none shrink-0 mt-[-2px]">
                                 •
                               </span>
                               <span>{bullet}</span>
@@ -1123,22 +988,7 @@ export function TechTalkPptStudio() {
                       </div>
                     )}
                   </div>
-
-                  {/* Master Footer Strip */}
-                  <div className="border-t border-[#CBD5E1] pt-2 flex items-center justify-between text-[11px] text-[#4B5563] relative z-10">
-                    <span>
-                      {presentation.iareMetadata?.rollNumber} -{" "}
-                      {presentation.iareMetadata?.studentName}
-                    </span>
-                    <span className="truncate max-w-[200px] sm:max-w-xs text-[#4B5563]">
-                      {presentation.iareMetadata?.subject}
-                    </span>
-                    <span className="font-mono">
-                      Slide {currentSlide.slideNumber} of{" "}
-                      {presentation.slides.length}
-                    </span>
-                  </div>
-                </>
+                </div>
               )}
             </div>
 

@@ -56,8 +56,9 @@ export function getPresentationExportFilename(
 }
 
 /**
- * 1. Export 16:9 PowerPoint (.pptx) with embedded Speaker Notes & Themed Layouts
- * Using exact official IARE 13.333" x 7.5" geometry, Times New Roman / Calibri, and Logo
+ * 1. Export 16:9 PowerPoint (.pptx) with embedded Speaker Notes
+ * Exact official IARE 13.333" x 7.5" geometry, Times New Roman / Calibri
+ * ZERO extra address headers and ZERO footer text lines on Slides 2–13
  */
 export async function exportToPptx(
   presentation: TechTalkPresentation
@@ -95,202 +96,160 @@ export async function exportToPptx(
     // 1. Crisp White Background
     slide.background = { color: "FFFFFF" };
 
-    // 2. Embedded Speaker Notes
+    // 2. Subtle Top Institutional Accent Bar (Maroon + Gold)
+    slide.addShape(pptx.ShapeType.rect, {
+      x: 0,
+      y: 0,
+      w: 13.333,
+      h: 0.08,
+      fill: { color: "8B0000" },
+      line: { color: "8B0000", width: 0 },
+    });
+    slide.addShape(pptx.ShapeType.rect, {
+      x: 0,
+      y: 0.08,
+      w: 13.333,
+      h: 0.02,
+      fill: { color: "C59B27" },
+      line: { color: "C59B27", width: 0 },
+    });
+
+    // 3. Embedded Stage Speaker Notes
     if (s.speakerNotes) {
       slide.addNotes(s.speakerNotes);
     }
 
-    // 3. Layout Rendering
+    // 4. Layout Rendering
     if (s.layout === "title") {
       // ======================================================================
-      // SLIDE 1: EXACT TITLE COVER SLIDE
+      // SLIDE 1: EXACT 6-LINE TITLE COVER SLIDE
       // ======================================================================
-      // Left-aligned IARE Logo (1.05" x 1.05")
-      try {
-        slide.addImage({
-          data: iareLogoBase64,
-          x: 0.75,
-          y: 0.5,
-          w: 1.05,
-          h: 1.05,
-        });
-      } catch {
-        // Fallback
+      // Optional Logo at Top-Left (if available)
+      if (iareLogoBase64) {
+        try {
+          slide.addImage({
+            data: iareLogoBase64,
+            x: 0.9,
+            y: 0.35,
+            w: 0.95,
+            h: 0.95,
+          });
+        } catch {
+          // Fallback
+        }
       }
 
-      // Top Institutional Header text alongside logo
-      slide.addText("INSTITUTE OF AERONAUTICAL ENGINEERING", {
-        x: 2.0,
-        y: 0.45,
-        w: 10.5,
-        h: 0.38,
-        fontSize: 20,
-        fontFace: "Times New Roman",
-        bold: true,
-        color: "8B0000",
-      });
-
-      slide.addText("(Autonomous)", {
-        x: 2.0,
-        y: 0.83,
-        w: 10.5,
-        h: 0.28,
-        fontSize: 13,
-        fontFace: "Times New Roman",
-        bold: true,
-        color: "002147",
-      });
-
-      slide.addText("Dundigal, Hyderabad - 500 043, Telangana", {
-        x: 2.0,
-        y: 1.11,
-        w: 10.5,
-        h: 0.24,
-        fontSize: 11,
-        fontFace: "Calibri",
-        color: "374151",
-      });
-
-      // Horizontal Double Divider Rule across slide (Maroon + Gold)
-      slide.addShape(pptx.ShapeType.rect, {
-        x: 0.75,
-        y: 1.68,
-        w: 11.833,
-        h: 0.04,
-        fill: { color: "8B0000" },
-        line: { color: "8B0000", width: 0 },
-      });
-      slide.addShape(pptx.ShapeType.rect, {
-        x: 0.75,
-        y: 1.74,
-        w: 11.833,
-        h: 0.02,
-        fill: { color: "C59B27" },
-        line: { color: "C59B27", width: 0 },
-      });
-
-      // Assessment Title: [ASSESSMENT TYPE]
+      // Line 1: Centered [Assessment Type] (24pt Bold Times New Roman Navy #002147)
       slide.addText(`[ ${assessmentTitle} ]`, {
-        x: 0.75,
-        y: 2.05,
-        w: 11.833,
-        h: 0.42,
-        fontSize: 18,
+        x: 0,
+        y: 1.3,
+        w: 13.333,
+        h: 0.55,
+        fontSize: 24,
         fontFace: "Times New Roman",
         bold: true,
         color: "002147",
         align: "center",
       });
 
-      // Topic Line: Topic - [User's Entered Topic]
+      // Line 2: Left-aligned Topic - [Topic] (22pt Bold Times New Roman #111827 at x: 0.9")
       const topicHeading = s.title.startsWith("Topic -")
         ? s.title
         : `Topic - ${s.title}`;
       slide.addText(topicHeading, {
-        x: 0.75,
-        y: 2.65,
-        w: 11.833,
-        h: 1.15,
+        x: 0.9,
+        y: 2.25,
+        w: 11.533,
+        h: 0.75,
         fontSize: 22,
         fontFace: "Times New Roman",
         bold: true,
         color: "111827",
-        align: "center",
-        valign: "top",
+        align: "left",
       });
 
-      // Student Details Block at bottom half of Slide 1
-      slide.addShape(pptx.ShapeType.roundRect, {
-        x: 0.75,
-        y: 4.15,
-        w: 11.833,
-        h: 2.65,
-        fill: { color: "F8FAFC" },
-        line: { color: "CBD5E1", width: 1 },
-        rectRadius: 0.08,
+      // Line 3: Subtle horizontal Maroon rule
+      slide.addShape(pptx.ShapeType.rect, {
+        x: 0.9,
+        y: 3.15,
+        w: 11.533,
+        h: 0.035,
+        fill: { color: "8B0000" },
+        line: { color: "8B0000", width: 0 },
       });
 
-      // Left Column: Name & Roll No
-      const leftColProps: pptxgen.TextProps[] = [
+      // Lines 4-7: Cleanly stacked student metadata block at x: 0.9" (18pt Calibri #111827, line spacing 1.4)
+      const metaProps: pptxgen.TextProps[] = [
         {
-          text: "Name: ",
+          text: "Name:     ",
           options: {
-            fontSize: 16,
+            fontSize: 18,
             fontFace: "Calibri",
             bold: true,
             color: "002147",
           },
         },
         {
-          text: `${studentName}\n\n`,
+          text: `${studentName}\n`,
           options: {
-            fontSize: 16,
+            fontSize: 18,
             fontFace: "Calibri",
             bold: false,
             color: "111827",
+            paraSpaceAfter: 10,
           },
         },
         {
-          text: "Roll No: ",
+          text: "Roll No:  ",
           options: {
-            fontSize: 16,
+            fontSize: 18,
             fontFace: "Calibri",
             bold: true,
             color: "002147",
           },
         },
         {
-          text: rollNumber,
+          text: `${rollNumber}\n`,
           options: {
-            fontSize: 16,
+            fontSize: 18,
             fontFace: "Calibri",
             bold: false,
             color: "111827",
+            paraSpaceAfter: 10,
           },
         },
-      ];
-
-      slide.addText(leftColProps, {
-        x: 1.5,
-        y: 4.65,
-        w: 4.8,
-        h: 1.7,
-        valign: "top",
-      });
-
-      // Right Column: Branch & Subject
-      const rightColProps: pptxgen.TextProps[] = [
         {
-          text: "Branch: ",
+          text: "Branch:   ",
           options: {
-            fontSize: 16,
+            fontSize: 18,
             fontFace: "Calibri",
             bold: true,
             color: "002147",
           },
         },
         {
-          text: `${branchName}\n\n`,
+          text: `${branchName}\n`,
           options: {
-            fontSize: 16,
+            fontSize: 18,
             fontFace: "Calibri",
             bold: false,
             color: "111827",
+            paraSpaceAfter: 10,
           },
         },
         {
-          text: "Subject: ",
+          text: "Subject:  ",
           options: {
-            fontSize: 16,
+            fontSize: 18,
             fontFace: "Calibri",
             bold: true,
             color: "002147",
           },
         },
         {
-          text: subjectName,
+          text: `${subjectName}`,
           options: {
-            fontSize: 16,
+            fontSize: 18,
             fontFace: "Calibri",
             bold: false,
             color: "111827",
@@ -298,244 +257,99 @@ export async function exportToPptx(
         },
       ];
 
-      slide.addText(rightColProps, {
-        x: 6.8,
-        y: 4.65,
-        w: 5.2,
-        h: 1.7,
+      slide.addText(metaProps, {
+        x: 0.9,
+        y: 3.55,
+        w: 11.533,
+        h: 3.2,
         valign: "top",
+        lineSpacingMultiple: 1.4,
       });
-    } else {
+    } else if (s.layout === "thank-you") {
       // ======================================================================
-      // SLIDES 2 TO N: MASTER HEADER + FOOTER STRIP
+      // SLIDE 13: CLEAN CENTERED THANK YOU SLIDE (NO EXTRA CLUTTER)
       // ======================================================================
-      // Top Header Strip: Small IARE Logo (0.42" x 0.42")
-      try {
-        slide.addImage({
-          data: iareLogoBase64,
-          x: 0.75,
-          y: 0.25,
-          w: 0.42,
-          h: 0.42,
-        });
-      } catch {
-        // Fallback
-      }
-
-      slide.addText("INSTITUTE OF AERONAUTICAL ENGINEERING", {
-        x: 1.25,
-        y: 0.26,
-        w: 6.5,
-        h: 0.35,
-        fontSize: 10,
-        fontFace: "Times New Roman",
-        bold: true,
-        color: "8B0000",
-      });
-
-      slide.addText(`[ ${assessmentTitle} ]`, {
-        x: 8.0,
-        y: 0.26,
-        w: 4.583,
-        h: 0.35,
-        fontSize: 10,
+      slide.addText("THANK YOU", {
+        x: 0,
+        y: 2.8,
+        w: 13.333,
+        h: 1.1,
+        fontSize: 42,
         fontFace: "Times New Roman",
         bold: true,
         color: "002147",
-        align: "right",
-      });
-
-      // Top rule
-      slide.addShape(pptx.ShapeType.rect, {
-        x: 0.75,
-        y: 0.72,
-        w: 11.833,
-        h: 0.015,
-        fill: { color: "CBD5E1" },
-        line: { color: "CBD5E1", width: 0 },
-      });
-
-      // Bottom Footer Strip
-      slide.addShape(pptx.ShapeType.rect, {
-        x: 0.75,
-        y: 6.85,
-        w: 11.833,
-        h: 0.015,
-        fill: { color: "CBD5E1" },
-        line: { color: "CBD5E1", width: 0 },
-      });
-
-      slide.addText(`${rollNumber} - ${studentName}`, {
-        x: 0.75,
-        y: 6.95,
-        w: 4.5,
-        h: 0.35,
-        fontSize: 9.5,
-        fontFace: "Calibri",
-        color: "4B5563",
-      });
-
-      slide.addText(subjectName, {
-        x: 5.3,
-        y: 6.95,
-        w: 3.8,
-        h: 0.35,
-        fontSize: 9.5,
-        fontFace: "Calibri",
-        color: "4B5563",
         align: "center",
       });
 
-      slide.addText(`Slide ${s.slideNumber} of ${presentation.slides.length}`, {
-        x: 9.3,
-        y: 6.95,
-        w: 3.283,
-        h: 0.35,
-        fontSize: 9.5,
-        fontFace: "Calibri",
-        color: "4B5563",
-        align: "right",
+      // Subtle Maroon Underline Rule
+      slide.addShape(pptx.ShapeType.rect, {
+        x: 5.266,
+        y: 4.05,
+        w: 2.8,
+        h: 0.04,
+        fill: { color: "8B0000" },
+        line: { color: "8B0000", width: 0 },
+      });
+    } else {
+      // ======================================================================
+      // SLIDES 2 TO 12: CONTENT SLIDE WITH SIDE-HEADING & MAROON UNDERLINE
+      // ZERO EXTRA ADDRESS HEADERS & ZERO FOOTER TEXT LINES
+      // ======================================================================
+      const sideHeading = (s.title || "CONTENT SLIDE").toUpperCase();
+
+      // Left-Aligned Side-Heading (24pt Bold Times New Roman, Navy #002147)
+      slide.addText(sideHeading, {
+        x: 0.9,
+        y: 0.75,
+        w: 11.533,
+        h: 0.6,
+        fontSize: 24,
+        fontFace: "Times New Roman",
+        bold: true,
+        color: "002147",
+        valign: "top",
+        align: "left",
       });
 
-      if (s.layout === "thank-you") {
-        // ====================================================================
-        // SLIDE N: THANK YOU SLIDE
-        // ====================================================================
-        slide.addText("THANK YOU", {
-          x: 0.75,
-          y: 1.85,
-          w: 11.833,
-          h: 0.95,
-          fontSize: 40,
-          fontFace: "Times New Roman",
-          bold: true,
-          color: "002147",
-          align: "center",
-        });
+      // Crisp Maroon (#8B0000) accent rule directly underneath the heading
+      slide.addShape(pptx.ShapeType.rect, {
+        x: 0.9,
+        y: 1.4,
+        w: 2.2,
+        h: 0.04,
+        fill: { color: "8B0000" },
+        line: { color: "8B0000", width: 0 },
+      });
 
-        // Double Divider Line (Maroon + Gold)
-        slide.addShape(pptx.ShapeType.rect, {
-          x: 4.666,
-          y: 2.88,
-          w: 4.0,
-          h: 0.035,
-          fill: { color: "8B0000" },
-          line: { color: "8B0000", width: 0 },
-        });
-        slide.addShape(pptx.ShapeType.rect, {
-          x: 4.666,
-          y: 2.93,
-          w: 4.0,
-          h: 0.02,
-          fill: { color: "C59B27" },
-          line: { color: "C59B27", width: 0 },
-        });
+      if (s.layout === "index") {
+        // SLIDE 2: INDEX (Numbered list 1.  to 8.  with two spaces in Title Case)
+        const items = s.bulletPoints || [];
+        const half = Math.ceil(items.length / 2);
+        const col1 = items.slice(0, half);
+        const col2 = items.slice(half);
 
-        slide.addText("Questions & Discussion", {
-          x: 0.75,
-          y: 3.15,
-          w: 11.833,
-          h: 0.45,
-          fontSize: 18,
-          fontFace: "Times New Roman",
-          color: "4B5563",
-          align: "center",
-        });
-
-        // Student Details Card
-        slide.addShape(pptx.ShapeType.roundRect, {
-          x: 2.166,
-          y: 4.05,
-          w: 9.0,
-          h: 2.3,
-          fill: { color: "F8FAFC" },
-          line: { color: "CBD5E1", width: 1 },
-          rectRadius: 0.08,
-        });
-
-        const thankYouDetails: pptxgen.TextProps[] = [
-          {
-            text: `Presented by: ${studentName} (${rollNumber})\n\n`,
-            options: {
-              fontSize: 16,
-              fontFace: "Calibri",
-              bold: true,
-              color: "002147",
-            },
+        const col1Props: pptxgen.TextProps[] = col1.map((item) => ({
+          text: `${item}\n`,
+          options: {
+            fontSize: 18,
+            fontFace: "Calibri",
+            color: "111827",
+            bold: true,
+            lineSpacingMultiple: 1.5,
+            paraSpaceAfter: 14,
           },
-          {
-            text: `Department of ${branchName} • Subject: ${subjectName}\n\n`,
-            options: {
-              fontSize: 14,
-              fontFace: "Calibri",
-              bold: false,
-              color: "111827",
-            },
-          },
-          {
-            text: "INSTITUTE OF AERONAUTICAL ENGINEERING (Autonomous)\n",
-            options: {
-              fontSize: 13,
-              fontFace: "Times New Roman",
-              bold: true,
-              color: "8B0000",
-            },
-          },
-          {
-            text: "Dundigal, Hyderabad - 500 043, Telangana",
-            options: {
-              fontSize: 11,
-              fontFace: "Calibri",
-              color: "4B5563",
-            },
-          },
-        ];
+        }));
 
-        slide.addText(thankYouDetails, {
-          x: 2.3,
-          y: 4.3,
-          w: 8.733,
-          h: 1.85,
-          align: "center",
-          valign: "middle",
-        });
-      } else {
-        // ====================================================================
-        // SLIDES 2 TO N-1: CONTENT SLIDE WITH SIDE-HEADING & MAROON UNDERLINE
-        // ====================================================================
-        const sideHeading = (s.title || "CONTENT SLIDE").toUpperCase();
-
-        // Left-Aligned Side-Heading (23pt Bold Times New Roman, Navy #002147)
-        slide.addText(sideHeading, {
-          x: 0.75,
-          y: 0.88,
-          w: 11.833,
-          h: 0.55,
-          fontSize: 23,
-          fontFace: "Times New Roman",
-          bold: true,
-          color: "002147",
+        slide.addText(col1Props, {
+          x: 0.9,
+          y: 1.95,
+          w: 5.5,
+          h: 5.0,
           valign: "top",
         });
 
-        // Crisp Maroon (#8B0000) accent rule directly underneath the heading
-        slide.addShape(pptx.ShapeType.rect, {
-          x: 0.75,
-          y: 1.48,
-          w: 1.8,
-          h: 0.04,
-          fill: { color: "8B0000" },
-          line: { color: "8B0000", width: 0 },
-        });
-
-        if (s.layout === "index") {
-          // SLIDE 2: INDEX (Numbered list 1 to 8 matching core titles in Title Case)
-          const items = s.bulletPoints || [];
-          const half = Math.ceil(items.length / 2);
-          const col1 = items.slice(0, half);
-          const col2 = items.slice(half);
-
-          const col1Props: pptxgen.TextProps[] = col1.map((item) => ({
+        if (col2.length > 0) {
+          const col2Props: pptxgen.TextProps[] = col2.map((item) => ({
             text: `${item}\n`,
             options: {
               fontSize: 18,
@@ -543,80 +357,58 @@ export async function exportToPptx(
               color: "111827",
               bold: true,
               lineSpacingMultiple: 1.5,
-              paraSpaceAfter: 12,
+              paraSpaceAfter: 14,
             },
           }));
 
-          slide.addText(col1Props, {
-            x: 0.85,
-            y: 1.9,
-            w: 5.6,
-            h: 4.6,
-            valign: "top",
-          });
-
-          if (col2.length > 0) {
-            const col2Props: pptxgen.TextProps[] = col2.map((item) => ({
-              text: `${item}\n`,
-              options: {
-                fontSize: 18,
-                fontFace: "Calibri",
-                color: "111827",
-                bold: true,
-                lineSpacingMultiple: 1.5,
-                paraSpaceAfter: 12,
-              },
-            }));
-
-            slide.addText(col2Props, {
-              x: 6.85,
-              y: 1.9,
-              w: 5.6,
-              h: 4.6,
-              valign: "top",
-            });
-          }
-        } else if (s.layout === "paragraph") {
-          // SLIDE 3 (INTRODUCTION) & SLIDE N-1 (CONCLUSION): ONE PROSE PARAGRAPH (NO BULLETS)
-          const paragraphText =
-            s.paragraph ||
-            s.bulletPoints?.join(" ") ||
-            "Academic synthesis conforming strictly to Institute of Aeronautical Engineering OBE continuous evaluation standards.";
-
-          slide.addText(paragraphText, {
-            x: 0.85,
+          slide.addText(col2Props, {
+            x: 6.8,
             y: 1.95,
-            w: 11.6,
-            h: 4.5,
-            fontSize: 17,
-            fontFace: "Calibri",
-            color: "111827",
-            lineSpacingMultiple: 1.45,
-            valign: "top",
-          });
-        } else {
-          // SLIDES 4 TO N-2: 8 CORE TECHNICAL SLIDES (EXACTLY 5 SUBSTANTIVE BULLETS)
-          const bullets = (s.bulletPoints || []).slice(0, 5);
-          const bulletProps: pptxgen.TextProps[] = bullets.map((b) => ({
-            text: b,
-            options: {
-              bullet: true,
-              fontSize: 16,
-              fontFace: "Calibri",
-              color: "111827",
-              lineSpacingMultiple: 1.35,
-              paraSpaceAfter: 10,
-            },
-          }));
-
-          slide.addText(bulletProps, {
-            x: 0.85,
-            y: 1.85,
-            w: 11.6,
-            h: 4.7,
+            w: 5.5,
+            h: 5.0,
             valign: "top",
           });
         }
+      } else if (s.layout === "paragraph") {
+        // SLIDE 3 (INTRODUCTION) & SLIDE 12 (CONCLUSION): ONE PROSE PARAGRAPH (NO BULLETS)
+        const paragraphText =
+          s.paragraph ||
+          s.bulletPoints?.join(" ") ||
+          "";
+
+        slide.addText(paragraphText, {
+          x: 0.9,
+          y: 1.95,
+          w: 11.533,
+          h: 4.8,
+          fontSize: 17,
+          fontFace: "Calibri",
+          color: "111827",
+          lineSpacingMultiple: 1.5,
+          valign: "top",
+        });
+      } else {
+        // SLIDES 4 TO 11: 8 CORE TECHNICAL SLIDES (STRICTLY 5 SUBSTANTIVE BULLETS)
+        const bullets = (s.bulletPoints || []).slice(0, 5);
+        const bulletProps: pptxgen.TextProps[] = bullets.map((b) => ({
+          text: b,
+          options: {
+            bullet: true,
+            fontSize: 16.5,
+            fontFace: "Calibri",
+            color: "111827",
+            lineSpacingMultiple: 1.35,
+            paraSpaceAfter: 12,
+          },
+        }));
+
+        slide.addText(bulletProps, {
+          x: 0.9,
+          y: 1.9,
+          w: 11.533,
+          h: 5.1,
+          valign: "top",
+        });
       }
     }
   }
@@ -628,12 +420,12 @@ export async function exportToPptx(
 /**
  * 2. Export 16:9 PDF Slide Deck via pdf-lib
  * Exact 16:9 widescreen layout matching PowerPoint template (960 x 540)
+ * ZERO extra address headers and ZERO footer text lines on Slides 2–13
  */
 export async function exportToPdfDeck(
   presentation: TechTalkPresentation
 ): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.create();
-  const fontTimesRoman = await pdfDoc.embedFont(StandardFonts.TimesRoman);
   const fontTimesRomanBold = await pdfDoc.embedFont(
     StandardFonts.TimesRomanBold
   );
@@ -667,9 +459,6 @@ export async function exportToPdfDeck(
   const navyRgb = hexToPdfRgb("#002147");
   const goldRgb = hexToPdfRgb("#C59B27");
   const charcoalRgb = hexToPdfRgb("#111827");
-  const grayRgb = hexToPdfRgb("#4B5563");
-  const borderRgb = hexToPdfRgb("#CBD5E1");
-  const cardRgb = hexToPdfRgb("#F8FAFC");
 
   const pageWidth = 960;
   const pageHeight = 540;
@@ -686,415 +475,235 @@ export async function exportToPdfDeck(
       color: whiteRgb,
     });
 
+    // 2. Subtle Top Institutional Accent Bar (Maroon + Gold)
+    page.drawRectangle({
+      x: 0,
+      y: pageHeight - 6,
+      width: pageWidth,
+      height: 6,
+      color: maroonRgb,
+    });
+    page.drawRectangle({
+      x: 0,
+      y: pageHeight - 8,
+      width: pageWidth,
+      height: 2,
+      color: goldRgb,
+    });
+
     if (s.layout === "title") {
       // ======================================================================
-      // SLIDE 1: EXACT TITLE COVER SLIDE
+      // SLIDE 1: EXACT 6-LINE TITLE COVER SLIDE
       // ======================================================================
       if (logoImage) {
         page.drawImage(logoImage, {
-          x: 54,
-          y: pageHeight - 110,
-          width: 75,
-          height: 75,
+          x: 64,
+          y: pageHeight - 95,
+          width: 65,
+          height: 65,
         });
       }
 
-      page.drawText("INSTITUTE OF AERONAUTICAL ENGINEERING", {
-        x: 145,
-        y: pageHeight - 55,
-        size: 20,
-        font: fontTimesRomanBold,
-        color: maroonRgb,
-      });
-
-      page.drawText("(Autonomous)", {
-        x: 145,
-        y: pageHeight - 80,
-        size: 13,
-        font: fontTimesRomanBold,
-        color: navyRgb,
-      });
-
-      page.drawText("Dundigal, Hyderabad - 500 043, Telangana", {
-        x: 145,
-        y: pageHeight - 100,
-        size: 11,
-        font: fontHelvetica,
-        color: grayRgb,
-      });
-
-      // Double Divider Rule
-      page.drawRectangle({
-        x: 54,
-        y: pageHeight - 122,
-        width: pageWidth - 108,
-        height: 3,
-        color: maroonRgb,
-      });
-      page.drawRectangle({
-        x: 54,
-        y: pageHeight - 127,
-        width: pageWidth - 108,
-        height: 2,
-        color: goldRgb,
-      });
-
-      // Assessment Title
+      // Line 1: Centered [Assessment Type]
       const assessText = `[ ${assessmentTitle} ]`;
-      const assessWidth = fontTimesRomanBold.widthOfTextAtSize(assessText, 18);
+      const assessWidth = fontTimesRomanBold.widthOfTextAtSize(assessText, 24);
       page.drawText(assessText, {
         x: (pageWidth - assessWidth) / 2,
-        y: pageHeight - 165,
-        size: 18,
+        y: pageHeight - 140,
+        size: 24,
         font: fontTimesRomanBold,
         color: navyRgb,
       });
 
-      // Topic Line
+      // Line 2: Left-aligned Topic - [Topic]
       const topicText = s.title.startsWith("Topic -")
         ? s.title
         : `Topic - ${s.title}`;
-      const topicWidth = fontTimesRomanBold.widthOfTextAtSize(
-        topicText.substring(0, 50),
-        22
-      );
-      page.drawText(topicText.substring(0, 50), {
-        x: Math.max(54, (pageWidth - topicWidth) / 2),
-        y: pageHeight - 215,
+      page.drawText(topicText.substring(0, 55), {
+        x: 64,
+        y: pageHeight - 205,
         size: 22,
         font: fontTimesRomanBold,
         color: charcoalRgb,
       });
 
-      // Student Details Block
-      const cardY = 50;
-      const cardH = 200;
+      // Line 3: Subtle horizontal Maroon rule
       page.drawRectangle({
-        x: 54,
-        y: cardY,
-        width: pageWidth - 108,
-        height: cardH,
-        color: cardRgb,
-        borderColor: borderRgb,
-        borderWidth: 1,
+        x: 64,
+        y: pageHeight - 225,
+        width: pageWidth - 128,
+        height: 2.5,
+        color: maroonRgb,
       });
 
-      // Left Column
+      // Lines 4-7: Cleanly stacked student metadata block
       page.drawText("Name: ", {
-        x: 95,
-        y: cardY + cardH - 55,
-        size: 16,
+        x: 64,
+        y: pageHeight - 275,
+        size: 17,
         font: fontHelveticaBold,
         color: navyRgb,
       });
       page.drawText(studentName, {
         x: 155,
-        y: cardY + cardH - 55,
-        size: 16,
+        y: pageHeight - 275,
+        size: 17,
         font: fontHelvetica,
         color: charcoalRgb,
       });
 
       page.drawText("Roll No: ", {
-        x: 95,
-        y: cardY + cardH - 120,
-        size: 16,
+        x: 64,
+        y: pageHeight - 315,
+        size: 17,
         font: fontHelveticaBold,
         color: navyRgb,
       });
       page.drawText(rollNumber, {
-        x: 170,
-        y: cardY + cardH - 120,
-        size: 16,
+        x: 165,
+        y: pageHeight - 315,
+        size: 17,
         font: fontHelvetica,
         color: charcoalRgb,
       });
 
-      // Right Column
       page.drawText("Branch: ", {
-        x: 510,
-        y: cardY + cardH - 55,
-        size: 16,
+        x: 64,
+        y: pageHeight - 355,
+        size: 17,
         font: fontHelveticaBold,
         color: navyRgb,
       });
-      page.drawText(branchName.substring(0, 32), {
-        x: 580,
-        y: cardY + cardH - 55,
-        size: 16,
+      page.drawText(branchName.substring(0, 40), {
+        x: 165,
+        y: pageHeight - 355,
+        size: 17,
         font: fontHelvetica,
         color: charcoalRgb,
       });
 
       page.drawText("Subject: ", {
-        x: 510,
-        y: cardY + cardH - 120,
-        size: 16,
+        x: 64,
+        y: pageHeight - 395,
+        size: 17,
         font: fontHelveticaBold,
         color: navyRgb,
       });
-      page.drawText(subjectName.substring(0, 32), {
-        x: 585,
-        y: cardY + cardH - 120,
-        size: 16,
+      page.drawText(subjectName.substring(0, 45), {
+        x: 165,
+        y: pageHeight - 395,
+        size: 17,
         font: fontHelvetica,
         color: charcoalRgb,
       });
-    } else {
+    } else if (s.layout === "thank-you") {
       // ======================================================================
-      // SLIDES 2 TO N: MASTER HEADER & FOOTER STRIP
+      // SLIDE 13: CLEAN CENTERED THANK YOU SLIDE (NO EXTRA CLUTTER)
       // ======================================================================
-      if (logoImage) {
-        page.drawImage(logoImage, {
-          x: 54,
-          y: pageHeight - 38,
-          width: 25,
-          height: 25,
-        });
-      }
-
-      page.drawText("INSTITUTE OF AERONAUTICAL ENGINEERING", {
-        x: 88,
-        y: pageHeight - 30,
-        size: 10,
-        font: fontTimesRomanBold,
-        color: maroonRgb,
-      });
-
-      page.drawText(`[ ${assessmentTitle} ]`, {
-        x: pageWidth - 220,
-        y: pageHeight - 30,
-        size: 10,
+      const thankText = "THANK YOU";
+      const thankW = fontTimesRomanBold.widthOfTextAtSize(thankText, 42);
+      page.drawText(thankText, {
+        x: (pageWidth - thankW) / 2,
+        y: pageHeight - 250,
+        size: 42,
         font: fontTimesRomanBold,
         color: navyRgb,
       });
 
-      // Top rule
+      // Subtle Maroon underline rule
       page.drawRectangle({
-        x: 54,
-        y: pageHeight - 48,
-        width: pageWidth - 108,
-        height: 1,
-        color: borderRgb,
+        x: (pageWidth - 200) / 2,
+        y: pageHeight - 268,
+        width: 200,
+        height: 3,
+        color: maroonRgb,
+      });
+    } else {
+      // ======================================================================
+      // SLIDES 2 TO 12: CONTENT SLIDE WITH SIDE-HEADING & MAROON UNDERLINE
+      // ZERO EXTRA ADDRESS HEADERS & ZERO FOOTER TEXT LINES
+      // ======================================================================
+      const sideHeading = (s.title || "CONTENT SLIDE").toUpperCase();
+
+      page.drawText(sideHeading.substring(0, 55), {
+        x: 64,
+        y: pageHeight - 75,
+        size: 24,
+        font: fontTimesRomanBold,
+        color: navyRgb,
       });
 
-      // Bottom Footer Strip
+      // Crisp Maroon (#8B0000) accent rule directly underneath the heading
       page.drawRectangle({
-        x: 54,
-        y: 42,
-        width: pageWidth - 108,
-        height: 1,
-        color: borderRgb,
+        x: 64,
+        y: pageHeight - 88,
+        width: 140,
+        height: 3,
+        color: maroonRgb,
       });
 
-      page.drawText(`${rollNumber} - ${studentName}`, {
-        x: 54,
-        y: 24,
-        size: 9.5,
-        font: fontHelvetica,
-        color: grayRgb,
-      });
+      if (s.layout === "index") {
+        // INDEX SLIDE (1.  to 8.  in Title Case in 2 columns)
+        const items = s.bulletPoints || [];
+        const half = Math.ceil(items.length / 2);
+        const col1 = items.slice(0, half);
+        const col2 = items.slice(half);
 
-      const subW = fontHelvetica.widthOfTextAtSize(
-        subjectName.substring(0, 35),
-        9.5
-      );
-      page.drawText(subjectName.substring(0, 35), {
-        x: (pageWidth - subW) / 2,
-        y: 24,
-        size: 9.5,
-        font: fontHelvetica,
-        color: grayRgb,
-      });
-
-      const slideNumText = `Slide ${s.slideNumber} of ${presentation.slides.length}`;
-      page.drawText(slideNumText, {
-        x: pageWidth - 145,
-        y: 24,
-        size: 9.5,
-        font: fontHelvetica,
-        color: grayRgb,
-      });
-
-      if (s.layout === "thank-you") {
-        // ====================================================================
-        // SLIDE N: THANK YOU SLIDE
-        // ====================================================================
-        const thankText = "THANK YOU";
-        const thankW = fontTimesRomanBold.widthOfTextAtSize(thankText, 40);
-        page.drawText(thankText, {
-          x: (pageWidth - thankW) / 2,
-          y: pageHeight - 160,
-          size: 40,
-          font: fontTimesRomanBold,
-          color: navyRgb,
+        let y1 = pageHeight - 145;
+        col1.forEach((item) => {
+          page.drawText(item.substring(0, 48), {
+            x: 64,
+            y: y1,
+            size: 17,
+            font: fontHelveticaBold,
+            color: charcoalRgb,
+          });
+          y1 -= 48;
         });
 
-        // Double Divider Line (Maroon + Gold)
-        page.drawRectangle({
-          x: (pageWidth - 280) / 2,
-          y: pageHeight - 180,
-          width: 280,
-          height: 3,
-          color: maroonRgb,
+        let y2 = pageHeight - 145;
+        col2.forEach((item) => {
+          page.drawText(item.substring(0, 48), {
+            x: 500,
+            y: y2,
+            size: 17,
+            font: fontHelveticaBold,
+            color: charcoalRgb,
+          });
+          y2 -= 48;
         });
-        page.drawRectangle({
-          x: (pageWidth - 280) / 2,
-          y: pageHeight - 185,
-          width: 280,
-          height: 2,
-          color: goldRgb,
-        });
+      } else if (s.layout === "paragraph") {
+        // INTRODUCTION OR CONCLUSION (STRICTLY ONE PROSE PARAGRAPH, NO BULLETS)
+        const paragraphText =
+          s.paragraph ||
+          s.bulletPoints?.join(" ") ||
+          "";
 
-        const qText = "Questions & Discussion";
-        const qW = fontTimesRoman.widthOfTextAtSize(qText, 18);
-        page.drawText(qText, {
-          x: (pageWidth - qW) / 2,
-          y: pageHeight - 215,
-          size: 18,
-          font: fontTimesRoman,
-          color: grayRgb,
-        });
-
-        // Student Card
-        const thankCardY = 70;
-        const thankCardH = 170;
-        const thankCardW = 600;
-        page.drawRectangle({
-          x: (pageWidth - thankCardW) / 2,
-          y: thankCardY,
-          width: thankCardW,
-          height: thankCardH,
-          color: cardRgb,
-          borderColor: borderRgb,
-          borderWidth: 1,
-        });
-
-        const line1 = `Presented by: ${studentName} (${rollNumber})`;
-        const w1 = fontHelveticaBold.widthOfTextAtSize(line1, 15);
-        page.drawText(line1, {
-          x: (pageWidth - w1) / 2,
-          y: thankCardY + thankCardH - 45,
-          size: 15,
-          font: fontHelveticaBold,
-          color: navyRgb,
-        });
-
-        const line2 = `Department of ${branchName} • Subject: ${subjectName}`;
-        const w2 = fontHelvetica.widthOfTextAtSize(line2, 13);
-        page.drawText(line2, {
-          x: (pageWidth - w2) / 2,
-          y: thankCardY + thankCardH - 80,
-          size: 13,
+        page.drawText(paragraphText, {
+          x: 64,
+          y: pageHeight - 150,
+          size: 16.5,
           font: fontHelvetica,
           color: charcoalRgb,
-        });
-
-        const line3 = "INSTITUTE OF AERONAUTICAL ENGINEERING (Autonomous)";
-        const w3 = fontTimesRomanBold.widthOfTextAtSize(line3, 12.5);
-        page.drawText(line3, {
-          x: (pageWidth - w3) / 2,
-          y: thankCardY + thankCardH - 115,
-          size: 12.5,
-          font: fontTimesRomanBold,
-          color: maroonRgb,
-        });
-
-        const line4 = "Dundigal, Hyderabad - 500 043, Telangana";
-        const w4 = fontHelvetica.widthOfTextAtSize(line4, 11);
-        page.drawText(line4, {
-          x: (pageWidth - w4) / 2,
-          y: thankCardY + thankCardH - 142,
-          size: 11,
-          font: fontHelvetica,
-          color: grayRgb,
+          maxWidth: pageWidth - 128,
+          lineHeight: 28,
         });
       } else {
-        // ====================================================================
-        // SLIDES 2 TO N-1: CONTENT SLIDE WITH SIDE-HEADING & MAROON UNDERLINE
-        // ====================================================================
-        const sideHeading = (s.title || "CONTENT SLIDE").toUpperCase();
-
-        page.drawText(sideHeading.substring(0, 60), {
-          x: 54,
-          y: pageHeight - 90,
-          size: 23,
-          font: fontTimesRomanBold,
-          color: navyRgb,
-        });
-
-        // Crisp Maroon (#8B0000) accent rule directly underneath the heading
-        page.drawRectangle({
-          x: 54,
-          y: pageHeight - 100,
-          width: 130,
-          height: 3,
-          color: maroonRgb,
-        });
-
-        if (s.layout === "index") {
-          // INDEX SLIDE
-          const items = s.bulletPoints || [];
-          const half = Math.ceil(items.length / 2);
-          const col1 = items.slice(0, half);
-          const col2 = items.slice(half);
-
-          let y1 = pageHeight - 145;
-          col1.forEach((item) => {
-            page.drawText(item.substring(0, 48), {
-              x: 64,
-              y: y1,
-              size: 17,
-              font: fontHelveticaBold,
-              color: charcoalRgb,
-            });
-            y1 -= 44;
-          });
-
-          let y2 = pageHeight - 145;
-          col2.forEach((item) => {
-            page.drawText(item.substring(0, 48), {
-              x: 510,
-              y: y2,
-              size: 17,
-              font: fontHelveticaBold,
-              color: charcoalRgb,
-            });
-            y2 -= 44;
-          });
-        } else if (s.layout === "paragraph") {
-          // INTRODUCTION OR CONCLUSION (NO BULLETS)
-          const paragraphText =
-            s.paragraph ||
-            s.bulletPoints?.join(" ") ||
-            "Academic synthesis conforming strictly to Institute of Aeronautical Engineering OBE continuous evaluation standards.";
-
-          page.drawText(paragraphText, {
+        // 8 CORE TECHNICAL SLIDES (STRICTLY 5 SUBSTANTIVE BULLETS)
+        const bullets = (s.bulletPoints || []).slice(0, 5);
+        let bY = pageHeight - 145;
+        bullets.forEach((b) => {
+          page.drawText(`•  ${b}`, {
             x: 64,
-            y: pageHeight - 150,
-            size: 16.5,
+            y: bY,
+            size: 15.5,
             font: fontHelvetica,
             color: charcoalRgb,
             maxWidth: pageWidth - 128,
-            lineHeight: 28,
+            lineHeight: 22,
           });
-        } else {
-          // 8 CORE TECHNICAL SLIDES (EXACTLY 5 SUBSTANTIVE BULLETS)
-          const bullets = (s.bulletPoints || []).slice(0, 5);
-          let bY = pageHeight - 145;
-          bullets.forEach((b) => {
-            page.drawText(`•  ${b}`, {
-              x: 64,
-              y: bY,
-              size: 15.5,
-              font: fontHelvetica,
-              color: charcoalRgb,
-              maxWidth: pageWidth - 128,
-              lineHeight: 22,
-            });
-            bY -= 56;
-          });
-        }
+          bY -= 58;
+        });
       }
     }
   }
