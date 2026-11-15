@@ -1,7 +1,14 @@
 {
   "name": "velodoc-studio",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "Swiss-precision client-side document and academic presentation studio with zero server uploads.",
   "private": true,
+  "author": "VeloDoc Studio Engineering Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vigneshreddy-dev/velodoc-studio.git"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
