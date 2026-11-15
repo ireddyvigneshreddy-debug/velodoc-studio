@@ -98,6 +98,8 @@ import {
   LightningSlash,
   MagnifyingGlassPlus,
   MagnifyingGlassMinus,
+  BookmarkSimple,
+  Bookmark,
   IconProps as PhosphorIconProps,
 } from "@phosphor-icons/react";
 
@@ -202,9 +204,12 @@ export {
   LightningSlash,
   MagnifyingGlassPlus,
   MagnifyingGlassMinus,
+  BookmarkSimple,
+  Bookmark,
 };
 
 // Aliases for seamless 1:1 drop-in replacement
+export const ArrowsClockwise = ArrowClockwise;
 export const AlertCircle = WarningCircle;
 export const AlertTriangle = Warning;
 export const Award = Medal;

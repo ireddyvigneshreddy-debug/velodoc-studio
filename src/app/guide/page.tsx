@@ -4,7 +4,7 @@ import { ArrowLeft } from "@/components/common/icons";
 
 export const metadata = {
   title: "Guide — Precision Operations Manual",
-  description: "Comprehensive step-by-step operational guide for VeloDoc Studio's 19 document tools and academic presentation studio.",
+  description: "Comprehensive step-by-step operational guide for VeloDoc Studio's 27 document tools and academic presentation studio.",
 };
 
 export default function GuidePage() {
@@ -163,6 +163,57 @@ export default function GuidePage() {
                 Export the presentation as a true native <code>.pptx</code> file with fully editable text boxes and shapes, ready for projection in lecture halls.
               </li>
             </ol>
+          </div>
+        </section>
+
+        {/* Chapter 5: Advanced Academic & Utility Suites */}
+        <section className="paper-card p-6 sm:p-8 rounded-lg dark:bg-charcoal-800">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="w-8 h-8 rounded bg-[#FFF5F0] text-[#C2410C] dark:bg-[#C2410C]/20 dark:text-[#ffedd5] flex items-center justify-center font-mono text-sm font-bold">
+              05
+            </span>
+            <h2 className="text-xl font-serif text-ink-primary dark:text-white">
+              Advanced Academic &amp; Institutional Document Suites
+            </h2>
+          </div>
+          <div className="space-y-4 text-sm text-ink-secondary dark:text-paper-400 leading-relaxed font-sans">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-4 rounded-lg bg-paper-100 dark:bg-charcoal-900 border border-paper-300 dark:border-charcoal-border">
+                <h3 className="font-semibold text-zinc-950 dark:text-white mb-1">
+                  2-in-1 ID &amp; Passport Sheet Maker
+                </h3>
+                <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                  Align front and back cards onto single A4 sheets or generate 35x45mm / 2x2&quot; passport photo grids with cut lines and target KB compression.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-lg bg-paper-100 dark:bg-charcoal-900 border border-paper-300 dark:border-charcoal-border">
+                <h3 className="font-semibold text-zinc-950 dark:text-white mb-1">
+                  Code &amp; Lab Record to PDF
+                </h3>
+                <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                  Compile .java, .py, .c, .cpp, .sql source code with Prism syntax highlighting, student metadata headers, and evaluation observation boxes.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-lg bg-paper-100 dark:bg-charcoal-900 border border-paper-300 dark:border-charcoal-border">
+                <h3 className="font-semibold text-zinc-950 dark:text-white mb-1">
+                  Offline WebAssembly OCR
+                </h3>
+                <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                  Extract text from scanned PDFs or photos in-memory, edit text side-by-side, and synthesize searchable hybrid PDFs.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-lg bg-paper-100 dark:bg-charcoal-900 border border-paper-300 dark:border-charcoal-border">
+                <h3 className="font-semibold text-zinc-950 dark:text-white mb-1">
+                  Clickable Index / Table of Contents
+                </h3>
+                <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                  Combine up to 30 chapters with true GoTo internal PDF links that jump directly to designated pages in any PDF viewer.
+                </p>
+              </div>
+            </div>
           </div>
         </section>
       </div>

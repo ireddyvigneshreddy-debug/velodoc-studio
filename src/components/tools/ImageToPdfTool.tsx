@@ -1,36 +1,28 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import Image from "next/image";
 import { DropZone } from "@/components/common/DropZone";
 import { ResultPreviewStudio } from "@/components/ResultPreviewStudio";
 import { CameraScannerModal } from "@/components/CameraScannerModal";
-import { UploadedFileItem, ProcessingMetrics } from "@/types";
+import { FileArrangerGrid, ArrangerItem } from "@/components/common/FileArrangerGrid";
+import { ProcessingMetrics } from "@/types";
 import { convertImagesToPdf, ImagesToPdfOptions } from "@/lib/pdf-engine";
 import {
   FileImage,
-  Loader2,
+  CircleNotch,
   AlertCircle,
-  ArrowUp,
-  ArrowDown,
-  Trash2,
+  Camera,
   Maximize2,
   Layers,
-  Camera,
+  Sparkle,
 } from "@/components/common/icons";
 import { sessionHistory } from "@/lib/session-history";
 import { createPdfBlob, createSafeFile } from "@/lib/utils";
 
-interface ImagePreviewItem extends UploadedFileItem {
-  previewUrl: string;
-}
-
 export function ImageToPdfTool() {
-  const [images, setImages] = useState<ImagePreviewItem[]>([]);
+  const [images, setImages] = useState<ArrangerItem[]>([]);
   const [pageSize, setPageSize] = useState<"fit" | "a4" | "letter">("a4");
-  const [orientation, setOrientation] = useState<"portrait" | "landscape">(
-    "portrait"
-  );
+  const [orientation, setOrientation] = useState<"portrait" | "landscape">("portrait");
   const [margin, setMargin] = useState<"none" | "small" | "large">("small");
 
   const [isProcessing, setIsProcessing] = useState(false);
@@ -42,20 +34,47 @@ export function ImageToPdfTool() {
   // Pro Camera Scanner Studio State
   const [isScannerOpen, setIsScannerOpen] = useState(false);
 
-  const handleFilesAdded = useCallback((newFiles: File[]) => {
+  // Eliminate Async Race-Condition Scrambling using Promise.all over indexed promises
+  const handleFilesAdded = useCallback(async (newFiles: File[]) => {
     setErrorMessage(null);
     setMetrics(null);
 
-    const newItems: ImagePreviewItem[] = newFiles.map((file) => ({
-      id: Math.random().toString(36).substring(7),
-      file,
-      name: file.name,
-      size: file.size,
-      status: "ready",
-      previewUrl: URL.createObjectURL(file),
-    }));
+    const indexedItems: ArrangerItem[] = await Promise.all(
+      newFiles.map(async (file, idx) => {
+        const previewUrl = URL.createObjectURL(file);
+        let width = 0;
+        let height = 0;
 
-    setImages((prev) => [...prev, ...newItems]);
+        try {
+          const img = new window.Image();
+          await new Promise((resolve) => {
+            img.onload = () => {
+              width = img.naturalWidth;
+              height = img.naturalHeight;
+              resolve(null);
+            };
+            img.onerror = () => resolve(null);
+            img.src = previewUrl;
+          });
+        } catch {
+          // ignore
+        }
+
+        return {
+          id: `${Date.now()}-${idx}-${Math.random().toString(36).substring(7)}`,
+          file,
+          name: file.name,
+          size: file.size,
+          previewUrl,
+          width,
+          height,
+          rotation: 0,
+          status: "ready" as const,
+        };
+      })
+    );
+
+    setImages((prev) => [...prev, ...indexedItems]);
   }, []);
 
   // Check for chained file or URL query param on mount
@@ -82,16 +101,25 @@ export function ImageToPdfTool() {
     });
   };
 
-  const handleMove = (index: number, direction: "up" | "down") => {
-    const targetIndex = direction === "up" ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= images.length) return;
+  const handleRotate = (id: string, newRotation: number) => {
+    setImages((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, rotation: newRotation } : item))
+    );
+  };
 
+  const handleDuplicate = (id: string) => {
     setImages((prev) => {
-      const next = [...prev];
-      const temp = next[index];
-      next[index] = next[targetIndex];
-      next[targetIndex] = temp;
-      return next;
+      const idx = prev.findIndex((i) => i.id === id);
+      if (idx === -1) return prev;
+      const original = prev[idx];
+      const clone: ArrangerItem = {
+        ...original,
+        id: `${Date.now()}-${Math.random().toString(36).substring(7)}`,
+        name: `${original.name.replace(/\.[^/.]+$/, "")}_copy.${original.name.split(".").pop()}`,
+      };
+      const copy = [...prev];
+      copy.splice(idx + 1, 0, clone);
+      return copy;
     });
   };
 
@@ -109,13 +137,16 @@ export function ImageToPdfTool() {
       const imageInputs = [];
       let totalOriginalSize = 0;
 
+      // Follow exact arranged sequence from images state
       for (const item of images) {
-        totalOriginalSize += item.size;
+        if (!item.file) continue;
+        totalOriginalSize += item.size || item.file.size;
         const buf = await item.file.arrayBuffer();
         imageInputs.push({
           file: item.file,
           buffer: buf,
-          type: item.file.type,
+          type: item.file.type || "image/jpeg",
+          rotation: item.rotation || 0,
         });
       }
 
@@ -144,11 +175,21 @@ export function ImageToPdfTool() {
         processedSize: pdfBytes.byteLength,
         savedBytes: 0,
         savedPercentage: 0,
-        durationMs,
+        durationMs: Math.round(durationMs),
         downloadUrl,
         downloadFilename: filename,
         pageCount: images.length,
         targetAccuracy: "Lossless PDF Generation",
+      });
+
+      sessionHistory.recordExecution({
+        toolId: "image-to-pdf",
+        toolName: "Images & Camera to PDF",
+        inputFiles: images.map((i) => i.name),
+        outputFileName: filename,
+        outputSizeBytes: pdfBytes.byteLength,
+        durationMs: Math.round(durationMs),
+        outputData: pdfBytes,
       });
     } catch (err: unknown) {
       console.error("Image to PDF error:", err);
@@ -160,71 +201,14 @@ export function ImageToPdfTool() {
     }
   };
 
-  // Instant 1-Click PDF generation directly from Camera Scanner Studio
   const handleInstantGeneratePdf = async (scannedFiles: File[]) => {
     if (scannedFiles.length === 0) return;
-
-    setIsProcessing(true);
-    setErrorMessage(null);
-    const startTime = performance.now();
-
-    try {
-      const imageInputs = [];
-      let totalOriginalSize = 0;
-
-      for (const file of scannedFiles) {
-        totalOriginalSize += file.size;
-        const buf = await file.arrayBuffer();
-        imageInputs.push({
-          file,
-          buffer: buf,
-          type: file.type || "image/jpeg",
-        });
-      }
-
-      const options: ImagesToPdfOptions = {
-        pageSize,
-        orientation,
-        margin,
-      };
-
-      const pdfBytes = await convertImagesToPdf(imageInputs, options);
-      const endTime = performance.now();
-      const durationMs = endTime - startTime;
-
-      const blob = createPdfBlob(pdfBytes);
-      const downloadUrl = URL.createObjectURL(blob);
-      const filename = `VeloDoc_CameraScan_${new Date().toISOString().slice(0, 10)}.pdf`;
-
-      setOutputBytes(pdfBytes);
-      if (imageInputs.length > 0) {
-        setOriginalBytes(imageInputs[0].buffer);
-      }
-
-      setMetrics({
-        originalSize: totalOriginalSize,
-        processedSize: pdfBytes.byteLength,
-        savedBytes: 0,
-        savedPercentage: 0,
-        durationMs,
-        downloadUrl,
-        downloadFilename: filename,
-        pageCount: scannedFiles.length,
-        targetAccuracy: "Pro Camera Lossless PDF",
-      });
-    } catch (err: unknown) {
-      console.error("Instant PDF generation error:", err);
-      setErrorMessage(
-        err instanceof Error ? err.message : "Failed to generate PDF from camera scans."
-      );
-    } finally {
-      setIsProcessing(false);
-    }
+    await handleFilesAdded(scannedFiles);
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6">
-      {/* Active Camera Scanner Studio Modal */}
+    <div className="space-y-6">
+      {/* Pro Camera Scanner Modal */}
       <CameraScannerModal
         isOpen={isScannerOpen}
         onClose={() => setIsScannerOpen(false)}
@@ -242,96 +226,88 @@ export function ImageToPdfTool() {
         />
       ) : (
         <>
-          {/* Prominent Pro Camera Studio Hero Banner */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-indigo-950/70 via-[#12141D] to-[#12141D] border border-cyan-500/30 shadow-2xl relative overflow-hidden">
-            <div className="flex items-center gap-3.5 relative z-10">
-              <div className="p-3 rounded-2xl bg-gradient-to-br from-indigo-500 via-cyan-500 to-emerald-500 text-white shadow-lg shadow-cyan-500/20 shrink-0">
+          {/* Pro Camera Banner */}
+          <div className="paper-card p-4 sm:p-5 rounded-xl bg-white dark:bg-charcoal-800 border border-paper-300 dark:border-charcoal-border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-lg bg-[#FEF3C7] dark:bg-[#B45309]/20 text-[#B45309] dark:text-[#fde68a] border border-[#FDE68A] dark:border-[#B45309]/30 flex items-center justify-center shrink-0">
                 <Camera className="w-5 h-5" />
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-0.5">
-                  <h3 className="text-sm sm:text-base font-bold text-white tracking-tight">
-                    Pro Camera &amp; Document Scanner
+                  <h3 className="text-sm font-semibold text-zinc-950 dark:text-white">
+                    4K Pro Camera &amp; Document Scanner
                   </h3>
-                  <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 uppercase">
-                    4K Studio
+                  <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-300 uppercase">
+                    Rapid Batch
                   </span>
                 </div>
-                <p className="text-xs text-slate-400 max-w-md">
-                  Snap documents, receipts, and book pages with hands-free auto-shutter, high-contrast B&amp;W xerox filters, and instant PDF compilation.
+                <p className="text-xs text-zinc-600 dark:text-zinc-400 max-w-md">
+                  Snap documents, ID cards, and homework pages with automatic boundary cropping, contrast filters, and multi-shot batching.
                 </p>
               </div>
             </div>
 
-            <div className="relative z-10 flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setIsScannerOpen(true)}
-                className="w-full sm:w-auto px-5 py-3 rounded-xl bg-gradient-to-r from-indigo-600 via-cyan-500 to-emerald-500 hover:from-indigo-500 hover:to-emerald-400 text-white font-bold text-xs sm:text-sm shadow-xl shadow-cyan-500/25 flex items-center justify-center gap-2.5 transition-all transform hover:-translate-y-0.5 cursor-pointer"
-              >
-                <Camera className="w-4 h-4 text-white" />
-                <span>Scan with Camera</span>
-                <span className="px-1.5 py-0.5 rounded bg-black/30 text-[10px] font-mono text-cyan-200">
-                  Rapid Batch
-                </span>
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setIsScannerOpen(true)}
+              className="px-4 py-2.5 rounded-lg bg-[#C2410C] hover:bg-[#A8370A] text-white font-mono text-xs font-medium flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
+            >
+              <Camera className="w-4 h-4" />
+              <span>Scan with Camera</span>
+            </button>
           </div>
 
-          <DropZone
-            files={images}
-            onFilesAdded={handleFilesAdded}
-            onRemoveFile={handleRemove}
-            onMoveFile={handleMove}
-            onClearAll={() => setImages([])}
-            onOpenScanner={() => setIsScannerOpen(true)}
-            acceptedFileTypes={{
-              "image/jpeg": [".jpg", ".jpeg"],
-              "image/png": [".png"],
-              "image/webp": [".webp"],
-            }}
-            multiple={true}
-            title="Drop JPG, PNG, or WebP Images"
-            subtitle="or click to browse from your device, or use the Pro Camera Scanner above"
-          />
+          {/* Dropzone only shown when queue is empty */}
+          {images.length === 0 && (
+            <DropZone
+              files={[]}
+              onFilesAdded={handleFilesAdded}
+              onRemoveFile={() => {}}
+              onOpenScanner={() => setIsScannerOpen(true)}
+              acceptedFileTypes={{
+                "image/jpeg": [".jpg", ".jpeg"],
+                "image/png": [".png"],
+                "image/webp": [".webp"],
+              }}
+              multiple={true}
+              title="Drop JPG, PNG, or WebP Photos (Up to 30 Files)"
+              subtitle="Order is preserved automatically • Instant Smart Alphanumeric & Timestamp Sorting"
+            />
+          )}
 
           {images.length > 0 && (
             <div className="space-y-6">
-              {/* Settings Controls */}
-              <div className="p-5 rounded-2xl bg-[#12141D] border border-white/10 space-y-4 shadow-xl">
+              {/* Layout & Margin Settings Bar */}
+              <div className="paper-card p-4 sm:p-5 rounded-xl bg-white dark:bg-charcoal-800 border border-paper-300 dark:border-charcoal-border">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {/* Page Size */}
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                      <Maximize2 className="w-3.5 h-3.5 text-indigo-400" />
-                      <span>Page Size</span>
+                  <div className="space-y-1">
+                    <label className="text-xs font-mono font-medium text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
+                      <Maximize2 className="w-3.5 h-3.5 text-[#C2410C]" />
+                      <span>Page Format</span>
                     </label>
                     <select
                       value={pageSize}
-                      onChange={(e) =>
-                        setPageSize(e.target.value as "fit" | "a4" | "letter")
-                      }
-                      className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs focus:outline-none focus:border-indigo-500 font-medium cursor-pointer"
+                      onChange={(e) => setPageSize(e.target.value as "fit" | "a4" | "letter")}
+                      className="w-full px-3 py-2 rounded-lg bg-paper-100 dark:bg-charcoal-900 border border-paper-300 dark:border-charcoal-border text-zinc-950 dark:text-white text-xs font-mono outline-none focus:border-[#C2410C]"
                     >
-                      <option value="a4">A4 (Standard Document)</option>
-                      <option value="letter">US Letter</option>
-                      <option value="fit">Fit to Image Dimensions</option>
+                      <option value="a4">A4 (Standard 210 × 297 mm)</option>
+                      <option value="letter">US Letter (8.5 × 11 in)</option>
+                      <option value="fit">Fit to Image Natural Dimensions</option>
                     </select>
                   </div>
 
                   {/* Orientation */}
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                      <Layers className="w-3.5 h-3.5 text-indigo-400" />
+                  <div className="space-y-1">
+                    <label className="text-xs font-mono font-medium text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
+                      <Layers className="w-3.5 h-3.5 text-[#C2410C]" />
                       <span>Orientation</span>
                     </label>
                     <select
                       value={orientation}
                       disabled={pageSize === "fit"}
-                      onChange={(e) =>
-                        setOrientation(e.target.value as "portrait" | "landscape")
-                      }
-                      className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs focus:outline-none focus:border-indigo-500 font-medium disabled:opacity-40 cursor-pointer"
+                      onChange={(e) => setOrientation(e.target.value as "portrait" | "landscape")}
+                      className="w-full px-3 py-2 rounded-lg bg-paper-100 dark:bg-charcoal-900 border border-paper-300 dark:border-charcoal-border text-zinc-950 dark:text-white text-xs font-mono outline-none focus:border-[#C2410C] disabled:opacity-40"
                     >
                       <option value="portrait">Portrait (Vertical)</option>
                       <option value="landscape">Landscape (Horizontal)</option>
@@ -339,154 +315,64 @@ export function ImageToPdfTool() {
                   </div>
 
                   {/* Margin */}
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                  <div className="space-y-1">
+                    <label className="text-xs font-mono font-medium text-zinc-700 dark:text-zinc-300">
                       Page Margin
                     </label>
                     <select
                       value={margin}
                       disabled={pageSize === "fit"}
-                      onChange={(e) =>
-                        setMargin(e.target.value as "none" | "small" | "large")
-                      }
-                      className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs focus:outline-none focus:border-indigo-500 font-medium disabled:opacity-40 cursor-pointer"
+                      onChange={(e) => setMargin(e.target.value as "none" | "small" | "large")}
+                      className="w-full px-3 py-2 rounded-lg bg-paper-100 dark:bg-charcoal-900 border border-paper-300 dark:border-charcoal-border text-zinc-950 dark:text-white text-xs font-mono outline-none focus:border-[#C2410C] disabled:opacity-40"
                     >
-                      <option value="none">None (Full Bleed)</option>
-                      <option value="small">Small (20pt)</option>
-                      <option value="large">Large (40pt)</option>
+                      <option value="none">None (Full Bleed Edge-to-Edge)</option>
+                      <option value="small">Small (20pt Border)</option>
+                      <option value="large">Large (40pt Document Margin)</option>
                     </select>
                   </div>
                 </div>
               </div>
 
-              {/* Queue List of Uploaded Images */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs text-slate-400 px-1">
-                  <span>Image Sequence ({images.length} images)</span>
-                  <div className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setIsScannerOpen(true)}
-                      className="text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-semibold transition-colors cursor-pointer"
-                    >
-                      <Camera className="w-3.5 h-3.5" />
-                      <span>Scan More Pages</span>
-                    </button>
-                    <span>Drag or use arrows to adjust order</span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                  {images.map((item, index) => (
-                    <div
-                      key={item.id}
-                      className="relative group rounded-xl bg-[#12141D] border border-white/10 p-2 overflow-hidden flex flex-col justify-between"
-                    >
-                      <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-black/40 mb-2">
-                        <Image
-                          src={item.previewUrl}
-                          alt={item.name}
-                          fill
-                          className="object-cover"
-                          unoptimized
-                        />
-                        <div className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-sm text-[10px] font-bold text-white border border-white/10">
-                          #{index + 1}
-                        </div>
-                      </div>
-
-                      <div className="text-[11px] font-medium text-slate-300 truncate mb-2">
-                        {item.name}
-                      </div>
-
-                      <div className="flex items-center justify-between pt-1 border-t border-white/5">
-                        <div className="flex items-center gap-1">
-                          <button
-                            type="button"
-                            onClick={() => handleMove(index, "up")}
-                            disabled={index === 0}
-                            className="p-1 rounded bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white disabled:opacity-20"
-                          >
-                            <ArrowUp className="w-3 h-3" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleMove(index, "down")}
-                            disabled={index === images.length - 1}
-                            className="p-1 rounded bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white disabled:opacity-20"
-                          >
-                            <ArrowDown className="w-3 h-3" />
-                          </button>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => handleRemove(item.id)}
-                          className="p-1 rounded text-rose-400 hover:bg-rose-500/10"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              {/* UNIVERSAL VISUAL PHOTO & FILE ARRANGER GRID */}
+              <FileArrangerGrid
+                items={images}
+                onReorder={setImages}
+                onRotate={handleRotate}
+                onRemove={handleRemove}
+                onDuplicate={handleDuplicate}
+                onAddMore={handleFilesAdded}
+                itemTypeLabel="Photo"
+                subtitle="Drag cards to rearrange, use Smart Sort pills (1, 2, 10 or capture time), or rotate sideways camera photos."
+              />
 
               {errorMessage && (
-                <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
+                <div className="p-3 rounded-lg bg-rose-50 border border-rose-300 text-rose-900 text-xs font-mono flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
                   <span>{errorMessage}</span>
                 </div>
               )}
 
-              {/* Action Trigger */}
-              <div className="flex justify-end gap-3">
+              {/* Action Trigger Button */}
+              <div className="flex justify-end pt-2">
                 <button
                   type="button"
                   onClick={handleConvert}
                   disabled={isProcessing}
-                  className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-semibold text-sm shadow-xl shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                  className="px-6 py-3 rounded-lg bg-[#C2410C] hover:bg-[#A8370A] disabled:opacity-50 text-white font-mono text-xs font-medium shadow-sm flex items-center gap-2 transition-colors cursor-pointer"
                 >
                   {isProcessing ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Compiling PDF Document...</span>
+                      <CircleNotch className="w-4 h-4 animate-spin" />
+                      <span>Compiling {images.length} Photos into PDF...</span>
                     </>
                   ) : (
                     <>
                       <FileImage className="w-4 h-4" />
-                      <span>Convert {images.length} Images to PDF</span>
+                      <span>Compile {images.length} Photos into Clean PDF</span>
                     </>
                   )}
                 </button>
               </div>
-            </div>
-          )}
-
-          {/* Mobile Sticky Thumb-Zone Action Bar */}
-          {images.length > 0 && !metrics && (
-            <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-safe bg-[#05060B]/90 backdrop-blur-xl border-t border-white/10 md:hidden flex items-center justify-between gap-3 shadow-2xl">
-              <div className="text-xs text-zinc-300 font-mono">
-                <span className="font-semibold text-indigo-400">{images.length}</span> images
-              </div>
-              <button
-                type="button"
-                onClick={handleConvert}
-                disabled={isProcessing}
-                className="flex-1 py-3 px-4 rounded-xl bg-vermilion active:bg-vermilion-hover text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg disabled:opacity-40"
-              >
-                {isProcessing ? (
-                  <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span>Compiling...</span>
-                  </>
-                ) : (
-                  <>
-                    <FileImage className="w-3.5 h-3.5" />
-                    <span>Convert to PDF</span>
-                  </>
-                )}
-              </button>
             </div>
           )}
         </>

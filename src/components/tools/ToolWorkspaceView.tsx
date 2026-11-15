@@ -45,6 +45,13 @@ import { PdfDiffTextTool } from "./PdfDiffTextTool";
 import { HtmlToPdfTool } from "./HtmlToPdfTool";
 import { PdfFormFillerTool } from "./PdfFormFillerTool";
 import { PresentationPdfTool } from "./PresentationPdfTool";
+import { IdCardStudioTool } from "./IdCardStudioTool";
+import { CodeToPdfTool } from "./CodeToPdfTool";
+import { OcrPdfTool } from "./OcrPdfTool";
+import { TocPdfTool } from "./TocPdfTool";
+import { QrStampPdfTool } from "./QrStampPdfTool";
+import { FillFormPdfTool } from "./FillFormPdfTool";
+import { LinksPdfTool } from "./LinksPdfTool";
 
 interface ToolWorkspaceViewProps {
   tool: ToolDefinition;
@@ -114,6 +121,20 @@ export function ToolWorkspaceView({ tool }: ToolWorkspaceViewProps) {
         return <PdfFormFillerTool />;
       case "presentation-pdf":
         return <PresentationPdfTool />;
+      case "id-card-studio":
+        return <IdCardStudioTool />;
+      case "code-to-pdf":
+        return <CodeToPdfTool />;
+      case "ocr-pdf":
+        return <OcrPdfTool />;
+      case "toc-pdf":
+        return <TocPdfTool />;
+      case "qr-stamp-pdf":
+        return <QrStampPdfTool />;
+      case "fill-form-pdf":
+        return <FillFormPdfTool />;
+      case "links-pdf":
+        return <LinksPdfTool />;
       default:
         return (
           <div className="p-8 text-center text-zinc-700 dark:text-zinc-400 font-sans">

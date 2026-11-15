@@ -19,6 +19,7 @@
     "@phosphor-icons/react": "^2.1.10",
     "@types/canvas-confetti": "^1.9.0",
     "@types/diff": "^7.0.2",
+    "@types/prismjs": "^1.26.6",
     "@types/qrcode": "^1.5.6",
     "browser-image-compression": "^2.0.2",
     "canvas-confetti": "^1.9.4",
@@ -31,11 +32,13 @@
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^6.5.438",
     "pptxgenjs": "^4.0.1",
+    "prismjs": "^1.30.0",
     "qrcode": "^1.5.4",
     "react": "^18",
     "react-dom": "^18",
     "react-dropzone": "^20.2.0",
-    "tailwind-merge": "^3.7.0"
+    "tailwind-merge": "^3.7.0",
+    "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
     "@types/node": "^20",

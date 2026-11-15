@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { DropZone } from "@/components/common/DropZone";
-import { ThumbnailGrid, PageControlAction } from "@/components/common/ThumbnailGrid";
+import { FileArrangerGrid, ArrangerItem } from "@/components/common/FileArrangerGrid";
 import { ResultPreviewStudio } from "@/components/ResultPreviewStudio";
 import { UploadedFileItem, PageThumbnail, ProcessingMetrics } from "@/types";
 import {
@@ -13,9 +13,10 @@ import {
 } from "@/lib/pdf-engine";
 import { sessionHistory } from "@/lib/session-history";
 import { createPdfBlob } from "@/lib/utils";
-import { RotateCw, Loader2, AlertCircle, Undo2 } from "@/components/common/icons";
+import { RotateCw, Loader2, AlertCircle, Undo2, Check } from "@/components/common/icons";
 
 interface InternalPageItem extends PageThumbnail {
+  id: string;
   originalIndex: number;
   rotationDelta: number;
 }
@@ -63,9 +64,10 @@ export function OrganizePdfTool() {
       const count = await getPdfPageCount(buffer);
       item.pageCount = count;
 
-      const thumbs = await renderAllPagesThumbnails(buffer, 0.35);
+      const thumbs = await renderAllPagesThumbnails(buffer, 0.4);
       const internalItems: InternalPageItem[] = thumbs.map((th, idx) => ({
         ...th,
+        id: `page_${idx + 1}_${Date.now()}_${Math.random().toString(36).substring(5)}`,
         originalIndex: idx,
         rotationDelta: 0,
       }));
@@ -74,53 +76,12 @@ export function OrganizePdfTool() {
       setFileItem({ ...item });
     } catch (err: unknown) {
       console.error(err);
-      setErrorMessage("Failed to load PDF pages.");
+      setErrorMessage("Failed to load PDF pages. The file may be password-protected or corrupted.");
       item.status = "error";
       setFileItem({ ...item });
     } finally {
       setIsLoadingThumbnails(false);
     }
-  };
-
-  const handlePageAction = (action: PageControlAction) => {
-    const { type, index } = action;
-
-    setPages((prev) => {
-      const next = [...prev];
-      if (type === "move-left" && index > 0) {
-        const temp = next[index];
-        next[index] = next[index - 1];
-        next[index - 1] = temp;
-      } else if (type === "move-right" && index < next.length - 1) {
-        const temp = next[index];
-        next[index] = next[index + 1];
-        next[index + 1] = temp;
-      } else if (type === "rotate-cw") {
-        next[index] = {
-          ...next[index],
-          rotationDelta: (next[index].rotationDelta + 90) % 360,
-          rotation: ((next[index].rotation || 0) + 90) % 360,
-        };
-      } else if (type === "rotate-ccw") {
-        next[index] = {
-          ...next[index],
-          rotationDelta: (next[index].rotationDelta + 270) % 360,
-          rotation: ((next[index].rotation || 0) + 270) % 360,
-        };
-      } else if (type === "duplicate") {
-        const target = next[index];
-        const duplicated: InternalPageItem = {
-          ...target,
-          pageNumber: next.length + 1,
-        };
-        next.splice(index + 1, 0, duplicated);
-      } else if (type === "delete") {
-        if (next.length > 1) {
-          next.splice(index, 1);
-        }
-      }
-      return next;
-    });
   };
 
   const handleRotateAll = (delta: number) => {
@@ -135,6 +96,52 @@ export function OrganizePdfTool() {
 
   const handleReverseAll = () => {
     setPages((prev) => [...prev].reverse());
+  };
+
+  const handleReorder = (newItems: ArrangerItem[]) => {
+    const map = new Map(pages.map((p) => [p.id, p]));
+    const reordered = newItems.map((item) => map.get(item.id)!).filter(Boolean);
+    setPages(reordered);
+  };
+
+  const handleRotatePage = (id: string, newRotation: number) => {
+    setPages((prev) =>
+      prev.map((p) =>
+        p.id === id
+          ? {
+              ...p,
+              rotationDelta: newRotation,
+              rotation: newRotation,
+            }
+          : p
+      )
+    );
+  };
+
+  const handleRemovePage = (id: string) => {
+    if (pages.length <= 1) {
+      setErrorMessage("The document must retain at least 1 page.");
+      return;
+    }
+    setErrorMessage(null);
+    setPages((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  const handleDuplicatePage = (id: string) => {
+    const idx = pages.findIndex((p) => p.id === id);
+    if (idx !== -1) {
+      const target = pages[idx];
+      const dup: InternalPageItem = {
+        ...target,
+        id: `page_dup_${Date.now()}_${Math.random().toString(36).substring(5)}`,
+        pageNumber: pages.length + 1,
+      };
+      setPages((prev) => {
+        const next = [...prev];
+        next.splice(idx + 1, 0, dup);
+        return next;
+      });
+    }
   };
 
   const handleSave = async () => {
@@ -204,19 +211,19 @@ export function OrganizePdfTool() {
               onRemoveFile={() => {}}
               acceptedFileTypes={{ "application/pdf": [".pdf"] }}
               multiple={false}
-              title="Upload PDF to organize, rotate &amp; reorder"
+              title="Upload PDF to organize, rotate & reorder"
               subtitle="Reorder sequence, rotate 90°/180°, reverse page order, and duplicate pages"
             />
           ) : (
             <div className="space-y-6">
-              {/* Toolbar */}
-              <div className="p-5 rounded-3xl bg-[#12141D] border border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
+              {/* Document Status & Quick Actions Bar */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-charcoal-800 border border-paper-300 dark:border-charcoal-border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 shadow-paper">
                 <div>
-                  <h3 className="font-semibold text-white text-base">
+                  <h3 className="font-semibold text-zinc-950 dark:text-white text-sm sm:text-base font-sans">
                     {fileItem.name}
                   </h3>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    {pages.length} pages in current layout • Reorder and rotate visually
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5 font-mono">
+                    {pages.length} pages in current sequence • Drag cards, use arrows, or pick jump numbers
                   </p>
                 </div>
 
@@ -224,18 +231,18 @@ export function OrganizePdfTool() {
                   <button
                     type="button"
                     onClick={() => handleRotateAll(90)}
-                    className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 flex items-center gap-1.5 transition-colors"
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-100 hover:bg-zinc-200 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-zinc-800 dark:text-zinc-200 border border-zinc-300 dark:border-charcoal-border flex items-center gap-1.5 transition-colors cursor-pointer"
                   >
-                    <RotateCw className="w-3.5 h-3.5 text-indigo-400" />
+                    <RotateCw className="w-3.5 h-3.5 text-[#C2410C] dark:text-orange-400" />
                     <span>Rotate All 90°</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={handleReverseAll}
-                    className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 flex items-center gap-1.5 transition-colors"
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-100 hover:bg-zinc-200 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-zinc-800 dark:text-zinc-200 border border-zinc-300 dark:border-charcoal-border flex items-center gap-1.5 transition-colors cursor-pointer"
                   >
-                    <Undo2 className="w-3.5 h-3.5 text-cyan-400" />
+                    <Undo2 className="w-3.5 h-3.5 text-[#1E3A5F] dark:text-cyan-400" />
                     <span>Reverse Order</span>
                   </button>
 
@@ -243,7 +250,7 @@ export function OrganizePdfTool() {
                     type="button"
                     disabled={isProcessing || pages.length === 0}
                     onClick={handleSave}
-                    className="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 disabled:opacity-40 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 shadow-paper transition-all"
+                    className="px-5 py-2 rounded-xl bg-[#C2410C] hover:bg-[#A8370A] disabled:opacity-40 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 shadow-paper active:scale-[0.98] transition-all cursor-pointer"
                   >
                     {isProcessing ? (
                       <>
@@ -252,8 +259,8 @@ export function OrganizePdfTool() {
                       </>
                     ) : (
                       <>
-                        <RotateCw className="w-4 h-4" />
-                        <span>Save &amp; Preview PDF</span>
+                        <Check className="w-4 h-4" />
+                        <span>Save & Preview PDF</span>
                       </>
                     )}
                   </button>
@@ -261,34 +268,58 @@ export function OrganizePdfTool() {
               </div>
 
               {errorMessage && (
-                <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm flex items-center gap-2">
+                <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-300 text-sm flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 shrink-0" />
                   <span>{errorMessage}</span>
                 </div>
               )}
 
-              {/* Thumbnails with Organize Controls */}
-              <ThumbnailGrid
-                thumbnails={pages}
-                mode="organize"
-                onPageAction={handlePageAction}
-                isLoading={isLoadingThumbnails}
-                totalPageEstimate={fileItem.pageCount || 0}
-              />
+              {/* Visual Interactive Arranger Grid for PDF Pages */}
+              {isLoadingThumbnails ? (
+                <div className="p-12 text-center rounded-2xl bg-white dark:bg-charcoal-800 border border-paper-300 dark:border-charcoal-border space-y-3">
+                  <Loader2 className="w-8 h-8 animate-spin text-[#C2410C] mx-auto" />
+                  <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 font-sans">
+                    Rendering high-resolution page thumbnails...
+                  </p>
+                  <p className="text-xs text-zinc-500 font-mono">
+                    Extracting all {fileItem.pageCount || 0} pages in parallel
+                  </p>
+                </div>
+              ) : (
+                <FileArrangerGrid
+                  items={pages.map((p, idx) => ({
+                    id: p.id,
+                    name: `Page ${p.originalIndex + 1}`,
+                    previewUrl: p.dataUrl,
+                    rotation: p.rotationDelta,
+                    extraLabel: `Source #${p.originalIndex + 1}`,
+                    status: "ready" as const,
+                  }))}
+                  onReorder={handleReorder}
+                  onRotate={handleRotatePage}
+                  onRemove={handleRemovePage}
+                  onDuplicate={handleDuplicatePage}
+                  title="Interactive Page Arranger"
+                  subtitle="Drag cards to reorder, use left/right nudge arrows, rotate individual pages 90°, or pick jump numbers."
+                  itemTypeLabel="Page"
+                  showRotate={true}
+                  showDuplicate={true}
+                />
+              )}
             </div>
           )}
 
           {/* Mobile Sticky Thumb-Zone Action Bar */}
           {fileItem && !metrics && (
-            <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-safe bg-[#05060B]/90 backdrop-blur-xl border-t border-white/10 md:hidden flex items-center justify-between gap-3 shadow-2xl">
-              <div className="text-xs text-zinc-300 font-mono">
-                <span className="font-semibold text-purple-400">{pages.length}</span> pages
+            <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-safe bg-white/95 dark:bg-charcoal-900/95 backdrop-blur-xl border-t border-paper-300 dark:border-charcoal-border md:hidden flex items-center justify-between gap-3 shadow-2xl">
+              <div className="text-xs text-zinc-800 dark:text-zinc-300 font-mono">
+                <span className="font-semibold text-[#C2410C]">{pages.length}</span> pages
               </div>
               <button
                 type="button"
                 disabled={isProcessing || pages.length === 0}
                 onClick={handleSave}
-                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 active:from-purple-600 active:to-indigo-700 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg disabled:opacity-40"
+                className="flex-1 py-2.5 px-4 rounded-xl bg-[#C2410C] active:bg-[#A8370A] text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-paper disabled:opacity-40"
               >
                 {isProcessing ? (
                   <>
@@ -297,8 +328,8 @@ export function OrganizePdfTool() {
                   </>
                 ) : (
                   <>
-                    <RotateCw className="w-3.5 h-3.5" />
-                    <span>Save &amp; Preview PDF</span>
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Save & Preview PDF</span>
                   </>
                 )}
               </button>

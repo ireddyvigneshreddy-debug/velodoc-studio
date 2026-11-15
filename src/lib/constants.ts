@@ -9,7 +9,7 @@ export interface QuickIntentPreset {
 }
 
 export const TOOL_CATEGORIES: ToolCategory[] = [
-  "All Studio Tools (29)",
+  "All Studio Tools (27)",
   "Shrink & Exact KB",
   "Merge & Split",
   "Edit & Organize Pages",
@@ -48,18 +48,18 @@ export const QUICK_INTENT_PRESETS: QuickIntentPreset[] = [
     description: "Reorder and merge up to 30 files instantly",
   },
   {
-    id: "delete-pages",
-    label: "Delete unwanted pages?",
-    toolId: "remove-pages",
-    path: "/tools/remove-pages",
-    description: "Visually pick and purge odd/even or ranges",
+    id: "code-to-pdf-preset",
+    label: "Code & Lab Record to PDF?",
+    toolId: "code-to-pdf",
+    path: "/tools/code-to-pdf",
+    description: "Prism syntax highlighted lab records with student headers",
   },
   {
-    id: "convert-images",
-    label: "Convert 30 images to PDF?",
-    toolId: "image-to-pdf",
-    path: "/tools/image-to-pdf",
-    description: "Turn JPG/PNG photos into clean A4 or Letter PDFs",
+    id: "ocr-pdf-preset",
+    label: "Scanned PDF to Text OCR?",
+    toolId: "ocr-pdf",
+    path: "/tools/ocr-pdf",
+    description: "Client-side WebAssembly OCR & Searchable Hybrid PDF",
   },
   {
     id: "sign-fast",
@@ -79,7 +79,7 @@ export const QUICK_INTENT_PRESETS: QuickIntentPreset[] = [
 
 export const TOOLS: ToolDefinition[] = [
   // ==========================================
-  // 1. SHRINK & EXACT KB (Emerald / Teal family)
+  // 1. SHRINK & EXACT KB
   // ==========================================
   {
     id: "compress-pdf",
@@ -130,9 +130,28 @@ export const TOOLS: ToolDefinition[] = [
     acceptedFileTypes: { "application/pdf": [".pdf"] },
     multipleFiles: true,
   },
+  {
+    id: "id-card-studio",
+    name: "2-in-1 ID & Passport Photo Sheet",
+    category: "Shrink & Exact KB",
+    toolType: "image",
+    description: "Generate 2-in-1 Front & Back ID Card prints on single A4 sheets or tiled passport/visa photo sheets (35x45mm, 2x2in) with cut guides.",
+    shortDesc: "2-in-1 ID card & passport photo grid",
+    inputOutputBadge: "Photo/Scan → A4 Sheet",
+    icon: "Camera",
+    color: "from-teal-500 to-emerald-600",
+    badge: "2-in-1 A4 & Passport",
+    path: "/tools/id-card-studio",
+    acceptedFileTypes: {
+      "image/jpeg": [".jpg", ".jpeg"],
+      "image/png": [".png"],
+      "image/webp": [".webp"],
+    },
+    multipleFiles: true,
+  },
 
   // ==========================================
-  // 2. MERGE & SPLIT (Indigo / Violet family)
+  // 2. MERGE & SPLIT
   // ==========================================
   {
     id: "merge-pdf",
@@ -164,9 +183,24 @@ export const TOOLS: ToolDefinition[] = [
     acceptedFileTypes: { "application/pdf": [".pdf"] },
     multipleFiles: true,
   },
+  {
+    id: "nup-pdf",
+    name: "2-Up / 4-Up Handout & Booklet Imposition",
+    category: "Merge & Split",
+    toolType: "pdf",
+    description: "Impose 2, 4, or 6 slides per sheet with cutting lines, borders, and custom margins for student lecture notes (Save up to 75% paper).",
+    shortDesc: "Combine multiple slides per sheet",
+    inputOutputBadge: "Slides → Handout Sheet",
+    icon: "LayoutGrid",
+    color: "from-indigo-500 to-violet-600",
+    badge: "Save 75% Paper",
+    path: "/tools/nup-pdf",
+    acceptedFileTypes: { "application/pdf": [".pdf"] },
+    multipleFiles: true,
+  },
 
   // ==========================================
-  // 3. EDIT & ORGANIZE PAGES (Indigo / Violet / Amber family)
+  // 3. EDIT & ORGANIZE PAGES
   // ==========================================
   {
     id: "organize-pdf",
@@ -243,9 +277,24 @@ export const TOOLS: ToolDefinition[] = [
     acceptedFileTypes: { "application/pdf": [".pdf"] },
     multipleFiles: true,
   },
+  {
+    id: "toc-pdf",
+    name: "Clickable Table of Contents & Index",
+    category: "Edit & Organize Pages",
+    toolType: "pdf",
+    description: "Prepend formatted Index page with real internal PDF GoTo link annotations so clicking any chapter jumps directly to that page.",
+    shortDesc: "Clickable PDF Index & GoTo links",
+    inputOutputBadge: "Chapters → Clickable TOC",
+    icon: "BookmarkSimple",
+    color: "from-indigo-500 to-violet-600",
+    badge: "Real GoTo Links",
+    path: "/tools/toc-pdf",
+    acceptedFileTypes: { "application/pdf": [".pdf"] },
+    multipleFiles: true,
+  },
 
   // ==========================================
-  // 4. CONVERT & CAMERA SCAN (Cyan / Sky family)
+  // 4. CONVERT & CAMERA SCAN
   // ==========================================
   {
     id: "image-to-pdf",
@@ -311,9 +360,44 @@ export const TOOLS: ToolDefinition[] = [
     acceptedFileTypes: { "text/markdown": [".md"], "text/plain": [".txt"] },
     multipleFiles: true,
   },
+  {
+    id: "code-to-pdf",
+    name: "Code & Academic Lab Record to PDF",
+    category: "Convert & Camera Scan",
+    toolType: "pdf",
+    description: "Convert up to 30 source code files (.java, .py, .cpp, .sql) with Prism syntax highlighting, line numbers, student headers, and observation boxes.",
+    shortDesc: "Syntax highlighted lab record PDF",
+    inputOutputBadge: "Source Code → Lab PDF",
+    icon: "Code",
+    color: "from-cyan-500 to-sky-600",
+    badge: "Prism Highlighting",
+    path: "/tools/code-to-pdf",
+    acceptedFileTypes: { "text/plain": [".java", ".py", ".c", ".cpp", ".js", ".ts", ".html", ".css", ".sql", ".txt"] },
+    multipleFiles: true,
+  },
+  {
+    id: "ocr-pdf",
+    name: "Offline OCR — Scanned PDF to Text",
+    category: "Convert & Camera Scan",
+    toolType: "pdf",
+    description: "Extract text from image PDFs or photos locally via WebAssembly OCR, edit text side-by-side, and export Searchable Hybrid PDFs.",
+    shortDesc: "Extract text & searchable hybrid PDF",
+    inputOutputBadge: "Scans → Searchable PDF",
+    icon: "FileSearch",
+    color: "from-cyan-500 to-sky-600",
+    badge: "Offline Wasm OCR",
+    path: "/tools/ocr-pdf",
+    acceptedFileTypes: {
+      "application/pdf": [".pdf"],
+      "image/jpeg": [".jpg", ".jpeg"],
+      "image/png": [".png"],
+      "image/webp": [".webp"],
+    },
+    multipleFiles: true,
+  },
 
   // ==========================================
-  // 5. SIGN, REDACT & COMPARE (Amber / Rose family)
+  // 5. SIGN, REDACT & COMPARE
   // ==========================================
   {
     id: "sign-pdf",
@@ -390,163 +474,54 @@ export const TOOLS: ToolDefinition[] = [
     acceptedFileTypes: { "application/pdf": [".pdf"] },
     multipleFiles: true,
   },
-
-  // ==========================================
-  // EXTREME & SMART PRO TOOLS (Unmatched Suite)
-  // ==========================================
   {
-    id: "flatten-pdf",
-    name: "PDF Flatten & Form Purge",
-    category: "Shrink & Exact KB",
-    toolType: "pdf",
-    description: "Freeze interactive fillable forms into permanent static vector paths or ultra-secure 300 DPI raster pages with annotation purge.",
-    shortDesc: "Lock forms & wipe comments permanently",
-    inputOutputBadge: "Forms → Flat PDF",
-    icon: "ShieldCheck",
-    color: "from-emerald-500 to-teal-600",
-    badge: "Tamper-Proof Lock",
-    path: "/tools/flatten-pdf",
-    acceptedFileTypes: { "application/pdf": [".pdf"] },
-    multipleFiles: false,
-  },
-  {
-    id: "passport-photo",
-    name: "Passport & Visa Photo Studio",
-    category: "Shrink & Exact KB",
-    toolType: "image",
-    description: "Create official US, Schengen, UK, India, and Australia compliant passport photos with head oval guides, background tint, and 4x6 print sheets.",
-    shortDesc: "Biometric passport & visa photo maker",
-    inputOutputBadge: "Photo → 4x6 Sheet",
-    icon: "Camera",
-    color: "from-teal-500 to-cyan-600",
-    badge: "4x6 Print Sheet",
-    path: "/tools/passport-photo",
-    acceptedFileTypes: {
-      "image/jpeg": [".jpg", ".jpeg"],
-      "image/png": [".png"],
-      "image/webp": [".webp"],
-    },
-    multipleFiles: false,
-  },
-  {
-    id: "nup-pdf",
-    name: "N-Up Multi-Page & Booklet Studio",
-    category: "Edit & Organize Pages",
-    toolType: "pdf",
-    description: "Arrange 2, 4, 6, 8, 9, or 16 pages per sheet with cut guides, borders, and custom margins. Save up to 75% printing paper.",
-    shortDesc: "Combine multiple pages per sheet",
-    inputOutputBadge: "Multi-Pages → 1 Sheet",
-    icon: "LayoutGrid",
-    color: "from-indigo-500 to-violet-600",
-    badge: "Save 75% Paper",
-    path: "/tools/nup-pdf",
-    acceptedFileTypes: { "application/pdf": [".pdf"] },
-    multipleFiles: false,
-  },
-  {
-    id: "pdf-form-filler",
-    name: "Universal PDF Form Filler",
+    id: "fill-form-pdf",
+    name: "Interactive Form Filler & Flattener",
     category: "Sign, Redact & Compare",
     toolType: "pdf",
-    description: "Click anywhere on any PDF to drop text answers, checkmarks, crossmarks, and dates. Bake answers directly into the vector document.",
-    shortDesc: "Fill out contracts, applications & forms",
-    inputOutputBadge: "PDF → Filled Form",
+    description: "Parse AcroForm fields dynamically, fill out applications, and lock fields into permanent tamper-proof vector paths.",
+    shortDesc: "Fill AcroForms & lock permanently",
+    inputOutputBadge: "AcroForm → Flat PDF",
     icon: "FileEdit",
     color: "from-amber-500 to-rose-600",
-    badge: "Click & Type Forms",
-    path: "/tools/pdf-form-filler",
+    badge: "AcroForm Flattener",
+    path: "/tools/fill-form-pdf",
     acceptedFileTypes: { "application/pdf": [".pdf"] },
     multipleFiles: false,
   },
   {
-    id: "pdf-diff-text",
-    name: "Contract & Text Diff Inspector",
+    id: "links-pdf",
+    name: "Link Auditor & Hyperlink Stripper",
     category: "Sign, Redact & Compare",
     toolType: "pdf",
-    description: "In-depth text diff comparison between two PDF revisions. Highlights additions, deletions, similarity score, and exports PDF audit reports.",
-    shortDesc: "Deep text-level contract comparison",
-    inputOutputBadge: "2 PDFs → Diff Report",
-    icon: "GitCompare",
-    color: "from-purple-500 to-rose-600",
-    badge: "Audit Report Export",
-    path: "/tools/pdf-diff-text",
+    description: "Audit all embedded URL and mailto links, export CSV tables, or strip external hyperlinks to eliminate outbound tracking.",
+    shortDesc: "Audit or strip embedded hyperlinks",
+    inputOutputBadge: "PDF → Sanitized Links",
+    icon: "Share2",
+    color: "from-amber-500 to-yellow-600",
+    badge: "Audit & Strip Links",
+    path: "/tools/links-pdf",
     acceptedFileTypes: { "application/pdf": [".pdf"] },
     multipleFiles: true,
   },
+
+  // ==========================================
+  // 6. EXTREME & SMART PRO
+  // ==========================================
   {
-    id: "html-to-pdf",
-    name: "HTML & Web Code to PDF Studio",
-    category: "Convert & Camera Scan",
-    toolType: "pdf",
-    description: "Live split-screen HTML, CSS, and Tailwind code editor with print-perfect page break preview, executive resume templates, and clean PDF export.",
-    shortDesc: "Live HTML & CSS to styled PDF",
-    inputOutputBadge: "HTML/CSS → Vector PDF",
-    icon: "Code",
-    color: "from-cyan-500 to-sky-600",
-    badge: "Live Code Split",
-    path: "/tools/html-to-pdf",
-    acceptedFileTypes: { "text/html": [".html", ".htm"] },
-    multipleFiles: false,
-  },
-  {
-    id: "qr-barcode-pdf",
-    name: "QR Code & Barcode Studio",
+    id: "qr-stamp-pdf",
+    name: "QR Code Document Stamper",
     category: "Extreme & Smart Pro",
     toolType: "pdf",
-    description: "Generate vector QR codes (Wi-Fi, vCard, URL, UPI) and 1D Barcodes, or stamp them directly onto any existing PDF document.",
-    shortDesc: "Generate & stamp QR or barcodes",
-    inputOutputBadge: "QR / Barcode → PDF",
+    description: "Stamp high-resolution vector QR codes (URLs, verification strings, portfolios) with captions onto any document page corner.",
+    shortDesc: "Stamp vector QR codes with captions",
+    inputOutputBadge: "URL/Data → PDF Stamp",
     icon: "QrCode",
     color: "from-violet-500 to-indigo-600",
-    badge: "Wi-Fi & Payment QR",
-    path: "/tools/qr-barcode-pdf",
+    badge: "Vector QR Stamper",
+    path: "/tools/qr-stamp-pdf",
     acceptedFileTypes: { "application/pdf": [".pdf"] },
-    multipleFiles: false,
-  },
-  {
-    id: "invoice-generator",
-    name: "Smart Invoice & Receipt Studio",
-    category: "Extreme & Smart Pro",
-    toolType: "pdf",
-    description: "Create professional business invoices and receipts with real-time tax calculation, currency switcher, and auto-generated payment QR codes.",
-    shortDesc: "Visual invoice builder with payment QR",
-    inputOutputBadge: "Live Builder → Invoice PDF",
-    icon: "FileSpreadsheet",
-    color: "from-indigo-500 to-emerald-600",
-    badge: "Auto Payment QR",
-    path: "/tools/invoice-generator",
-    acceptedFileTypes: { "application/json": [".json"] },
-    multipleFiles: false,
-  },
-  {
-    id: "certificate-generator",
-    name: "Award & Certificate Studio",
-    category: "Extreme & Smart Pro",
-    toolType: "pdf",
-    description: "Design luxury award certificates, completion diplomas, and credentials with classic gold borders, official seals, and verification QR codes.",
-    shortDesc: "Design diplomas & award certificates",
-    inputOutputBadge: "Customizer → A4 Diploma",
-    icon: "Award",
-    color: "from-amber-500 to-yellow-600",
-    badge: "Gold Guilloche Seal",
-    path: "/tools/certificate-generator",
-    acceptedFileTypes: { "application/json": [".json"] },
-    multipleFiles: false,
-  },
-  {
-    id: "presentation-pdf",
-    name: "PDF Presentation & Slideshow Mode",
-    category: "Extreme & Smart Pro",
-    toolType: "pdf",
-    description: "Distraction-free fullscreen presentation mode with illuminated laser pointer, live pen markup, speaker stopwatch, and blackout curtain.",
-    shortDesc: "Fullscreen presenter with laser & pen",
-    inputOutputBadge: "Slide Deck → Live Stage",
-    icon: "Presentation",
-    color: "from-fuchsia-500 to-rose-600",
-    badge: "Laser Pointer & Pen",
-    path: "/tools/presentation-pdf",
-    acceptedFileTypes: { "application/pdf": [".pdf"] },
-    multipleFiles: false,
+    multipleFiles: true,
   },
 ];
 

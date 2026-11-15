@@ -14,7 +14,12 @@ import {
 
 // Muted Swiss Editorial Accent Palette
 function getToolFamilyTheme(tool: ToolDefinition) {
-  if (tool.id === "compress-pdf" || tool.id === "image-studio" || tool.id === "flatten-pdf") {
+  if (
+    tool.id === "compress-pdf" ||
+    tool.id === "image-studio" ||
+    tool.id === "flatten-pdf" ||
+    tool.id === "id-card-studio"
+  ) {
     return {
       iconBg: "bg-[#EDF5F2] text-[#2E5A44] dark:bg-[#143A2F]/40 dark:text-[#6ee7b7] border border-[#C4DFD5] dark:border-[#143A2F]",
       badgeColor: "bg-[#EDF5F2] text-[#2E5A44] dark:bg-[#143A2F]/30 dark:text-[#6ee7b7] border-[#C4DFD5] dark:border-[#143A2F]",
@@ -28,7 +33,9 @@ function getToolFamilyTheme(tool: ToolDefinition) {
     tool.id === "redact-pdf" ||
     tool.id === "compare-pdf" ||
     tool.id === "remove-pages" ||
-    tool.id === "crop-pdf"
+    tool.id === "crop-pdf" ||
+    tool.id === "fill-form-pdf" ||
+    tool.id === "links-pdf"
   ) {
     return {
       iconBg: "bg-[#FFF5F0] text-[#C2410C] dark:bg-[#C2410C]/20 dark:text-[#ffedd5] border border-[#FBDCD0] dark:border-[#C2410C]/30",
@@ -42,7 +49,9 @@ function getToolFamilyTheme(tool: ToolDefinition) {
     tool.id === "image-to-pdf" ||
     tool.id === "pdf-to-image" ||
     tool.id === "presentation-pdf" ||
-    tool.id === "passport-photo"
+    tool.id === "passport-photo" ||
+    tool.id === "code-to-pdf" ||
+    tool.id === "ocr-pdf"
   ) {
     return {
       iconBg: "bg-[#FEF3C7] text-[#B45309] dark:bg-[#B45309]/20 dark:text-[#fde68a] border border-[#FDE68A] dark:border-[#B45309]/30",

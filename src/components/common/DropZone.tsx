@@ -30,6 +30,7 @@ interface DropZoneProps {
   onFilesAdded: (newFiles: File[]) => void;
   onRemoveFile: (id: string) => void;
   onMoveFile?: (index: number, direction: "up" | "down") => void;
+  onReorderFiles?: (newFiles: UploadedFileItem[]) => void;
   onClearAll?: () => void;
   acceptedFileTypes?: { [key: string]: string[] };
   multiple?: boolean;
@@ -45,6 +46,7 @@ export function DropZone({
   onFilesAdded,
   onRemoveFile,
   onMoveFile,
+  onReorderFiles,
   onClearAll,
   acceptedFileTypes = { "application/pdf": [".pdf"] },
   multiple = true,
@@ -271,6 +273,43 @@ export function DropZone({
             </div>
 
             <div className="flex items-center gap-3">
+              {onReorderFiles && files.length > 1 && (
+                <div className="hidden sm:flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const sorted = [...files].sort((a, b) =>
+                        a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" })
+                      );
+                      onReorderFiles(sorted);
+                    }}
+                    className="px-2 py-0.5 rounded text-[10px] font-mono bg-paper-100 dark:bg-charcoal-700 hover:bg-paper-200 text-zinc-800 dark:text-zinc-200 border border-paper-300 dark:border-charcoal-border transition-colors cursor-pointer"
+                    title="Sort natural numeric (e.g. 1, 2, 10)"
+                  >
+                    1, 2, 10
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const sorted = [...files].sort((a, b) =>
+                        b.name.localeCompare(a.name, undefined, { numeric: true, sensitivity: "base" })
+                      );
+                      onReorderFiles(sorted);
+                    }}
+                    className="px-2 py-0.5 rounded text-[10px] font-mono bg-paper-100 dark:bg-charcoal-700 hover:bg-paper-200 text-zinc-800 dark:text-zinc-200 border border-paper-300 dark:border-charcoal-border transition-colors cursor-pointer"
+                  >
+                    Z → A
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onReorderFiles([...files].reverse())}
+                    className="px-2 py-0.5 rounded text-[10px] font-mono bg-paper-100 dark:bg-charcoal-700 hover:bg-paper-200 text-zinc-800 dark:text-zinc-200 border border-paper-300 dark:border-charcoal-border transition-colors cursor-pointer"
+                  >
+                    Reverse
+                  </button>
+                </div>
+              )}
+
               {onOpenScanner && (
                 <button
                   type="button"

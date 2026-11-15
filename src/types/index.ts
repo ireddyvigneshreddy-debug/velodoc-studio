@@ -1,4 +1,5 @@
 export type ToolCategory =
+  | "All Studio Tools (27)"
   | "All Studio Tools (29)"
   | "All Studio Tools (19)"
   | "All Studio Tools"

@@ -28,6 +28,11 @@ import {
   Presentation,
   FileEdit,
   Code,
+  BookmarkSimple,
+  Bookmark,
+  Share2,
+  User,
+  Globe,
   LucideProps,
 } from "@/components/common/icons";
 
@@ -60,6 +65,11 @@ export const TOOL_ICON_MAP: Record<string, React.ComponentType<LucideProps>> = {
   Presentation,
   FileEdit,
   Code,
+  BookmarkSimple,
+  Bookmark,
+  Share2,
+  User,
+  Globe,
 };
 
 interface ToolIconProps {

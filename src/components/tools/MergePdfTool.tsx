@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { DropZone } from "@/components/common/DropZone";
+import { FileArrangerGrid } from "@/components/common/FileArrangerGrid";
 import { ResultPreviewStudio } from "@/components/ResultPreviewStudio";
 import { UploadedFileItem, ProcessingMetrics } from "@/types";
 import { mergePdfsPro, getPdfPageCount } from "@/lib/pdf-engine";
@@ -29,45 +30,58 @@ export function MergePdfTool() {
 
   const handleFilesAdded = async (newFiles: File[]) => {
     setErrorMessage(null);
-    const newItems: UploadedFileItem[] = newFiles.map((file) => ({
-      id: Math.random().toString(36).substring(7),
-      file,
-      name: file.name,
-      size: file.size,
-      status: "loading",
-      customPageRange: "",
-    }));
+    // Guarantee strict indexed upload order with zero race scrambling
+    const indexedItems: UploadedFileItem[] = await Promise.all(
+      newFiles.map(async (file, idx) => {
+        try {
+          const buffer = await file.arrayBuffer();
+          const pageCount = await getPdfPageCount(buffer);
+          return {
+            id: Math.random().toString(36).substring(7) + `_${idx}_${Date.now()}`,
+            file,
+            name: file.name,
+            size: file.size,
+            status: "ready" as const,
+            pageCount,
+            customPageRange: "",
+          };
+        } catch (err: unknown) {
+          console.error("Failed to read PDF pages:", err);
+          return {
+            id: Math.random().toString(36).substring(7) + `_${idx}_${Date.now()}`,
+            file,
+            name: file.name,
+            size: file.size,
+            status: "error" as const,
+            error: "Password encrypted or corrupted",
+            customPageRange: "",
+          };
+        }
+      })
+    );
 
-    setFiles((prev) => [...prev, ...newItems]);
-
-    for (const item of newItems) {
-      try {
-        const buffer = await item.file.arrayBuffer();
-        const pageCount = await getPdfPageCount(buffer);
-        setFiles((current) =>
-          current.map((f) =>
-            f.id === item.id ? { ...f, pageCount, status: "ready" } : f
-          )
-        );
-      } catch (err: unknown) {
-        console.error("Failed to read PDF pages:", err);
-        setFiles((current) =>
-          current.map((f) =>
-            f.id === item.id
-              ? {
-                  ...f,
-                  status: "error",
-                  error: "Password encrypted or corrupted",
-                }
-              : f
-          )
-        );
-      }
-    }
+    setFiles((prev) => [...prev, ...indexedItems]);
   };
 
   const handleRemoveFile = (id: string) => {
     setFiles((prev) => prev.filter((f) => f.id !== id));
+  };
+
+  const handleDuplicateFile = (id: string) => {
+    const idx = files.findIndex((f) => f.id === id);
+    if (idx !== -1) {
+      const item = files[idx];
+      const dup: UploadedFileItem = {
+        ...item,
+        id: Math.random().toString(36).substring(7) + `_copy_${Date.now()}`,
+        name: `${item.name.replace(/\.pdf$/i, "")}_copy.pdf`,
+      };
+      setFiles((prev) => {
+        const next = [...prev];
+        next.splice(idx + 1, 0, dup);
+        return next;
+      });
+    }
   };
 
   const handleMoveFile = (index: number, direction: "up" | "down") => {
@@ -176,6 +190,35 @@ export function MergePdfTool() {
 
           {files.length > 0 && (
             <div className="space-y-4">
+              {/* Visual Interactive Arranger Grid */}
+              <FileArrangerGrid
+                items={files.map((f) => ({
+                  id: f.id,
+                  file: f.file,
+                  name: f.name,
+                  size: f.size,
+                  pageCount: f.pageCount,
+                  status: f.status === "ready" ? "ready" : f.status === "error" ? "error" : "loading",
+                  extraLabel: f.customPageRange ? `Pages: ${f.customPageRange}` : undefined,
+                }))}
+                onReorder={(newArrangerItems) => {
+                  const fileMap = new Map(files.map((f) => [f.id, f]));
+                  const reordered = newArrangerItems
+                    .map((item) => fileMap.get(item.id)!)
+                    .filter(Boolean);
+                  setFiles(reordered);
+                }}
+                onRemove={handleRemoveFile}
+                onDuplicate={handleDuplicateFile}
+                onAddMore={handleFilesAdded}
+                acceptedFileTypes={{ "application/pdf": [".pdf"] }}
+                title="Arrange PDF Merge Sequence"
+                subtitle="Drag cards or use arrows to change merge order. Smart sort naturally orders 1, 2, 10 without scrambling."
+                itemTypeLabel="PDF"
+                showRotate={false}
+                showDuplicate={true}
+              />
+
               {/* Per-file custom page range inputs */}
               <div className="p-5 sm:p-6 rounded-3xl premium-card space-y-3 shadow-sm">
                 <span className="text-xs font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-400 block font-mono">

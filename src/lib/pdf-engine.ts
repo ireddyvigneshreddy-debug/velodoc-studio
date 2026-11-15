@@ -1464,7 +1464,7 @@ export interface ImagesToPdfOptions {
 }
 
 export async function convertImagesToPdf(
-  images: { file: File; buffer: ArrayBuffer; type: string }[],
+  images: { file: File; buffer: ArrayBuffer; type: string; rotation?: number }[],
   options: ImagesToPdfOptions
 ): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.create();
@@ -1544,6 +1544,9 @@ export async function convertImagesToPdf(
     const y = (pageHeight - drawH) / 2;
 
     const page = pdfDoc.addPage([pageWidth, pageHeight]);
+    if (img.rotation) {
+      page.setRotation(degrees(img.rotation));
+    }
     page.drawImage(embeddedImage, {
       x,
       y,
