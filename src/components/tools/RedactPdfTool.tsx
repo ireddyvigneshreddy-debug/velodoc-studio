@@ -19,7 +19,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ShieldCheck,
-} from "lucide-react";
+} from "@/components/common/icons";
 
 export function RedactPdfTool() {
   const [fileItem, setFileItem] = useState<UploadedFileItem | null>(null);
@@ -322,7 +322,7 @@ export function RedactPdfTool() {
                       type="button"
                       disabled={isProcessing || redactions.length === 0}
                       onClick={handleRedactAndSanitize}
-                      className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 to-red-700 hover:from-rose-700 hover:to-red-800 disabled:opacity-40 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(225,29,72,0.4)] transition-all cursor-pointer"
+                      className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 to-red-700 hover:from-rose-700 hover:to-red-800 disabled:opacity-40 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-paper transition-all cursor-pointer"
                     >
                       {isProcessing ? (
                         <>

@@ -10,7 +10,7 @@ import {
   Download,
   CheckCircle,
   Loader2,
-} from "lucide-react";
+} from "@/components/common/icons";
 
 export function CertificateGeneratorTool() {
   const [theme, setTheme] = useState<"gold" | "indigo" | "emerald">("gold");
@@ -414,7 +414,7 @@ export function CertificateGeneratorTool() {
               type="button"
               onClick={handleGenerateCertificate}
               disabled={isGenerating}
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 disabled:opacity-40 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(245,158,11,0.35)] transition-all cursor-pointer"
+              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 disabled:opacity-40 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-paper transition-all cursor-pointer"
             >
               {isGenerating ? (
                 <>
@@ -485,7 +485,7 @@ export function CertificateGeneratorTool() {
           type="button"
           onClick={handleGenerateCertificate}
           disabled={isGenerating}
-          className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-600 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(245,158,11,0.35)] cursor-pointer"
+          className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-600 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-paper cursor-pointer"
         >
           <Download className="w-4 h-4" />
           <span>Download Certificate</span>

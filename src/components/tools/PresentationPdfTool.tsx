@@ -13,7 +13,7 @@ import {
   Clock,
   Sparkles,
   RefreshCw,
-} from "lucide-react";
+} from "@/components/common/icons";
 
 export function PresentationPdfTool() {
   const [fileItem, setFileItem] = useState<UploadedFileItem | null>(null);
@@ -280,7 +280,7 @@ export function PresentationPdfTool() {
                   left: `${laserPos.x}px`,
                   top: `${laserPos.y}px`,
                 }}
-                className="pointer-events-none absolute w-5 h-5 -ml-2.5 -mt-2.5 rounded-full bg-red-500 shadow-[0_0_16px_6px_rgba(239,68,68,0.85)] z-40 transition-transform duration-75 ease-out"
+                className="pointer-events-none absolute w-5 h-5 -ml-2.5 -mt-2.5 rounded-full bg-red-500 shadow-paper z-40 transition-transform duration-75 ease-out"
               />
             )}
 

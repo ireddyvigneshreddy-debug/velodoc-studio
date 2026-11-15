@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import confetti from "canvas-confetti";
-import { Download, RefreshCw, Zap, TrendingDown, Clock, ShieldCheck } from "lucide-react";
+import { Download, RefreshCw, Zap, TrendingDown, Clock, ShieldCheck } from "@/components/common/icons";
 import { ProcessingMetrics } from "@/types";
 import { formatFileSize, formatTimeMs } from "@/lib/utils";
 
@@ -132,7 +132,7 @@ export function MetricsBar({
           <button
             type="button"
             onClick={handleDownload}
-            className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-cyan-500 hover:from-indigo-600 hover:to-cyan-600 text-white text-sm font-semibold flex items-center justify-center gap-2 transition-all shadow-[0_0_25px_rgba(99,102,241,0.45)] hover:shadow-[0_0_35px_rgba(99,102,241,0.65)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+            className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-vermilion hover:bg-vermilion-hover text-white text-xs font-mono uppercase tracking-wider font-semibold flex items-center justify-center gap-2 transition-colors shadow-paper cursor-pointer"
           >
             <Download className="w-4 h-4" />
             <span>Download File</span>

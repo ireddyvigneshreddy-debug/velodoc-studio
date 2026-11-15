@@ -13,9 +13,9 @@ interface SpotlightCardProps extends React.HTMLAttributes<HTMLDivElement> {
 export function SpotlightCard({
   children,
   className = "",
-  spotlightColor = "rgba(99, 102, 241, 0.15)",
-  spotlightRadius = 320,
-  borderGlowColor = "rgba(139, 92, 246, 0.35)",
+  spotlightColor = "rgba(217, 78, 40, 0.05)",
+  spotlightRadius = 240,
+  borderGlowColor = "rgba(217, 78, 40, 0.2)",
   ...props
 }: SpotlightCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -44,12 +44,12 @@ export function SpotlightCard({
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`relative group rounded-2xl overflow-hidden transition-all duration-300 ${className}`}
+      className={`relative group rounded-lg overflow-hidden transition-all duration-200 ${className}`}
       {...props}
     >
-      {/* Specular rim border highlight & cursor reactive border glow */}
+      {/* Subtle border highlight */}
       <div
-        className="pointer-events-none absolute inset-0 z-0 rounded-2xl transition-opacity duration-300"
+        className="pointer-events-none absolute inset-0 z-0 rounded-lg transition-opacity duration-200"
         style={{
           opacity: isHovered ? 1 : 0,
           background: `radial-gradient(${spotlightRadius * 0.75}px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), ${borderGlowColor}, transparent 70%)`,
@@ -61,17 +61,19 @@ export function SpotlightCard({
         }}
       />
 
-      {/* Surface Radial Spotlight fill */}
+      {/* Subtle radial spotlight overlay */}
       <div
-        className="pointer-events-none absolute inset-0 z-0 transition-opacity duration-300"
+        className="pointer-events-none absolute inset-0 z-0 transition-opacity duration-200"
         style={{
           opacity: isHovered ? 1 : 0,
-          background: `radial-gradient(${spotlightRadius}px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), ${spotlightColor}, transparent 75%)`,
+          background: `radial-gradient(${spotlightRadius}px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), ${spotlightColor}, transparent 80%)`,
         }}
       />
 
-      {/* Card Content with relative z-index */}
-      <div className="relative z-10 h-full w-full">{children}</div>
+      {/* Card Content */}
+      <div className="relative z-10 w-full h-full flex flex-col justify-between">
+        {children}
+      </div>
     </div>
   );
 }

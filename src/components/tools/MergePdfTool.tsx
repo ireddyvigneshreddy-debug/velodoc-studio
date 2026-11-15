@@ -7,7 +7,7 @@ import { UploadedFileItem, ProcessingMetrics } from "@/types";
 import { mergePdfsPro, getPdfPageCount } from "@/lib/pdf-engine";
 import { sessionHistory } from "@/lib/session-history";
 import { createPdfBlob } from "@/lib/utils";
-import { Layers, Loader2, Shuffle } from "lucide-react";
+import { Layers, Loader2, Shuffle } from "@/components/common/icons";
 
 export function MergePdfTool() {
   const [files, setFiles] = useState<UploadedFileItem[]>([]);
@@ -246,7 +246,7 @@ export function MergePdfTool() {
                   type="button"
                   disabled={files.length < 2 || isProcessing}
                   onClick={handleMerge}
-                  className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 disabled:opacity-40 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(99,102,241,0.45)] hover:shadow-[0_0_32px_rgba(99,102,241,0.65)] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                  className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-vermilion hover:bg-vermilion-hover disabled:opacity-40 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-paper hover:shadow-paper hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
                 >
                   {isProcessing ? (
                     <>
@@ -274,7 +274,7 @@ export function MergePdfTool() {
                 type="button"
                 disabled={isProcessing}
                 onClick={handleMerge}
-                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 active:from-indigo-600 active:to-indigo-700 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg disabled:opacity-40"
+                className="flex-1 py-3 px-4 rounded-xl bg-vermilion active:bg-vermilion-hover text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg disabled:opacity-40"
               >
                 {isProcessing ? (
                   <>

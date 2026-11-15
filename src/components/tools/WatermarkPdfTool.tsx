@@ -20,7 +20,7 @@ import {
   Type,
   AlertCircle,
   Upload,
-} from "lucide-react";
+} from "@/components/common/icons";
 import { sessionHistory } from "@/lib/session-history";
 import { formatFileSize, createPdfBlob, createSafeFile } from "@/lib/utils";
 

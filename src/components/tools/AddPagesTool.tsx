@@ -20,7 +20,7 @@ import {
   FileCheck,
   PlusCircle,
   Plus,
-} from "lucide-react";
+} from "@/components/common/icons";
 
 export function AddPagesTool() {
   const [baseFile, setBaseFile] = useState<UploadedFileItem | null>(null);
@@ -384,7 +384,7 @@ export function AddPagesTool() {
                     type="button"
                     disabled={isProcessing || (insertType === "pdf" && !auxFile)}
                     onClick={handleInsert}
-                    className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 disabled:opacity-40 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(16,185,129,0.35)] transition-all cursor-pointer"
+                    className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 disabled:opacity-40 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-paper transition-all cursor-pointer"
                   >
                     {isProcessing ? (
                       <>
@@ -426,7 +426,7 @@ export function AddPagesTool() {
                     onClick={() => setInsertPosition(0)}
                     className={`w-full py-2 px-4 rounded-xl border flex items-center justify-center gap-2 text-xs transition-all cursor-pointer font-mono ${
                       insertPosition === 0
-                        ? "bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.35)] ring-1 ring-emerald-400"
+                        ? "bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-paper ring-1 ring-emerald-400"
                         : "bg-white/[0.02] border-dashed border-white/15 text-zinc-400 hover:text-white hover:border-emerald-400/50 hover:bg-emerald-500/5"
                     }`}
                   >
@@ -496,7 +496,7 @@ export function AddPagesTool() {
                             onClick={() => setInsertPosition(slotPosition)}
                             className={`w-full py-1.5 px-3 rounded-xl border flex items-center justify-center gap-2 text-xs transition-all cursor-pointer font-mono ${
                               isSelectedSlot
-                                ? "bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.35)] ring-1 ring-emerald-400"
+                                ? "bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-paper ring-1 ring-emerald-400"
                                 : "bg-white/[0.015] border-dashed border-white/10 text-zinc-500 hover:text-zinc-200 hover:border-emerald-500/40 hover:bg-emerald-500/5"
                             }`}
                           >

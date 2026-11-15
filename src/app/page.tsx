@@ -3,132 +3,113 @@ import { HeroSection } from "@/components/dashboard/HeroSection";
 import { BentoGrid } from "@/components/dashboard/BentoGrid";
 import { TechTalkPptStudio } from "@/components/ppt/TechTalkPptStudio";
 import {
-  CheckCircle2,
+  CheckCircle,
   XCircle,
-  HelpCircle,
+  Question,
   Lock,
-} from "lucide-react";
+} from "@/components/common/icons";
 
 export default function HomePage() {
   return (
-    <div className="space-y-8 pb-16">
-      {/* 1. Compact Hero Section */}
+    <div className="space-y-12 pb-20">
+      {/* 1. Asymmetric Editorial Workbench Split Header */}
       <HeroSection />
 
-      {/* 2. Bento Grid Interactive Tool Catalog */}
+      {/* 2. 5-Column Precision Tool Directory */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <BentoGrid />
       </div>
 
-      {/* 3. The Client-Side Advantage (Comparison Table) */}
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-        <div className="text-center space-y-2.5 mb-8">
-          <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-indigo-300 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 font-mono">
-            <Lock className="w-3 h-3 text-cyan-400" />
+      {/* 3. The Client-Side Advantage (Comparison Matrix) */}
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        <div className="text-center space-y-2 mb-8">
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-[#1B4D3E] dark:text-[#6ee7b7] px-2.5 py-0.5 rounded bg-[#EDF5F2] dark:bg-[#143A2F]/40 border border-[#C4DFD5] dark:border-[#143A2F]">
+            <Lock className="w-3 h-3" />
             Air-Gapped Privacy Architecture
           </span>
-          <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-[-0.03em]">
-            Why Local In-Memory Processing Matters
+          <h2 className="text-2xl sm:text-3xl font-serif text-ink-primary dark:text-white tracking-tight">
+            Why In-Memory Processing Matters
           </h2>
-          <p className="text-xs sm:text-sm text-zinc-400 max-w-xl mx-auto">
-            Traditional online PDF converters upload confidential tax
-            returns, contracts, and medical records to remote cloud servers.
-            VeloDoc Pro executes 100% inside your browser sandbox.
+          <p className="text-xs sm:text-sm text-ink-secondary dark:text-paper-400 max-w-xl mx-auto font-sans">
+            Traditional online PDF converters upload confidential tax returns, contracts, and student records to remote servers. VeloDoc Studio executes 100% inside your browser sandbox.
           </p>
         </div>
 
-        <div className="rounded-3xl border border-white/[0.08] premium-card overflow-hidden shadow-2xl">
-          <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-white/[0.08]">
+        <div className="border border-paper-300 dark:border-charcoal-border rounded-lg overflow-hidden shadow-paper bg-white dark:bg-charcoal-800">
+          <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-paper-300 dark:divide-charcoal-border">
             {/* Cloud PDF Sites Column */}
-            <div className="p-6 sm:p-8 space-y-5 bg-rose-950/10">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20">
-                  <XCircle className="w-5 h-5" />
+            <div className="p-6 sm:p-8 space-y-5 bg-paper-100/60 dark:bg-charcoal-900/50">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded bg-rose-100 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400 flex items-center justify-center shrink-0">
+                  <XCircle className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white text-base tracking-tight">
-                    Traditional Cloud Tools
+                  <h3 className="font-sans font-semibold text-ink-primary dark:text-white text-sm">
+                    Traditional Cloud Converters
                   </h3>
-                  <span className="text-xs text-rose-400 font-medium">
+                  <span className="text-xs text-rose-600 dark:text-rose-400 font-mono">
                     Uploads files to remote servers
                   </span>
                 </div>
               </div>
 
-              <ul className="space-y-3 text-xs sm:text-sm text-zinc-400">
+              <ul className="space-y-3 text-xs sm:text-sm text-ink-secondary dark:text-paper-400 font-sans">
                 <li className="flex items-start gap-2.5">
                   <span className="text-rose-500 font-bold shrink-0">✕</span>
-                  <span>
-                    Uploads your private documents to third-party databases
-                  </span>
+                  <span>Uploads your private documents to third-party databases and log streams</span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <span className="text-rose-500 font-bold shrink-0">✕</span>
-                  <span>
-                    Strict file size limits (e.g., 25MB - 50MB paywalls)
-                  </span>
+                  <span>Strict file size limits (e.g., 25 MB paywalls and subscription gates)</span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <span className="text-rose-500 font-bold shrink-0">✕</span>
-                  <span>
-                    Network bandwidth lag &amp; slow remote server queues
-                  </span>
+                  <span>Network bandwidth latency, upload bottlenecks, and remote queue lag</span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <span className="text-rose-500 font-bold shrink-0">✕</span>
-                  <span>
-                    Requires account sign-up and aggressive recurring upselling
-                  </span>
+                  <span>Mandatory account registration and aggressive recurring marketing</span>
                 </li>
               </ul>
             </div>
 
-            {/* VeloDoc Pro Column */}
-            <div className="p-6 sm:p-8 space-y-5 bg-indigo-950/15 relative">
-              <div className="absolute top-4 right-4">
-                <span className="text-[11px] font-mono font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
+            {/* VeloDoc Studio Column */}
+            <div className="p-6 sm:p-8 space-y-5 bg-white dark:bg-charcoal-800 relative">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded bg-[#EDF5F2] text-[#1B4D3E] dark:bg-[#143A2F]/40 dark:text-[#6ee7b7] flex items-center justify-center shrink-0">
+                    <CheckCircle className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-sans font-semibold text-ink-primary dark:text-white text-sm">
+                      VeloDoc Local Engine
+                    </h3>
+                    <span className="text-xs text-[#1B4D3E] dark:text-[#6ee7b7] font-mono">
+                      100% Local In-Memory WebAssembly
+                    </span>
+                  </div>
+                </div>
+                <span className="text-[10px] font-mono font-semibold text-[#1B4D3E] bg-[#EDF5F2] dark:bg-[#143A2F]/50 dark:text-[#6ee7b7] px-2 py-0.5 rounded border border-[#C4DFD5] dark:border-[#143A2F]">
                   100% Private
                 </span>
               </div>
 
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  <CheckCircle2 className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-white text-base tracking-tight">
-                    VeloDoc Pro Engine
-                  </h3>
-                  <span className="text-xs text-emerald-400 font-medium">
-                    100% Local In-Memory WebAssembly
-                  </span>
-                </div>
-              </div>
-
-              <ul className="space-y-3 text-xs sm:text-sm text-zinc-300">
+              <ul className="space-y-3 text-xs sm:text-sm text-ink-primary dark:text-white font-sans">
                 <li className="flex items-start gap-2.5">
-                  <span className="text-emerald-400 font-bold shrink-0">✓</span>
-                  <span>
-                    Zero server uploads: Files never leave your local device
-                  </span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold shrink-0">✓</span>
+                  <span>Zero server uploads: Files never leave your local browser RAM</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <span className="text-emerald-400 font-bold shrink-0">✓</span>
-                  <span>
-                    No file size caps: Hardware-accelerated ArrayBuffers
-                  </span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold shrink-0">✓</span>
+                  <span>No artificial file size caps: Hardware-accelerated typed ArrayBuffers</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <span className="text-emerald-400 font-bold shrink-0">✓</span>
-                  <span>
-                    Instant processing: No network wait times or queues
-                  </span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold shrink-0">✓</span>
+                  <span>Instant processing: Zero network latency, queue waits, or server downtime</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <span className="text-emerald-400 font-bold shrink-0">✓</span>
-                  <span>
-                    Completely free &amp; permissive open-source IP
-                  </span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold shrink-0">✓</span>
+                  <span>Completely open-source, free, and unrestricted for academic &amp; personal use</span>
                 </li>
               </ul>
             </div>
@@ -137,68 +118,60 @@ export default function HomePage() {
       </section>
 
       {/* 4. Frequently Asked Questions */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-6">
-        <div className="text-center space-y-2 mb-8">
-          <h2 className="text-xl sm:text-2xl font-bold text-white tracking-[-0.03em]">
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4">
+        <div className="text-center space-y-1.5 mb-6">
+          <h2 className="text-xl sm:text-2xl font-serif text-ink-primary dark:text-white tracking-tight">
             Frequently Asked Questions
           </h2>
-          <p className="text-xs sm:text-sm text-zinc-400">
-            Everything you need to know about client-side document processing
+          <p className="text-xs sm:text-sm text-ink-muted font-sans">
+            Clear facts regarding client-side WebAssembly document processing
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="premium-card p-5 rounded-2xl space-y-2">
-            <h4 className="text-sm font-semibold text-white flex items-center gap-2">
-              <HelpCircle className="w-4 h-4 text-indigo-400 shrink-0" />
-              Are my files uploaded anywhere?
+          <div className="paper-card p-5 rounded-lg dark:bg-charcoal-800 space-y-2">
+            <h4 className="text-sm font-semibold text-ink-primary dark:text-white flex items-center gap-2">
+              <Question className="w-4 h-4 text-vermilion shrink-0" />
+              Are my documents uploaded to any server?
             </h4>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              No. Not even a single byte is sent over the internet. VeloDoc
-              Pro uses Web Workers, HTML5 Canvas, and WebAssembly to process
-              files in your browser memory.
+            <p className="text-xs text-ink-secondary dark:text-paper-400 leading-relaxed font-sans">
+              No. Not a single byte is sent over the internet. VeloDoc Studio uses HTML5 Canvas, typed arrays, and WebAssembly compiled modules to execute operations entirely inside your browser memory.
             </p>
           </div>
 
-          <div className="premium-card p-5 rounded-2xl space-y-2">
-            <h4 className="text-sm font-semibold text-white flex items-center gap-2">
-              <HelpCircle className="w-4 h-4 text-cyan-400 shrink-0" />
-              What is the maximum file size?
+          <div className="paper-card p-5 rounded-lg dark:bg-charcoal-800 space-y-2">
+            <h4 className="text-sm font-semibold text-ink-primary dark:text-white flex items-center gap-2">
+              <Question className="w-4 h-4 text-vermilion shrink-0" />
+              What is the maximum file size limit?
             </h4>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              There is no artificial limit. As long as your device has sufficient
-              RAM to hold the document, you can manipulate files of hundreds of
-              megabytes without restrictions.
+            <p className="text-xs text-ink-secondary dark:text-paper-400 leading-relaxed font-sans">
+              There is no artificial cap. As long as your device has enough RAM to hold the document buffer, you can manipulate files of hundreds of megabytes without paywalls or limitations.
             </p>
           </div>
 
-          <div className="premium-card p-5 rounded-2xl space-y-2">
-            <h4 className="text-sm font-semibold text-white flex items-center gap-2">
-              <HelpCircle className="w-4 h-4 text-emerald-400 shrink-0" />
-              Can I use VeloDoc Pro offline?
+          <div className="paper-card p-5 rounded-lg dark:bg-charcoal-800 space-y-2">
+            <h4 className="text-sm font-semibold text-ink-primary dark:text-white flex items-center gap-2">
+              <Question className="w-4 h-4 text-vermilion shrink-0" />
+              Can I operate VeloDoc Studio offline?
             </h4>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              Yes! Once loaded in your browser tab, all engine routines,
-              renderers, and scripts are cached locally, allowing seamless
-              offline manipulation.
+            <p className="text-xs text-ink-secondary dark:text-paper-400 leading-relaxed font-sans">
+              Yes. Once loaded in your browser tab, all engine routines, WebAssembly binaries, and presentation generators are cached locally, allowing complete offline use on airplanes or remote sites.
             </p>
           </div>
 
-          <div className="premium-card p-5 rounded-2xl space-y-2">
-            <h4 className="text-sm font-semibold text-white flex items-center gap-2">
-              <HelpCircle className="w-4 h-4 text-pink-400 shrink-0" />
-              Is VeloDoc Pro free for commercial use?
+          <div className="paper-card p-5 rounded-lg dark:bg-charcoal-800 space-y-2">
+            <h4 className="text-sm font-semibold text-ink-primary dark:text-white flex items-center gap-2">
+              <Question className="w-4 h-4 text-vermilion shrink-0" />
+              Is VeloDoc Studio free for educational use?
             </h4>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              Yes, 100%. VeloDoc Pro is built with permissive open-source
-              licenses (MIT/Apache 2.0). There are no subscriptions, ads, or
-              watermark paywalls.
+            <p className="text-xs text-ink-secondary dark:text-paper-400 leading-relaxed font-sans">
+              Yes, 100%. VeloDoc Studio is open source under permissive licensing. Students and faculty can generate IARE Tech Talks and format research papers freely without subscriptions or watermarks.
             </p>
           </div>
         </div>
       </section>
 
-      {/* 5. AI Tech-Talk & Presentation Studio (Topic to 10–15 Slide PPTX & PDF Generator) */}
+      {/* 5. Flagship AI Tech-Talk & Academic Presentation Studio */}
       <section id="tech-talk-ppt-studio" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
         <TechTalkPptStudio />
       </section>

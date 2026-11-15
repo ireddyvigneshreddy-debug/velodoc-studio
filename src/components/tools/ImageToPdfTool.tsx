@@ -17,7 +17,7 @@ import {
   Maximize2,
   Layers,
   Camera,
-} from "lucide-react";
+} from "@/components/common/icons";
 import { sessionHistory } from "@/lib/session-history";
 import { createPdfBlob, createSafeFile } from "@/lib/utils";
 
@@ -473,7 +473,7 @@ export function ImageToPdfTool() {
                 type="button"
                 onClick={handleConvert}
                 disabled={isProcessing}
-                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 active:from-indigo-600 active:to-indigo-700 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg disabled:opacity-40"
+                className="flex-1 py-3 px-4 rounded-xl bg-vermilion active:bg-vermilion-hover text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg disabled:opacity-40"
               >
                 {isProcessing ? (
                   <>

@@ -17,7 +17,7 @@ import {
   AlertCircle,
   ChevronLeft,
   ChevronRight,
-} from "lucide-react";
+} from "@/components/common/icons";
 
 const CROP_PRESETS = [
   { label: "Standard Trim (5%)", top: 5, bottom: 5, left: 5, right: 5 },
@@ -314,7 +314,7 @@ export function CropPdfTool() {
                       type="button"
                       disabled={isProcessing}
                       onClick={handleCrop}
-                      className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-700 hover:to-yellow-700 disabled:opacity-40 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(217,119,6,0.35)] transition-all cursor-pointer"
+                      className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-700 hover:to-yellow-700 disabled:opacity-40 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-paper transition-all cursor-pointer"
                     >
                       {isProcessing ? (
                         <>
@@ -374,7 +374,7 @@ export function CropPdfTool() {
                       left: `${margins.leftPercent}%`,
                       right: `${margins.rightPercent}%`,
                     }}
-                    className="border-2 border-dashed border-amber-400 shadow-[0_0_0_9999px_rgba(0,0,0,0.65)] pointer-events-none transition-all duration-100 flex items-center justify-center"
+                    className="border-2 border-dashed border-amber-400 shadow-paper pointer-events-none transition-all duration-100 flex items-center justify-center"
                   >
                     <span className="text-[10px] font-mono text-amber-300/80 bg-black/60 px-2 py-0.5 rounded border border-amber-400/40">
                       Crop Area

@@ -9,31 +9,68 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        serif: ["var(--font-serif)", "Georgia", "serif"],
+        sans: ["var(--font-sans)", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"],
+        mono: ["var(--font-mono)", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+      },
       colors: {
-        darkBg: "#090A0F",
-        darkCard: "#12141D",
-        darkCardHover: "#181B26",
-        darkBorder: "rgba(255, 255, 255, 0.08)",
-        lightBg: "#F8FAFC",
-        lightCard: "#FFFFFF",
-        lightBorder: "rgba(0, 0, 0, 0.08)",
-        accentIndigo: "#6366F1",
-        accentViolet: "#8B5CF6",
-        accentCyan: "#06B6D4",
-      },
-      backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "mesh-pattern": "radial-gradient(rgba(99, 102, 241, 0.15) 1px, transparent 1px)",
-      },
-      animation: {
-        "pulse-subtle": "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-        "shimmer": "shimmer 2s linear infinite",
-      },
-      keyframes: {
-        shimmer: {
-          from: { backgroundPosition: "0 0" },
-          to: { backgroundPosition: "-200% 0" },
+        // Archival Paper Light Theme (Default)
+        paper: {
+          50: "#FBFBFA",
+          100: "#F6F5F1",
+          200: "#EEECE5",
+          300: "#E2DFD7",
+          400: "#CBC7BD",
+          500: "#A8A397",
         },
+        ink: {
+          primary: "#141413",
+          secondary: "#57554E",
+          muted: "#88867E",
+          faint: "#B5B2A8",
+        },
+        // Accents
+        vermilion: {
+          DEFAULT: "#D94E28",
+          hover: "#C2411C",
+          light: "#FDF2ED",
+          dark: "#A33718",
+        },
+        forest: {
+          DEFAULT: "#1B4D3E",
+          hover: "#143A2F",
+          light: "#EDF5F2",
+        },
+        ochre: {
+          DEFAULT: "#B45309",
+          hover: "#92400E",
+          light: "#FEF3C7",
+        },
+        // Matte Charcoal Dark Theme
+        charcoal: {
+          900: "#161615",
+          800: "#1C1C1B",
+          700: "#262624",
+          600: "#363633",
+          border: "#2A2A28",
+        },
+        // Backwards compatibility mappings
+        darkBg: "#161615",
+        darkCard: "#1C1C1B",
+        darkCardHover: "#262624",
+        darkBorder: "#2A2A28",
+        lightBg: "#F6F5F1",
+        lightCard: "#FFFFFF",
+        lightBorder: "#E2DFD7",
+        accentIndigo: "#D94E28",
+        accentViolet: "#1B4D3E",
+        accentCyan: "#B45309",
+      },
+      boxShadow: {
+        "paper": "0 1px 2px rgba(20, 20, 19, 0.05), 0 1px 3px rgba(20, 20, 19, 0.03)",
+        "paper-elevated": "0 4px 12px -2px rgba(20, 20, 19, 0.06), 0 2px 4px -1px rgba(20, 20, 19, 0.04)",
+        "paper-modal": "0 20px 40px -8px rgba(20, 20, 19, 0.12), 0 0 1px rgba(20, 20, 19, 0.2)",
       },
     },
   },

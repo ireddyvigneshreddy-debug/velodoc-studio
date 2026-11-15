@@ -22,7 +22,7 @@ import {
   Archive,
   FileText,
   Share2,
-} from "lucide-react";
+} from "@/components/common/icons";
 import { ProcessingMetrics } from "@/types";
 import { formatFileSize, formatTimeMs } from "@/lib/utils";
 import { renderPdfPageToCanvas } from "@/lib/pdf-engine";
@@ -551,7 +551,7 @@ export function ResultPreviewStudio({
                   <span className="text-[11px] uppercase font-bold text-indigo-400 mb-2 tracking-wider font-mono tabular-nums">
                     Processed Output ({formatFileSize(activeMetrics.processedSize)})
                   </span>
-                  <div className="p-2 rounded-2xl bg-black/60 border border-indigo-500/40 shadow-[0_0_36px_rgba(99,102,241,0.25)] max-w-full overflow-hidden">
+                  <div className="p-2 rounded-lg bg-black/60 border border-paper-300 dark:border-charcoal-border shadow-paper max-w-full overflow-hidden">
                     <canvas
                       ref={outputCanvasRef}
                       className="max-w-full h-auto rounded-lg shadow-lg"
@@ -693,7 +693,7 @@ export function ResultPreviewStudio({
           <button
             type="button"
             onClick={handleDownloadSingle}
-            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-cyan-500 hover:from-indigo-600 hover:to-cyan-600 text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-[0_0_24px_rgba(99,102,241,0.45)] hover:shadow-[0_0_32px_rgba(99,102,241,0.65)] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+            className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-vermilion hover:bg-vermilion-hover text-white text-xs font-mono uppercase tracking-wider font-semibold flex items-center justify-center gap-1.5 shadow-paper transition-colors cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Download {filename}</span>
@@ -702,21 +702,21 @@ export function ResultPreviewStudio({
       </div>
 
       {/* Mobile Sticky Thumb-Zone Action Bar for Result Preview */}
-      <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-safe bg-[#05060B]/90 backdrop-blur-xl border-t border-white/10 md:hidden flex items-center justify-between gap-2.5 shadow-2xl">
+      <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-safe bg-white/95 dark:bg-[#161615]/95 backdrop-blur-xl border-t border-paper-300 dark:border-charcoal-border md:hidden flex items-center justify-between gap-2.5 shadow-paper">
         {canShare && (
           <button
             type="button"
             onClick={handleNativeShare}
-            className="p-3 rounded-xl glass-pill text-white flex items-center justify-center shrink-0 border border-white/15 active:scale-95"
+            className="p-3 rounded-lg border border-paper-300 dark:border-charcoal-border text-ink-primary dark:text-white flex items-center justify-center shrink-0 active:scale-95"
             title="Share Document"
           >
-            <Share2 className="w-4 h-4 text-cyan-400" />
+            <Share2 className="w-4 h-4 text-vermilion" />
           </button>
         )}
         <button
           type="button"
           onClick={handleDownloadSingle}
-          className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-cyan-500 active:from-indigo-600 active:to-cyan-600 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg"
+          className="flex-1 py-3 px-4 rounded-lg bg-vermilion active:bg-vermilion-hover text-white font-mono uppercase tracking-wider font-semibold text-xs flex items-center justify-center gap-2 shadow-paper"
         >
           <Download className="w-4 h-4" />
           <span className="truncate">Download {filename}</span>

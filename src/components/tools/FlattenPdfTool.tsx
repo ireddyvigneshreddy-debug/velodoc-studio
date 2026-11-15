@@ -8,7 +8,7 @@ import { flattenPdf, FlattenOptions } from "@/lib/flatten-engine";
 import { getPdfPageCount } from "@/lib/pdf-engine";
 import { sessionHistory } from "@/lib/session-history";
 import { createPdfBlob } from "@/lib/utils";
-import { ShieldCheck, Lock, Sparkles, Layers, AlertCircle, Loader2 } from "lucide-react";
+import { ShieldCheck, Lock, Sparkles, Layers, AlertCircle, Loader2 } from "@/components/common/icons";
 
 export function FlattenPdfTool() {
   const [fileItem, setFileItem] = useState<UploadedFileItem | null>(null);
@@ -177,7 +177,7 @@ export function FlattenPdfTool() {
                     onClick={() => setOptions({ ...options, mode: "vector" })}
                     className={`p-4 rounded-2xl border text-left transition-all ${
                       options.mode === "vector"
-                        ? "bg-indigo-500/10 border-indigo-500/40 shadow-[0_0_20px_rgba(99,102,241,0.2)]"
+                        ? "bg-indigo-500/10 border-indigo-500/40 shadow-paper"
                         : "bg-white/[0.02] border-white/[0.06] hover:border-white/[0.14]"
                     }`}
                   >
@@ -195,7 +195,7 @@ export function FlattenPdfTool() {
                     onClick={() => setOptions({ ...options, mode: "raster" })}
                     className={`p-4 rounded-2xl border text-left transition-all ${
                       options.mode === "raster"
-                        ? "bg-indigo-500/10 border-indigo-500/40 shadow-[0_0_20px_rgba(99,102,241,0.2)]"
+                        ? "bg-indigo-500/10 border-indigo-500/40 shadow-paper"
                         : "bg-white/[0.02] border-white/[0.06] hover:border-white/[0.14]"
                     }`}
                   >
@@ -268,7 +268,7 @@ export function FlattenPdfTool() {
                 type="button"
                 onClick={handleProcess}
                 disabled={isProcessing}
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 disabled:opacity-40 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(99,102,241,0.35)] transition-all cursor-pointer"
+                className="w-full py-3.5 rounded-2xl bg-vermilion hover:bg-vermilion-hover disabled:opacity-40 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-paper transition-all cursor-pointer"
               >
                 {isProcessing ? (
                   <>
@@ -332,7 +332,7 @@ export function FlattenPdfTool() {
             type="button"
             onClick={handleProcess}
             disabled={isProcessing}
-            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 disabled:opacity-40 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(99,102,241,0.35)] transition-all cursor-pointer"
+            className="w-full py-3.5 rounded-2xl bg-vermilion hover:bg-vermilion-hover disabled:opacity-40 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-paper transition-all cursor-pointer"
           >
             {isProcessing ? (
               <>

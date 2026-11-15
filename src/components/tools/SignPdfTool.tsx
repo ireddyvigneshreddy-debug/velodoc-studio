@@ -26,7 +26,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Move,
-} from "lucide-react";
+} from "@/components/common/icons";
 
 export function SignPdfTool() {
   const [fileItem, setFileItem] = useState<UploadedFileItem | null>(null);
@@ -700,7 +700,7 @@ export function SignPdfTool() {
                   type="button"
                   disabled={isProcessing || annotations.length === 0}
                   onClick={handleSaveDocument}
-                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 disabled:opacity-40 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(99,102,241,0.4)] transition-all cursor-pointer"
+                  className="w-full py-3.5 rounded-2xl bg-vermilion hover:bg-vermilion-hover disabled:opacity-40 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-paper transition-all cursor-pointer"
                 >
                   {isProcessing ? (
                     <>
@@ -771,7 +771,7 @@ export function SignPdfTool() {
                         }}
                         className={`group rounded flex items-center justify-center cursor-move select-none p-1 transition-shadow ${
                           isSelected
-                            ? "border-2 border-indigo-400 bg-indigo-500/20 shadow-[0_0_16px_rgba(99,102,241,0.5)] ring-1 ring-indigo-400"
+                            ? "border-2 border-indigo-400 bg-indigo-500/20 shadow-paper ring-1 ring-indigo-400"
                             : "border border-dashed border-indigo-400/70 bg-indigo-500/10 hover:border-indigo-400"
                         }`}
                       >
@@ -833,7 +833,7 @@ export function SignPdfTool() {
                 type="button"
                 disabled={isProcessing}
                 onClick={handleSaveDocument}
-                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 active:from-indigo-600 active:to-violet-700 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg disabled:opacity-40"
+                className="flex-1 py-3 px-4 rounded-xl bg-vermilion active:bg-vermilion-hover text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg disabled:opacity-40"
               >
                 {isProcessing ? (
                   <>

@@ -16,7 +16,7 @@ import {
   Save,
   Loader2,
   AlertCircle,
-} from "lucide-react";
+} from "@/components/common/icons";
 
 export function MetadataPdfTool() {
   const [fileItem, setFileItem] = useState<UploadedFileItem | null>(null);
@@ -275,7 +275,7 @@ export function MetadataPdfTool() {
                       type="button"
                       disabled={isProcessing}
                       onClick={() => handleSave(false)}
-                      className="px-7 py-2.5 rounded-xl bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 disabled:opacity-40 text-white font-semibold text-sm flex items-center gap-2 shadow-[0_0_20px_rgba(20,184,166,0.35)] transition-all"
+                      className="px-7 py-2.5 rounded-xl bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 disabled:opacity-40 text-white font-semibold text-sm flex items-center gap-2 shadow-paper transition-all"
                     >
                       {isProcessing ? (
                         <>

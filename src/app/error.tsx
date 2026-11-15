@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import Link from "next/link";
-import { AlertCircle, RefreshCw, Home, ShieldCheck } from "lucide-react";
+import { AlertCircle, RefreshCw, Home, ShieldCheck } from "@/components/common/icons";
 
 export default function RootError({
   error,

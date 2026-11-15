@@ -17,7 +17,7 @@ import {
   Loader2,
   AlertCircle,
   CheckCircle2,
-} from "lucide-react";
+} from "@/components/common/icons";
 
 export function SplitPdfTool() {
   const [fileItem, setFileItem] = useState<UploadedFileItem | null>(null);
@@ -373,7 +373,7 @@ export function SplitPdfTool() {
                     type="button"
                     disabled={isProcessing}
                     onClick={handleProcess}
-                    className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 disabled:opacity-40 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(245,158,11,0.35)] transition-all cursor-pointer"
+                    className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 disabled:opacity-40 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-paper transition-all cursor-pointer"
                   >
                     {isProcessing ? (
                       <>
@@ -431,7 +431,7 @@ export function SplitPdfTool() {
                           className={`group relative rounded-2xl overflow-hidden border transition-all duration-200 premium-card flex flex-col ${
                             splitMode === "extract"
                               ? isSelected
-                                ? "border-amber-500 shadow-[0_0_24px_rgba(245,158,11,0.3)] ring-2 ring-amber-500/50 cursor-pointer"
+                                ? "border-amber-500 shadow-paper ring-2 ring-amber-500/50 cursor-pointer"
                                 : "border-white/10 hover:border-white/25 cursor-pointer"
                               : "border-white/10 hover:border-white/20 cursor-default"
                           }`}
@@ -467,7 +467,7 @@ export function SplitPdfTool() {
                               onClick={() => toggleSplitPoint(index)}
                               className={`w-full py-1.5 px-3 rounded-xl border flex items-center justify-center gap-2 text-xs transition-all cursor-pointer font-mono ${
                                 isCutAfter
-                                  ? "bg-amber-500/20 border-amber-400 text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.35)] ring-1 ring-amber-400"
+                                  ? "bg-amber-500/20 border-amber-400 text-amber-300 shadow-paper ring-1 ring-amber-400"
                                   : "bg-white/[0.02] border-dashed border-white/15 text-zinc-400 hover:text-white hover:border-amber-400/50 hover:bg-amber-500/5"
                               }`}
                             >

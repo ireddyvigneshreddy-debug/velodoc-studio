@@ -19,7 +19,7 @@ import {
   Loader2,
   AlertCircle,
   CheckCircle2,
-} from "lucide-react";
+} from "@/components/common/icons";
 import { sessionHistory } from "@/lib/session-history";
 import { formatFileSize } from "@/lib/utils";
 
@@ -488,7 +488,7 @@ export function ImageStudioTool() {
                   type="button"
                   onClick={handleProcess}
                   disabled={isProcessing || images.length === 0}
-                  className="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(99,102,241,0.5)] active:scale-[0.98] transition-all cursor-pointer"
+                  className="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-paper active:scale-[0.98] transition-all cursor-pointer"
                 >
                   {isProcessing ? (
                     <>

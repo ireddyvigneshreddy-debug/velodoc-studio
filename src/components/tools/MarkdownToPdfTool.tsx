@@ -10,7 +10,7 @@ import {
   Loader2,
   AlertCircle,
   Upload,
-} from "lucide-react";
+} from "@/components/common/icons";
 
 const DEFAULT_MARKDOWN = `# Project Genesis: Technical Architecture Specification
 
@@ -174,7 +174,7 @@ export function MarkdownToPdfTool() {
                 type="button"
                 disabled={isProcessing}
                 onClick={handleGenerate}
-                className="px-6 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-40 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 shadow-[0_0_20px_rgba(37,99,235,0.4)] transition-all"
+                className="px-6 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-40 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 shadow-paper transition-all"
               >
                 {isProcessing ? (
                   <>
@@ -246,7 +246,7 @@ export function MarkdownToPdfTool() {
                 type="button"
                 disabled={isProcessing || !markdown.trim()}
                 onClick={handleGenerate}
-                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 active:from-indigo-600 active:to-indigo-700 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg disabled:opacity-40"
+                className="flex-1 py-3 px-4 rounded-xl bg-vermilion active:bg-vermilion-hover text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg disabled:opacity-40"
               >
                 {isProcessing ? (
                   <>

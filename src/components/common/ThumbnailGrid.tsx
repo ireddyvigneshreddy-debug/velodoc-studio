@@ -11,7 +11,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
-} from "lucide-react";
+} from "@/components/common/icons";
 import { PageThumbnail } from "@/types";
 
 export interface PageControlAction {
@@ -125,12 +125,12 @@ export function ThumbnailGrid({
                   onToggleSelect?.(index);
                 }
               }}
-              className={`group relative rounded-2xl overflow-hidden border transition-all duration-200 premium-card flex flex-col ${
+              className={`group relative rounded-lg overflow-hidden border transition-all duration-150 paper-card flex flex-col ${
                 mode === "remove" && isSelected
-                  ? "border-rose-500 shadow-[0_0_20px_rgba(244,63,94,0.3)] ring-2 ring-rose-500/50"
+                  ? "border-rose-500 shadow-paper ring-2 ring-rose-500/50"
                   : mode === "select" && isSelected
-                  ? "border-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.3)] ring-2 ring-indigo-500/50"
-                  : "border-white/10 hover:border-white/20 hover:shadow-lg"
+                  ? "border-vermilion shadow-paper ring-2 ring-vermilion/50"
+                  : "border-paper-300 dark:border-charcoal-border hover:border-vermilion/40"
               } ${
                 mode === "remove" || mode === "select"
                   ? "cursor-pointer"

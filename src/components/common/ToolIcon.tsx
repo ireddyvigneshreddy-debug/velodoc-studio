@@ -29,7 +29,7 @@ import {
   FileEdit,
   Code,
   LucideProps,
-} from "lucide-react";
+} from "@/components/common/icons";
 
 export const TOOL_ICON_MAP: Record<string, React.ComponentType<LucideProps>> = {
   Minimize2,

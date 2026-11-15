@@ -29,7 +29,7 @@ import {
   FileCheck,
   FileDown,
   ArrowRight,
-} from "lucide-react";
+} from "@/components/common/icons";
 import {
   DocumentFilterType,
   CropPreset,
@@ -862,19 +862,19 @@ export function CameraScannerModal({
                 {/* A4 / Letter Alignment Box */}
                 {(alignmentGuide === "a4" || alignmentGuide === "letter") && (
                   <div
-                    className={`relative border-2 border-dashed border-cyan-400/40 rounded-2xl shadow-[0_0_50px_rgba(6,182,212,0.15)] transition-all ${
+                    className={`relative border-2 border-dashed border-white/40 rounded-lg transition-all ${
                       alignmentGuide === "a4"
                         ? "aspect-[1/1.414] max-h-[85%] max-w-[85%]"
                         : "aspect-[8.5/11] max-h-[85%] max-w-[85%]"
                     }`}
                   >
-                    {/* Glowing neon corner brackets (Leica/iOS Pro HUD style) */}
-                    <div className="absolute -top-2 -left-2 w-7 h-7 border-t-4 border-l-4 border-cyan-400 rounded-tl-xl shadow-[0_0_16px_rgba(6,182,212,0.95)]" />
-                    <div className="absolute -top-2 -right-2 w-7 h-7 border-t-4 border-r-4 border-cyan-400 rounded-tr-xl shadow-[0_0_16px_rgba(6,182,212,0.95)]" />
-                    <div className="absolute -bottom-2 -left-2 w-7 h-7 border-b-4 border-l-4 border-cyan-400 rounded-bl-xl shadow-[0_0_16px_rgba(6,182,212,0.95)]" />
-                    <div className="absolute -bottom-2 -right-2 w-7 h-7 border-b-4 border-r-4 border-cyan-400 rounded-br-xl shadow-[0_0_16px_rgba(6,182,212,0.95)]" />
+                    {/* Tactile hardware corner brackets */}
+                    <div className="absolute -top-1.5 -left-1.5 w-6 h-6 border-t-3 border-l-3 border-white rounded-tl" />
+                    <div className="absolute -top-1.5 -right-1.5 w-6 h-6 border-t-3 border-r-3 border-white rounded-tr" />
+                    <div className="absolute -bottom-1.5 -left-1.5 w-6 h-6 border-b-3 border-l-3 border-white rounded-bl" />
+                    <div className="absolute -bottom-1.5 -right-1.5 w-6 h-6 border-b-3 border-r-3 border-white rounded-br" />
 
-                    <div className="absolute top-3 left-3 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-sm text-[10px] font-mono font-bold text-cyan-300 border border-cyan-500/30">
+                    <div className="absolute top-3 left-3 px-2 py-0.5 rounded bg-black/70 backdrop-blur-sm text-[10px] font-mono font-bold text-white border border-white/20">
                       {alignmentGuide.toUpperCase()} DOCUMENT ALIGNMENT
                     </div>
                   </div>
@@ -927,7 +927,7 @@ export function CameraScannerModal({
                 {/* Self-Timer Countdown Overlay */}
                 {countdownRemaining !== null && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-40">
-                    <div className="text-8xl font-black text-cyan-400 drop-shadow-[0_0_40px_rgba(6,182,212,0.8)] animate-ping">
+                    <div className="text-8xl font-black text-vermilion animate-ping">
                       {countdownRemaining}
                     </div>
                   </div>
@@ -1176,13 +1176,11 @@ export function CameraScannerModal({
                   onClick={handleShutterClick}
                   disabled={isCapturing || Boolean(cameraError)}
                   aria-label="Capture Document"
-                  className="relative group p-1.5 rounded-full border-4 border-white/90 hover:border-white transition-all transform active:scale-90 shadow-[0_0_35px_rgba(255,255,255,0.45),inset_0_2px_4px_rgba(0,0,0,0.5)] cursor-pointer disabled:opacity-50"
+                  className="relative group p-1.5 rounded-full border-4 border-white/90 hover:border-white transition-all transform active:scale-90 shadow-paper cursor-pointer disabled:opacity-50"
                 >
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-cyan-400 via-indigo-500 to-white/95 group-hover:scale-105 active:scale-95 transition-transform flex items-center justify-center shadow-inner">
-                    <Camera className="w-6 h-6 text-white drop-shadow-md group-hover:scale-110 transition-transform" />
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-vermilion hover:bg-vermilion-hover group-hover:scale-105 active:scale-95 transition-transform flex items-center justify-center">
+                    <Camera className="w-6 h-6 text-white group-hover:scale-110 transition-transform" />
                   </div>
-                  {/* Subtle pulsing ring */}
-                  <div className="absolute inset-0 rounded-full border-2 border-cyan-400/60 animate-ping pointer-events-none" />
                 </button>
 
                 {/* Captured Pages Counter Badge */}
@@ -1460,9 +1458,9 @@ export function CameraScannerModal({
                     setActivePageIndex(index);
                     setCurrentView("editor");
                   }}
-                  className={`relative group shrink-0 w-20 sm:w-24 rounded-xl border p-1 transition-all cursor-pointer ${
+                  className={`relative group shrink-0 w-20 sm:w-24 rounded-lg border p-1 transition-all cursor-pointer ${
                     isActive
-                      ? "border-cyan-400 bg-cyan-500/10 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+                      ? "border-vermilion bg-vermilion-light/20 shadow-paper"
                       : "border-white/10 hover:border-white/30 bg-[#12141D]"
                   }`}
                 >

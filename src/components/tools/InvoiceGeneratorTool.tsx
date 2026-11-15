@@ -15,7 +15,7 @@ import {
   Sparkles,
   QrCode,
   Loader2,
-} from "lucide-react";
+} from "@/components/common/icons";
 
 interface LineItem {
   id: string;
@@ -619,7 +619,7 @@ export function InvoiceGeneratorTool() {
               type="button"
               onClick={handleGeneratePdf}
               disabled={isGenerating}
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 disabled:opacity-40 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(99,102,241,0.35)] transition-all cursor-pointer"
+              className="w-full py-3.5 rounded-2xl bg-vermilion hover:bg-vermilion-hover disabled:opacity-40 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-paper transition-all cursor-pointer"
             >
               {isGenerating ? (
                 <>
@@ -670,7 +670,7 @@ export function InvoiceGeneratorTool() {
           type="button"
           onClick={handleGeneratePdf}
           disabled={isGenerating}
-          className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(99,102,241,0.35)] cursor-pointer"
+          className="w-full py-3.5 rounded-2xl bg-vermilion hover:bg-vermilion-hover text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-paper cursor-pointer"
         >
           <Download className="w-4 h-4" />
           <span>Download Invoice ({currency}{grandTotal.toFixed(2)})</span>

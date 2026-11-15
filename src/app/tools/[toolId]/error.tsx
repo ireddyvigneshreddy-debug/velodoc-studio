@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import Link from "next/link";
-import { AlertTriangle, RefreshCw, LayoutGrid, Home } from "lucide-react";
+import { AlertTriangle, RefreshCw, LayoutGrid, Home } from "@/components/common/icons";
 
 export default function ToolPageError({
   error,

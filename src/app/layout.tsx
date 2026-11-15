@@ -1,24 +1,39 @@
 import type { Metadata, Viewport } from "next";
-import localFont from "next/font/local";
+import { Instrument_Serif, Plus_Jakarta_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
+const serifFont = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--font-serif",
+  display: "swap",
 });
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
+
+const sansFont = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const monoFont = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-mono",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "VeloDoc Pro — Ultra-Premium Client-Side Document & PDF Studio",
+  metadataBase: new URL("https://velodoc-studio.vercel.app"),
+  title: {
+    default: "VeloDoc Studio — Swiss Precision Document Workbench",
+    template: "%s | VeloDoc Studio",
+  },
   description:
-    "100% private, on-device document studio with exact KB/MB binary-search compression, 30-document zero-crash batch engine, and 29 precision PDF & document tools. Zero server uploads.",
+    "100% private, on-device document studio with exact KB/MB binary-search compression, 30-document zero-crash batch engine, precision PDF tools, and official academic presentation studio. Zero server uploads.",
   keywords: [
     "PDF editor",
     "exact size PDF compressor",
@@ -27,18 +42,43 @@ export const metadata: Metadata = {
     "compress PDF",
     "client-side PDF",
     "watermark PDF",
-    "VeloDoc Pro",
+    "VeloDoc Studio",
     "zero upload PDF",
     "camera document scanner",
+    "academic presentation generator",
+    "IARE Tech Talk generator",
   ],
-  authors: [{ name: "VeloDoc Pro Team" }],
+  authors: [{ name: "VeloDoc Studio Engineering Team", url: "https://github.com/vigneshreddy-dev/velodoc-studio" }],
+  creator: "VeloDoc Studio",
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: "/icon.svg",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://velodoc-studio.vercel.app",
+    siteName: "VeloDoc Studio",
+    title: "VeloDoc Studio — Swiss Precision Document Workbench",
+    description:
+      "100% private, client-side document workbench with exact size compression, 30-file batch queue & academic presentations. Zero cloud uploads.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "VeloDoc Studio — Swiss Precision Document Workbench",
+    description:
+      "100% private, client-side document workbench with exact size compression, 30-file batch queue & academic presentations. Zero cloud uploads.",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#05060B",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F6F5F1" },
+    { media: "(prefers-color-scheme: dark)", color: "#161615" },
+  ],
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
@@ -51,38 +91,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark scroll-smooth overflow-x-hidden">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#05060B] text-[#F8FAFC] flex flex-col min-h-dvh overflow-x-hidden selection:bg-indigo-500/30 selection:text-white relative`}
-      >
-        {/* Layer 1: Tactile Film-Grain Noise Texture Overlay */}
+    <html
+      lang="en"
+      className={`${serifFont.variable} ${sansFont.variable} ${monoFont.variable} scroll-smooth`}
+      suppressHydrationWarning
+    >
+      <body className="antialiased bg-[#F6F5F1] text-[#141413] dark:bg-[#161615] dark:text-[#F6F5F1] flex flex-col min-h-dvh overflow-x-hidden selection:bg-[#D94E28]/20 selection:text-[#141413] relative transition-colors duration-200">
+        {/* Subtle Architectural Dot Grid */}
         <div
           aria-hidden="true"
-          className="pointer-events-none fixed inset-0 z-50 opacity-[0.028] mix-blend-overlay"
-          style={{
-            backgroundImage:
-              'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")',
-          }}
-        />
-
-        {/* Layer 2: Masked Architectural Dot Grid */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none fixed inset-0 z-0 architectural-grid opacity-85"
-        />
-
-        {/* Layer 2: Breathing Aurora Mesh Orbs */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none fixed -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[450px] ambient-aurora blur-[130px] opacity-25 z-0"
-        />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none fixed -top-32 right-[8%] w-[550px] h-[350px] ambient-aurora-cyan blur-[130px] opacity-20 z-0"
-        />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none fixed -top-32 left-[8%] w-[500px] h-[350px] ambient-aurora-emerald blur-[130px] opacity-15 z-0"
+          className="pointer-events-none fixed inset-0 z-0 architectural-grid opacity-60 dark:opacity-30"
         />
 
         {/* App Content */}

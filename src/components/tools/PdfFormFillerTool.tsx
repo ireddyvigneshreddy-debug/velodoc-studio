@@ -23,7 +23,7 @@ import {
   ChevronRight,
   AlertCircle,
   Loader2,
-} from "lucide-react";
+} from "@/components/common/icons";
 
 export function PdfFormFillerTool() {
   const [fileItem, setFileItem] = useState<UploadedFileItem | null>(null);
@@ -307,7 +307,7 @@ export function PdfFormFillerTool() {
                 type="button"
                 onClick={handleSaveFilledPdf}
                 disabled={isProcessing}
-                className="hidden md:flex px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white font-semibold text-xs items-center gap-1.5 shadow-lg transition-all cursor-pointer"
+                className="hidden md:flex px-4 py-2 rounded-xl bg-vermilion hover:bg-vermilion-hover text-white font-semibold text-xs items-center gap-1.5 shadow-lg transition-all cursor-pointer"
               >
                 {isProcessing ? (
                   <>
@@ -432,7 +432,7 @@ export function PdfFormFillerTool() {
             type="button"
             onClick={handleSaveFilledPdf}
             disabled={isProcessing}
-            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(99,102,241,0.35)] cursor-pointer"
+            className="w-full py-3.5 rounded-2xl bg-vermilion hover:bg-vermilion-hover text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-paper cursor-pointer"
           >
             <Download className="w-4 h-4" />
             <span>Download Filled PDF ({fields.length} Fields)</span>

@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { DropZone } from "@/components/common/DropZone";
 import { PDFDocument } from "pdf-lib";
 import { createPdfBlob } from "@/lib/utils";
-import { Camera, Download, RefreshCw, Sparkles, ZoomIn, ZoomOut, Move } from "lucide-react";
+import { Camera, Download, RefreshCw, Sparkles, ZoomIn, ZoomOut, Move } from "@/components/common/icons";
 
 interface CountryPreset {
   id: string;
@@ -438,7 +438,7 @@ export function PassportPhotoTool() {
                 <button
                   type="button"
                   onClick={handleDownloadSingle}
-                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(99,102,241,0.35)] transition-all cursor-pointer"
+                  className="w-full py-3.5 rounded-2xl bg-vermilion hover:bg-vermilion-hover text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-paper transition-all cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
                   <span>Download Single Photo ({selectedPreset.widthMm}x{selectedPreset.heightMm}mm)</span>
@@ -498,7 +498,7 @@ export function PassportPhotoTool() {
           <button
             type="button"
             onClick={handleDownloadSingle}
-            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(99,102,241,0.35)] cursor-pointer"
+            className="w-full py-3.5 rounded-2xl bg-vermilion hover:bg-vermilion-hover text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-paper cursor-pointer"
           >
             <Download className="w-4 h-4" />
             <span>Save Passport Photo</span>

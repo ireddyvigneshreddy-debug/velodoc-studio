@@ -44,7 +44,7 @@ import {
   RotateCcw,
   AlertCircle,
   CheckCircle2,
-} from "lucide-react";
+} from "@/components/common/icons";
 
 export function TechTalkPptStudio() {
   // STRICT BLANK INPUT FORM — ALL FIELDS START EMPTY (ZERO SAMPLE DATA)
@@ -333,26 +333,22 @@ export function TechTalkPptStudio() {
   return (
     <section
       id="ai-presentation-studio"
-      className="relative rounded-3xl border border-white/[0.12] bg-[#05060B] p-5 sm:p-10 shadow-[0_0_60px_rgba(99,102,241,0.08)] overflow-hidden space-y-8"
+      className="relative rounded-xl border border-paper-300 dark:border-charcoal-border bg-white dark:bg-charcoal-800 p-5 sm:p-8 shadow-paper overflow-hidden space-y-8"
     >
-      {/* Specular Ambient Glow Orbs */}
-      <div className="pointer-events-none absolute -top-40 -left-40 w-96 h-96 rounded-full bg-indigo-600/10 blur-[120px]" />
-      <div className="pointer-events-none absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-rose-600/10 blur-[120px]" />
-
       {/* Top Banner & Heading Strip */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/[0.08] pb-6 relative z-10">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-paper-300 dark:border-charcoal-border pb-6 relative z-10">
         <div className="space-y-1.5">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-indigo-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono font-semibold">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-paper-100 dark:bg-charcoal-700 border border-paper-300 dark:border-charcoal-border text-ink-primary dark:text-white text-xs font-mono font-semibold">
+            <Sparkles className="w-3.5 h-3.5 text-vermilion" />
             <span>IARE Official Tech-Talk &amp; Concept Video Studio</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-[-0.03em] flex items-center gap-2 flex-wrap">
+          <h2 className="text-2xl sm:text-3xl font-serif text-ink-primary dark:text-white tracking-tight flex items-center gap-2 flex-wrap">
             <span>IARE Official 13-Slide AAT Tech Talk Generator</span>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold font-mono">
+            <span className="text-xs px-2.5 py-0.5 rounded text-[11px] font-mono bg-[#EDF5F2] text-[#1B4D3E] dark:bg-[#143A2F]/40 dark:text-[#6ee7b7] border border-[#C4DFD5] dark:border-[#143A2F]">
               OBE Rubric Aligned
             </span>
           </h2>
-          <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl leading-relaxed">
+          <p className="text-xs sm:text-sm text-ink-secondary dark:text-paper-400 max-w-2xl leading-relaxed font-sans">
             Generate authentic Institute of Aeronautical Engineering (Autonomous)
             AAT presentations matching the exact 13-slide institutional layout
             (Cover, INDEX, INTRODUCTION, 8 ALL CAPS Core Slides, CONCLUSION, and
@@ -365,12 +361,12 @@ export function TechTalkPptStudio() {
           <button
             type="button"
             onClick={() => setIsVaultOpen(true)}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.1] text-xs text-zinc-300 hover:text-white transition-all cursor-pointer shadow-inner"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-paper-100 dark:bg-charcoal-700 hover:bg-paper-200 dark:hover:bg-charcoal-600 border border-paper-300 dark:border-charcoal-border text-xs text-ink-secondary dark:text-paper-400 hover:text-ink-primary dark:hover:text-white transition-colors cursor-pointer shadow-paper"
           >
-            <Key className="w-3.5 h-3.5 text-indigo-400" />
-            <span className="font-medium">
+            <Key className="w-3.5 h-3.5 text-vermilion" />
+            <span className="font-mono text-xs">
               Engine:{" "}
-              <strong className="text-white capitalize">
+              <strong className="text-ink-primary dark:text-white capitalize">
                 {vaultConfig.provider === "zero-key"
                   ? "Zero-Key (Free)"
                   : vaultConfig.provider}
@@ -688,16 +684,16 @@ export function TechTalkPptStudio() {
                 type="button"
                 onClick={handleGenerateDeck}
                 disabled={isGenerating}
-                className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-rose-600 to-indigo-600 hover:from-amber-400 hover:via-rose-500 hover:to-indigo-500 text-white font-extrabold text-sm sm:text-base flex items-center justify-center gap-2.5 transition-all shadow-xl shadow-amber-500/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-lg bg-vermilion hover:bg-vermilion-hover text-white font-mono uppercase tracking-wider font-semibold text-xs sm:text-sm flex items-center justify-center gap-2.5 transition-colors shadow-paper cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isGenerating ? (
                   <>
-                    <Loader2 className="w-5 h-5 animate-spin text-white" />
+                    <Loader2 className="w-4 h-4 animate-spin text-white" />
                     <span>Synthesizing Exact {slideCount}-Slide Presentation...</span>
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-5 h-5 text-amber-200" />
+                    <Sparkles className="w-4 h-4 text-white" />
                     <span>Generate Presentation</span>
                   </>
                 )}
@@ -708,38 +704,38 @@ export function TechTalkPptStudio() {
 
         {/* EMPTY STATE (Visible until user generates presentation) */}
         {!presentation && (
-          <div className="rounded-3xl border border-white/[0.08] bg-zinc-950/60 p-8 sm:p-12 text-center space-y-4">
-            <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 mx-auto flex items-center justify-center">
+          <div className="rounded-lg border border-paper-300 dark:border-charcoal-border bg-paper-100/50 dark:bg-charcoal-900/50 p-8 sm:p-12 text-center space-y-4">
+            <div className="w-16 h-16 rounded-lg bg-[#FEF3C7] dark:bg-[#B45309]/20 border border-[#FDE68A] dark:border-[#B45309]/30 text-[#B45309] dark:text-[#fde68a] mx-auto flex items-center justify-center">
               <IareEmblem size={40} className="w-10 h-10" />
             </div>
             <div className="space-y-1.5 max-w-lg mx-auto">
-              <h3 className="text-lg font-bold text-white tracking-tight">
+              <h3 className="text-lg font-serif text-ink-primary dark:text-white tracking-tight">
                 No Presentation Generated Yet
               </h3>
-              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+              <p className="text-xs sm:text-sm text-ink-secondary dark:text-paper-400 leading-relaxed font-sans">
                 Enter your authentic topic, full name, roll number, engineering
                 branch, and subject above, then click{" "}
-                <strong className="text-amber-300">
+                <strong className="text-vermilion">
                   &ldquo;Generate Presentation&rdquo;
                 </strong>{" "}
                 to build your OBE-compliant 13-slide IARE deck with speaker notes.
               </p>
             </div>
-            <div className="pt-2 flex items-center justify-center gap-6 text-xs text-zinc-500 flex-wrap">
+            <div className="pt-2 flex items-center justify-center gap-6 text-xs text-ink-muted flex-wrap font-mono">
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-vermilion" />
                 13 Official Master Slides
               </span>
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-vermilion" />
                 Cover + INDEX + 8 ALL CAPS Core
               </span>
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-vermilion" />
                 Embedded Verbal Speaker Notes
               </span>
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-vermilion" />
                 Direct .PPTX &amp; .PDF Download
               </span>
             </div>
@@ -775,7 +771,7 @@ export function TechTalkPptStudio() {
                   type="button"
                   onClick={handleExportPptx}
                   disabled={isExportingPptx}
-                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-indigo-600/20 disabled:opacity-50"
+                  className="px-4 py-2 rounded-lg bg-vermilion hover:bg-vermilion-hover text-white font-mono uppercase tracking-wider font-semibold text-xs flex items-center gap-2 transition-colors cursor-pointer shadow-paper disabled:opacity-50"
                   title="Export PowerPoint (.pptx) with speaker notes"
                 >
                   {isExportingPptx ? (
@@ -790,7 +786,7 @@ export function TechTalkPptStudio() {
                   type="button"
                   onClick={handleExportPdf}
                   disabled={isExportingPdf}
-                  className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-rose-600/20 disabled:opacity-50"
+                  className="px-4 py-2 rounded-lg bg-ink-primary hover:bg-black text-white dark:bg-charcoal-700 dark:hover:bg-charcoal-600 font-mono uppercase tracking-wider font-semibold text-xs flex items-center gap-2 transition-colors cursor-pointer shadow-paper disabled:opacity-50"
                   title="Export 16:9 PDF Presentation Deck"
                 >
                   {isExportingPdf ? (
@@ -804,10 +800,10 @@ export function TechTalkPptStudio() {
                 <button
                   type="button"
                   onClick={handleDownloadCheatSheet}
-                  className="px-3.5 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1] text-zinc-300 hover:text-white font-medium text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                  className="px-3.5 py-2 rounded-lg bg-paper-100 hover:bg-paper-200 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 border border-paper-300 dark:border-charcoal-border text-ink-primary dark:text-white font-mono text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-paper"
                   title="Download Speaker Script for your phone"
                 >
-                  <Copy className="w-3.5 h-3.5 text-amber-400" />
+                  <Copy className="w-3.5 h-3.5 text-vermilion" />
                   <span>Speech Notes (.md)</span>
                 </button>
 

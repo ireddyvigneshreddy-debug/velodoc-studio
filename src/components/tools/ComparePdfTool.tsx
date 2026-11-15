@@ -14,7 +14,7 @@ import {
   ChevronRight,
   Loader2,
   Eye,
-} from "lucide-react";
+} from "@/components/common/icons";
 import { formatFileSize } from "@/lib/utils";
 
 interface ComparisonSummaryItem {
@@ -470,7 +470,7 @@ export function ComparePdfTool() {
                     <span className="text-[11px] font-bold text-rose-400 uppercase mb-2">
                       Visual Neon Diff Overlay (Red/Magenta = Changed Pixels)
                     </span>
-                    <div className="p-2 rounded-2xl bg-black/40 border border-rose-500/40 shadow-[0_0_35px_rgba(244,63,94,0.25)] max-w-full overflow-hidden">
+                    <div className="p-2 rounded-2xl bg-black/40 border border-rose-500/40 shadow-paper max-w-full overflow-hidden">
                       <canvas ref={canvasDiffRef} className="max-w-full h-auto rounded-xl" />
                     </div>
                   </div>

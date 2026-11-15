@@ -14,7 +14,7 @@ import {
   Download,
   AlertCircle,
   Loader2,
-} from "lucide-react";
+} from "@/components/common/icons";
 
 export function PdfDiffTextTool() {
   const [fileA, setFileA] = useState<File | null>(null);
@@ -157,7 +157,7 @@ export function PdfDiffTextTool() {
             type="button"
             onClick={handleCompare}
             disabled={!fileA || !fileB || isComparing}
-            className="w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 disabled:opacity-40 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(99,102,241,0.35)] transition-all cursor-pointer"
+            className="w-full py-4 rounded-2xl bg-vermilion hover:bg-vermilion-hover disabled:opacity-40 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-paper transition-all cursor-pointer"
           >
             {isComparing ? (
               <>

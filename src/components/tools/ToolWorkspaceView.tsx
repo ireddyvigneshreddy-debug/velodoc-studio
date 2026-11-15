@@ -13,7 +13,7 @@ import {
   ChevronDown,
   LayoutGrid,
   ArrowLeft,
-} from "lucide-react";
+} from "@/components/common/icons";
 
 // Tool components (All 29 native tools)
 import { MergePdfTool } from "./MergePdfTool";

@@ -12,7 +12,7 @@ import {
 } from "@/lib/pdf-engine";
 import { sessionHistory } from "@/lib/session-history";
 import { createPdfBlob } from "@/lib/utils";
-import { Trash2, Loader2, AlertCircle } from "lucide-react";
+import { Trash2, Loader2, AlertCircle } from "@/components/common/icons";
 
 export function RemovePagesTool() {
   const [fileItem, setFileItem] = useState<UploadedFileItem | null>(null);
@@ -256,7 +256,7 @@ export function RemovePagesTool() {
                       isProcessing
                     }
                     onClick={handleRemovePages}
-                    className="ml-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 disabled:opacity-40 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 shadow-[0_0_24px_rgba(244,63,94,0.4)] hover:shadow-[0_0_32px_rgba(244,63,94,0.6)] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                    className="ml-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 disabled:opacity-40 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 shadow-paper hover:shadow-paper hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
                   >
                     {isProcessing ? (
                       <>

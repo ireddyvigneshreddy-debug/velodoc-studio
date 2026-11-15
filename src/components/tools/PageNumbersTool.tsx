@@ -10,7 +10,7 @@ import {
 } from "@/lib/pdf-engine";
 import { sessionHistory } from "@/lib/session-history";
 import { createPdfBlob } from "@/lib/utils";
-import { Hash, Loader2, AlertCircle } from "lucide-react";
+import { Hash, Loader2, AlertCircle } from "@/components/common/icons";
 
 export function PageNumbersTool() {
   const [fileItem, setFileItem] = useState<UploadedFileItem | null>(null);
@@ -382,7 +382,7 @@ export function PageNumbersTool() {
                     type="button"
                     disabled={isProcessing}
                     onClick={handleApply}
-                    className="px-7 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 disabled:opacity-40 text-white font-semibold text-sm flex items-center gap-2 shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-all"
+                    className="px-7 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 disabled:opacity-40 text-white font-semibold text-sm flex items-center gap-2 shadow-paper transition-all"
                   >
                     {isProcessing ? (
                       <>

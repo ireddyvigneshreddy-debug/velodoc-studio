@@ -2,7 +2,7 @@
 
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import Link from "next/link";
-import { AlertTriangle, RefreshCw, Home, Copy, Check, ShieldCheck } from "lucide-react";
+import { AlertTriangle, RefreshCw, Home, Copy, Check, ShieldCheck } from "@/components/common/icons";
 
 interface Props {
   children: ReactNode;
@@ -73,25 +73,23 @@ export class ToolErrorBoundary extends Component<Props, State> {
         "An unexpected error occurred while processing document data.";
 
       return (
-        <div className="w-full max-w-2xl mx-auto my-8 p-6 sm:p-8 rounded-3xl bg-[#12141D] border border-rose-500/20 shadow-2xl relative overflow-hidden text-center space-y-6 animate-in fade-in zoom-in-95 duration-200">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-32 bg-rose-500/10 rounded-full blur-[80px] pointer-events-none" />
-
+        <div className="w-full max-w-2xl mx-auto my-8 p-6 sm:p-8 rounded-lg paper-card bg-white dark:bg-charcoal-800 border-paper-300 dark:border-charcoal-border shadow-paper relative overflow-hidden text-center space-y-6">
           <div className="relative z-10 flex flex-col items-center space-y-4">
-            <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 shadow-inner">
-              <AlertTriangle className="w-8 h-8" />
+            <div className="p-3.5 rounded-lg bg-rose-100 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400">
+              <AlertTriangle className="w-7 h-7" />
             </div>
 
             <div className="space-y-1.5">
-              <h2 className="text-xl font-bold text-white tracking-tight">
+              <h2 className="text-xl font-serif text-ink-primary dark:text-white tracking-tight">
                 {this.props.fallbackTitle || "Workspace Recovered Safely"}
               </h2>
-              <p className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto">
+              <p className="text-xs sm:text-sm text-ink-secondary dark:text-paper-400 max-w-md mx-auto font-sans">
                 A localized processing error was intercepted. Your session and device
                 RAM have been protected from crashing.
               </p>
             </div>
 
-            <div className="w-full p-3.5 rounded-xl bg-black/40 border border-white/5 text-left text-xs font-mono text-rose-300 break-all select-all">
+            <div className="w-full p-3 rounded-md bg-paper-100 dark:bg-charcoal-900 border border-paper-300 dark:border-charcoal-border text-left text-xs font-mono text-rose-600 dark:text-rose-400 break-all select-all">
               {errorMsg}
             </div>
 

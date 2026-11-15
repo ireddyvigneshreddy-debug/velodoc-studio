@@ -24,7 +24,7 @@ import {
   Stamp,
   AlertCircle,
   Loader2,
-} from "lucide-react";
+} from "@/components/common/icons";
 
 export function QrBarcodePdfTool() {
   const [activeTab, setActiveTab] = useState<"stamp" | "generator">("stamp");
@@ -182,7 +182,7 @@ export function QrBarcodePdfTool() {
           onClick={() => setActiveTab("stamp")}
           className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-2 ${
             activeTab === "stamp"
-              ? "bg-indigo-600 text-white shadow-[0_0_16px_rgba(99,102,241,0.3)]"
+              ? "bg-indigo-600 text-white shadow-paper"
               : "text-zinc-400 hover:text-white"
           }`}
         >
@@ -195,7 +195,7 @@ export function QrBarcodePdfTool() {
           onClick={() => setActiveTab("generator")}
           className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-2 ${
             activeTab === "generator"
-              ? "bg-indigo-600 text-white shadow-[0_0_16px_rgba(99,102,241,0.3)]"
+              ? "bg-indigo-600 text-white shadow-paper"
               : "text-zinc-400 hover:text-white"
           }`}
         >
@@ -436,7 +436,7 @@ export function QrBarcodePdfTool() {
                 <button
                   type="button"
                   onClick={handleDownloadStandalonePng}
-                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-[0_0_16px_rgba(99,102,241,0.3)] cursor-pointer"
+                  className="w-full py-3 rounded-2xl bg-vermilion hover:bg-vermilion-hover text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-paper cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
                   <span>Download High-Res PNG</span>
@@ -477,7 +477,7 @@ export function QrBarcodePdfTool() {
                     type="button"
                     onClick={handleStampPdf}
                     disabled={isProcessing}
-                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-semibold text-xs flex items-center gap-2 shadow-[0_0_16px_rgba(99,102,241,0.3)] cursor-pointer"
+                    className="px-5 py-2.5 rounded-xl bg-vermilion hover:bg-vermilion-hover text-white font-semibold text-xs flex items-center gap-2 shadow-paper cursor-pointer"
                   >
                     {isProcessing ? (
                       <>

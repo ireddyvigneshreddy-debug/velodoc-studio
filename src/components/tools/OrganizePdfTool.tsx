@@ -13,7 +13,7 @@ import {
 } from "@/lib/pdf-engine";
 import { sessionHistory } from "@/lib/session-history";
 import { createPdfBlob } from "@/lib/utils";
-import { RotateCw, Loader2, AlertCircle, Undo2 } from "lucide-react";
+import { RotateCw, Loader2, AlertCircle, Undo2 } from "@/components/common/icons";
 
 interface InternalPageItem extends PageThumbnail {
   originalIndex: number;
@@ -243,7 +243,7 @@ export function OrganizePdfTool() {
                     type="button"
                     disabled={isProcessing || pages.length === 0}
                     onClick={handleSave}
-                    className="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 disabled:opacity-40 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 shadow-[0_0_20px_rgba(168,85,247,0.35)] transition-all"
+                    className="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 disabled:opacity-40 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 shadow-paper transition-all"
                   >
                     {isProcessing ? (
                       <>

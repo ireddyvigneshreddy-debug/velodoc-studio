@@ -3,70 +3,61 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CommandPalette } from "@/components/common/CommandPalette";
 import { CameraScannerModal } from "@/components/CameraScannerModal";
 import { sessionHistory } from "@/lib/session-history";
 import {
-  Sparkles,
-  ArrowRight,
   Camera,
   Layers,
   Trash2,
   GitCompare,
   Minimize2,
-  Presentation,
-} from "lucide-react";
+  PresentationChart,
+  ShieldCheck,
+  UploadSimple,
+} from "@/components/common/icons";
 
-const EVERYDAY_INTENT_CHIPS = [
+const INTENT_CHIPS = [
   {
     id: "shrink-200kb",
-    label: "Shrink PDF to exact 200 KB",
+    label: "Shrink to exact 200 KB",
     icon: Minimize2,
     href: "/tools/compress-pdf?target=200kb",
-    color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/25 hover:border-emerald-400/50 hover:bg-emerald-500/15",
-  },
-  {
-    id: "camera-scan",
-    label: "Scan pages with Camera → PDF",
-    icon: Camera,
-    isCameraModal: true,
-    href: "/tools/image-to-pdf?scan=true",
-    color: "text-cyan-400 bg-cyan-500/10 border-cyan-500/25 hover:border-cyan-400/50 hover:bg-cyan-500/15 ring-1 ring-cyan-500/40",
+    badge: "Binary Search",
   },
   {
     id: "tech-talk-ppt",
-    label: "AI Tech-Talk PPTX Studio (10–15 Slides)",
-    icon: Presentation,
+    label: "IARE Tech-Talk PPT Studio",
+    icon: PresentationChart,
     href: "#tech-talk-ppt-studio",
-    color: "text-amber-300 bg-amber-500/10 border-amber-500/25 hover:border-amber-400/50 hover:bg-amber-500/15 ring-1 ring-amber-500/30",
+    badge: "13 Slides",
   },
   {
     id: "combine-30",
     label: "Combine up to 30 PDFs",
     icon: Layers,
     href: "/tools/merge-pdf",
-    color: "text-indigo-400 bg-indigo-500/10 border-indigo-500/25 hover:border-indigo-400/50 hover:bg-indigo-500/15",
+    badge: "Batch",
   },
   {
     id: "delete-pages",
-    label: "Delete unwanted pages",
+    label: "Remove unwanted pages",
     icon: Trash2,
     href: "/tools/remove-pages",
-    color: "text-rose-400 bg-rose-500/10 border-rose-500/25 hover:border-rose-400/50 hover:bg-rose-500/15",
+    badge: "Visual",
   },
   {
     id: "compare-docs",
     label: "Compare 2–30 PDFs",
     icon: GitCompare,
     href: "/tools/compare-pdf",
-    color: "text-violet-400 bg-violet-500/10 border-violet-500/25 hover:border-violet-400/50 hover:bg-violet-500/15",
+    badge: "Diff",
   },
 ];
 
 export function HeroSection() {
   const router = useRouter();
-  const [paletteOpen, setPaletteOpen] = useState(false);
   const [cameraModalOpen, setCameraModalOpen] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   const handleCameraScanned = async (files: File[]) => {
     if (files.length > 0) {
@@ -81,81 +72,174 @@ export function HeroSection() {
     }
   };
 
+  const handleBatchDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    if (droppedFiles.length > 0) {
+      try {
+        const first = droppedFiles[0];
+        const buffer = await first.arrayBuffer();
+        sessionHistory.setChainedFile(new Uint8Array(buffer), first.name, first.type);
+        router.push("/tools/merge-pdf");
+      } catch (err) {
+        console.error("Drop error:", err);
+      }
+    }
+  };
+
   return (
     <>
-      <section className="relative pt-4 pb-4 sm:pt-7 sm:pb-5 text-center overflow-hidden">
-        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 space-y-3.5">
-          {/* Top Pill Announcement with Live Telemetry */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-pill text-xs text-zinc-300 shadow-inner">
-            <span className="p-0.5 rounded-full bg-indigo-500/20 text-cyan-300">
-              <Sparkles className="w-3 h-3" />
-            </span>
-            <span className="font-medium text-[11px] sm:text-xs tracking-tight">
-              VeloDoc Pro • <span className="font-mono tabular-nums text-indigo-300">30-Document</span> Zero-Crash Batch Studio • 100% In-Memory
-            </span>
-          </div>
+      <section className="pt-6 sm:pt-10 pb-6 border-b border-paper-300 dark:border-charcoal-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Asymmetric Editorial Workbench Split Header */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+            {/* Left Column (7 cols): Editorial Headline & Telemetry */}
+            <div className="lg:col-span-7 space-y-5">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[11px] font-mono tracking-wider uppercase bg-[#EDF5F2] text-[#1B4D3E] dark:bg-[#143A2F]/40 dark:text-[#6ee7b7] border border-[#C4DFD5] dark:border-[#143A2F]">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  Air-Gapped Client Engine
+                </span>
+                <span className="text-xs font-mono text-ink-muted">v2.4.0 • Zero Cloud Storage</span>
+              </div>
 
-          {/* Main Hero Headline with Swiss Precision & Metallic Typography */}
-          <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-[-0.03em] leading-tight max-w-4xl mx-auto">
-            <span className="text-metallic">Universal Client-Side</span>{" "}
-            <span className="bg-gradient-to-r from-indigo-400 via-cyan-300 to-emerald-400 bg-clip-text text-transparent">
-              Document &amp; PDF Studio
-            </span>
-          </h1>
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-sans font-bold tracking-tight text-ink-primary dark:text-white leading-[1.08]">
+                Private Document Studio,{" "}
+                <span className="font-serif italic font-normal text-vermilion">
+                  Direct on Your Hardware.
+                </span>
+              </h1>
 
-          {/* Compact Subtitle */}
-          <p className="max-w-2xl mx-auto text-xs sm:text-sm text-zinc-400 leading-normal font-normal">
-            Precision binary-search KB compression, 30-file batch pipelines, visual diff, and lossless format conversions.
-            Zero cloud uploads • Zero tracking • Runs 100% in local browser memory.
-          </p>
+              <p className="text-sm sm:text-base text-ink-secondary dark:text-paper-400 font-sans leading-relaxed max-w-2xl">
+                Exact KB/MB binary-search compression, 30-document zero-crash batch pipelines, and official academic presentation generation. Zero server uploads, zero accounts, zero tracking.
+              </p>
 
-          {/* 1-Click Everyday Intent Chips (Swipeable on Mobile) */}
-          <div className="pt-1.5 flex items-center sm:justify-center overflow-x-auto no-scrollbar snap-x snap-mandatory gap-2 max-w-4xl mx-auto px-1 sm:flex-wrap pb-1">
-            {EVERYDAY_INTENT_CHIPS.map((chip) => {
-              const Icon = chip.icon;
-              if (chip.isCameraModal) {
-                return (
-                  <button
-                    key={chip.id}
-                    type="button"
-                    onClick={() => setCameraModalOpen(true)}
-                    className={`group shrink-0 snap-start inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 shadow-sm cursor-pointer hover:scale-[1.03] active:scale-[0.98] ${chip.color}`}
-                  >
-                    <Icon className="w-3.5 h-3.5 shrink-0" />
-                    <span>{chip.label}</span>
-                    <ArrowRight className="w-3 h-3 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
-                  </button>
-                );
-              }
+              {/* Local Hardware Telemetry Bar */}
+              <div className="grid grid-cols-3 gap-2 sm:gap-3 py-3 px-4 rounded-lg bg-white dark:bg-charcoal-800 border border-paper-300 dark:border-charcoal-border text-xs">
+                <div>
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-ink-muted">Wasm Sandbox</div>
+                  <div className="font-mono font-medium text-ink-primary dark:text-white flex items-center gap-1.5 mt-0.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    Isolated RAM
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-ink-muted">Network Ingress</div>
+                  <div className="font-mono font-medium text-emerald-600 dark:text-emerald-400 mt-0.5">
+                    0.00 KB Outbound
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-ink-muted">Batch Concurrency</div>
+                  <div className="font-mono font-medium text-ink-primary dark:text-white mt-0.5">
+                    30 Files Safe
+                  </div>
+                </div>
+              </div>
 
-              return (
-                <Link
-                  key={chip.id}
-                  href={chip.href}
-                  className={`group shrink-0 snap-start inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-200 shadow-sm cursor-pointer hover:scale-[1.03] active:scale-[0.98] ${chip.color}`}
+              {/* 1-Click Everyday Intent Chips */}
+              <div className="space-y-2 pt-1">
+                <div className="text-[11px] font-mono uppercase tracking-wider text-ink-muted">
+                  Quick Actions:
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {INTENT_CHIPS.map((chip) => {
+                    const Icon = chip.icon;
+                    return (
+                      <Link
+                        key={chip.id}
+                        href={chip.href}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono bg-white dark:bg-charcoal-800 border border-paper-300 dark:border-charcoal-border hover:border-vermilion hover:text-vermilion text-ink-secondary dark:text-paper-400 transition-colors shadow-paper group"
+                      >
+                        <Icon className="w-3.5 h-3.5 text-vermilion group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">{chip.label}</span>
+                        <span className="text-[10px] text-ink-muted">({chip.badge})</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column (5 cols): Tactile Quick-Action Dock */}
+            <div className="lg:col-span-5 space-y-4">
+              {/* Camera Scanner Trigger Card */}
+              <div className="paper-card p-5 rounded-lg dark:bg-charcoal-800 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded bg-vermilion-light text-vermilion dark:bg-vermilion/20 flex items-center justify-center">
+                      <Camera className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h2 className="text-sm font-semibold text-ink-primary dark:text-white">
+                        Pro Camera Scanner
+                      </h2>
+                      <p className="text-[11px] text-ink-muted font-mono">
+                        Hardware Webcam / Phone Camera → PDF
+                      </p>
+                    </div>
+                  </div>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-paper-200 dark:bg-charcoal-700 text-ink-primary dark:text-white border border-paper-300 dark:border-charcoal-border">
+                    1-Click
+                  </span>
+                </div>
+                <p className="text-xs text-ink-secondary dark:text-paper-400 leading-relaxed font-sans">
+                  Capture physical paper notes or IDs with real-time perspective alignment and automatic archival contrast filtering.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setCameraModalOpen(true)}
+                  className="w-full py-2.5 px-4 rounded text-xs font-mono uppercase tracking-wider font-semibold bg-ink-primary dark:bg-white text-white dark:text-ink-primary hover:bg-black dark:hover:bg-paper-100 transition-colors flex items-center justify-center gap-2 shadow-paper cursor-pointer"
                 >
-                  <Icon className="w-3.5 h-3.5 shrink-0" />
-                  <span>{chip.label}</span>
-                  <ArrowRight className="w-3 h-3 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
-                </Link>
-              );
-            })}
+                  <Camera className="w-4 h-4" />
+                  Launch Camera Scanner
+                </button>
+              </div>
+
+              {/* 30-File Batch Drop Target Dock */}
+              <div
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDragging(true);
+                }}
+                onDragLeave={() => setIsDragging(false)}
+                onDrop={handleBatchDrop}
+                className={`border-2 border-dashed rounded-lg p-5 text-center transition-colors ${
+                  isDragging
+                    ? "border-vermilion bg-vermilion-light/40 dark:bg-vermilion/10"
+                    : "border-paper-300 dark:border-charcoal-border bg-white/60 dark:bg-charcoal-800/60 hover:border-vermilion/60"
+                }`}
+              >
+                <div className="w-9 h-9 rounded-full bg-paper-200 dark:bg-charcoal-700 flex items-center justify-center mx-auto text-ink-secondary dark:text-paper-400 mb-2">
+                  <UploadSimple className="w-5 h-5 text-vermilion" />
+                </div>
+                <h2 className="text-xs font-mono font-semibold uppercase tracking-wider text-ink-primary dark:text-white">
+                  30-Document Fast Drop Target
+                </h2>
+                <p className="text-[11px] text-ink-muted font-sans mt-1">
+                  Drag and drop up to 30 PDFs or images here to instantly open the Batch Workbench.
+                </p>
+                <div className="mt-3 flex items-center justify-center gap-2 text-[10px] font-mono text-ink-secondary dark:text-paper-400">
+                  <span className="inline-flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    Zero Cloud Upload
+                  </span>
+                  <span>•</span>
+                  <span>No Size Limits</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* 1-Click Camera Scanner Modal on Dashboard */}
+      {/* 1-Click Camera Scanner Modal */}
       <CameraScannerModal
         isOpen={cameraModalOpen}
         onClose={() => setCameraModalOpen(false)}
         onAddScansToQueue={handleCameraScanned}
         onInstantGeneratePdf={handleCameraScanned}
-      />
-
-      {/* Global Command Palette */}
-      <CommandPalette
-        isOpen={paletteOpen}
-        onClose={() => setPaletteOpen(false)}
       />
     </>
   );

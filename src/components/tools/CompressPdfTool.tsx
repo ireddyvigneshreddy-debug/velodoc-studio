@@ -19,7 +19,7 @@ import {
   Sliders,
   Target,
   Percent,
-} from "lucide-react";
+} from "@/components/common/icons";
 import { formatFileSize } from "@/lib/utils";
 
 export function CompressPdfTool() {
@@ -413,7 +413,7 @@ export function CompressPdfTool() {
                       onClick={preset.action}
                       className={`p-3 rounded-2xl border text-left flex flex-col justify-between transition-all cursor-pointer ${
                         preset.isActive
-                          ? "bg-indigo-600/20 border-indigo-500 shadow-[0_0_16px_rgba(99,102,241,0.3)] ring-1 ring-indigo-500"
+                          ? "bg-indigo-600/20 border-indigo-500 shadow-paper ring-1 ring-indigo-500"
                           : "bg-white/[0.03] border-white/10 hover:border-white/20 hover:bg-white/[0.05]"
                       }`}
                     >
@@ -712,7 +712,7 @@ export function CompressPdfTool() {
                   type="button"
                   onClick={handleCompress}
                   disabled={isProcessing || files.length === 0}
-                  className="w-full sm:w-auto px-7 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-600 hover:to-indigo-700 disabled:opacity-40 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all cursor-pointer"
+                  className="w-full sm:w-auto px-7 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-600 hover:to-indigo-700 disabled:opacity-40 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-paper transition-all cursor-pointer"
                 >
                   {isProcessing ? (
                     <>
@@ -738,7 +738,7 @@ export function CompressPdfTool() {
                   type="button"
                   onClick={handleCompress}
                   disabled={isProcessing || files.length === 0}
-                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-cyan-500 via-indigo-600 to-indigo-700 hover:from-cyan-600 hover:to-indigo-800 disabled:opacity-40 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(6,182,212,0.5)] active:scale-[0.98] transition-all cursor-pointer"
+                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-cyan-500 via-indigo-600 to-indigo-700 hover:from-cyan-600 hover:to-indigo-800 disabled:opacity-40 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-paper active:scale-[0.98] transition-all cursor-pointer"
                 >
                   {isProcessing ? (
                     <>

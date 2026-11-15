@@ -16,7 +16,7 @@ import {
   Camera,
   FolderOpen,
   CheckCircle2,
-} from "lucide-react";
+} from "@/components/common/icons";
 import { UploadedFileItem } from "@/types";
 import { formatFileSize } from "@/lib/utils";
 import {
@@ -130,66 +130,57 @@ export function DropZone({
         </div>
       )}
 
-      {/* Magnetic Animated Smoked Glass Dropzone */}
+      {/* Swiss Editorial Tactile Dropzone */}
       <div
         {...getRootProps()}
-        className={`relative group cursor-pointer rounded-3xl p-6 sm:p-10 text-center transition-all duration-300 overflow-hidden premium-card ${
+        className={`relative group cursor-pointer rounded-xl p-6 sm:p-10 text-center transition-all duration-200 overflow-hidden paper-card ${
           isDragActive
-            ? "border-indigo-400 bg-indigo-500/15 shadow-[0_0_40px_rgba(99,102,241,0.35),inset_0_1px_0_rgba(255,255,255,0.4)] scale-[1.01]"
+            ? "border-vermilion bg-vermilion-light/40 dark:bg-vermilion/10 scale-[1.01]"
             : isDragReject
-            ? "border-rose-500 bg-rose-500/15 shadow-[0_0_35px_rgba(244,63,94,0.3)]"
-            : "border-white/[0.08] hover:border-indigo-500/40 hover:shadow-[0_12px_36px_rgba(0,0,0,0.6)]"
+            ? "border-rose-500 bg-rose-50 dark:bg-rose-950/20"
+            : "bg-white dark:bg-charcoal-800 border-paper-300 dark:border-charcoal-border hover:border-vermilion/60"
         }`}
       >
         <input {...getInputProps()} />
-
-        {/* Dynamic neon edge glow when drag active */}
-        <div
-          className={`pointer-events-none absolute inset-0 transition-opacity duration-300 ${
-            isDragActive
-              ? "opacity-100 bg-gradient-to-b from-indigo-500/10 via-cyan-500/5 to-transparent"
-              : "opacity-0"
-          }`}
-        />
 
         {/* Layered Floating Document Illustration */}
         <div className="relative z-10 flex flex-col items-center justify-center space-y-3.5">
           <div className="relative">
             {/* Background layered ghost pages */}
-            <div className="absolute -top-1 -left-2 w-12 h-14 rounded-xl bg-white/[0.03] border border-white/[0.08] -rotate-6 transition-transform group-hover:-rotate-12 duration-300 pointer-events-none" />
-            <div className="absolute -top-1 -right-2 w-12 h-14 rounded-xl bg-white/[0.03] border border-white/[0.08] rotate-6 transition-transform group-hover:rotate-12 duration-300 pointer-events-none" />
+            <div className="absolute -top-1 -left-2 w-12 h-14 rounded-md bg-paper-200 dark:bg-charcoal-700 border border-paper-300 dark:border-charcoal-border -rotate-6 transition-transform group-hover:-rotate-12 duration-200 pointer-events-none" />
+            <div className="absolute -top-1 -right-2 w-12 h-14 rounded-md bg-paper-200 dark:bg-charcoal-700 border border-paper-300 dark:border-charcoal-border rotate-6 transition-transform group-hover:rotate-12 duration-200 pointer-events-none" />
 
-            {/* Central glowing icon container with spring bounce */}
+            {/* Central icon container */}
             <div
-              className={`relative z-10 p-4 rounded-2xl shadow-xl transition-all duration-300 ${
+              className={`relative z-10 p-4 rounded-lg shadow-paper transition-all duration-200 ${
                 isDragActive
-                  ? "scale-[1.08] bg-gradient-to-br from-indigo-500 to-cyan-500 text-white shadow-[0_0_24px_rgba(99,102,241,0.6)]"
-                  : "bg-white/[0.05] border border-white/[0.12] text-indigo-400 group-hover:text-cyan-300 group-hover:scale-105 group-hover:bg-white/[0.08] group-hover:border-white/[0.2] shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]"
+                  ? "scale-[1.06] bg-vermilion text-white"
+                  : "bg-white dark:bg-charcoal-800 border border-paper-300 dark:border-charcoal-border text-vermilion group-hover:scale-105"
               }`}
             >
-              <UploadCloud className="w-8 h-8" />
+              <UploadCloud className="w-7 h-7" />
             </div>
           </div>
 
           <div className="space-y-1 max-w-md mx-auto">
-            <h3 className="text-sm sm:text-base font-semibold text-white tracking-tight">
+            <h3 className="text-sm sm:text-base font-semibold text-ink-primary dark:text-white tracking-tight font-sans">
               {isDragActive
                 ? "Release files to load into memory instantly"
                 : isDragReject
                 ? "File type not supported for this studio tool"
                 : title}
             </h3>
-            <p className="text-xs text-zinc-400 leading-normal">{subtitle}</p>
+            <p className="text-xs text-ink-secondary dark:text-paper-400 leading-normal font-sans">{subtitle}</p>
           </div>
 
           {/* Supported Types & Telemetry Badges */}
           <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
-            <span className="px-2.5 py-0.5 rounded-md bg-white/[0.04] border border-white/[0.08] font-mono text-[10px] text-zinc-300 tracking-wider uppercase">
+            <span className="px-2.5 py-0.5 rounded bg-paper-100 dark:bg-charcoal-700 border border-paper-300 dark:border-charcoal-border font-mono text-[10px] text-ink-secondary dark:text-paper-400 tracking-wider uppercase">
               {Object.values(acceptedFileTypes).flat().join(", ")}
             </span>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono tabular-nums text-[11px]">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              100% In-Memory • Zero-Crash 30-Doc Queue
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#EDF5F2] dark:bg-[#143A2F]/40 border border-[#C4DFD5] dark:border-[#143A2F] text-[#1B4D3E] dark:text-[#6ee7b7] font-mono tabular-nums text-[11px]">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              100% In-Memory • 30-Doc Queue Safe
             </span>
           </div>
 
@@ -197,9 +188,9 @@ export function DropZone({
           <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
             <button
               type="button"
-              className="keycap-btn px-4 py-2 rounded-xl text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md cursor-pointer hover:border-indigo-400/40"
+              className="keycap-btn px-4 py-2 rounded-lg text-ink-primary dark:text-white text-xs font-mono font-medium flex items-center gap-1.5 transition-colors cursor-pointer hover:border-vermilion"
             >
-              <FolderOpen className="w-3.5 h-3.5 text-indigo-400" />
+              <FolderOpen className="w-3.5 h-3.5 text-vermilion" />
               <span>Select up to 30 Files</span>
             </button>
 
@@ -210,9 +201,9 @@ export function DropZone({
                   e.stopPropagation();
                   onOpenScanner();
                 }}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500/20 via-indigo-500/20 to-emerald-500/20 hover:from-cyan-500/30 hover:to-emerald-500/30 border border-cyan-500/40 text-cyan-200 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                className="px-4 py-2 rounded-lg bg-paper-100 dark:bg-charcoal-700 hover:bg-paper-200 dark:hover:bg-charcoal-600 border border-paper-300 dark:border-charcoal-border text-ink-primary dark:text-white text-xs font-mono font-medium flex items-center gap-1.5 transition-colors cursor-pointer shadow-paper"
               >
-                <Camera className="w-3.5 h-3.5 text-cyan-400" />
+                <Camera className="w-3.5 h-3.5 text-vermilion" />
                 <span>Scan with Camera</span>
               </button>
             )}

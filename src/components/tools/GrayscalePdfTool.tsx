@@ -10,7 +10,7 @@ import {
 } from "@/lib/pdf-engine";
 import { sessionHistory } from "@/lib/session-history";
 import { createPdfBlob } from "@/lib/utils";
-import { SunMedium, Loader2, AlertCircle, Sparkles } from "lucide-react";
+import { SunMedium, Loader2, AlertCircle, Sparkles } from "@/components/common/icons";
 
 export function GrayscalePdfTool() {
   const [fileItem, setFileItem] = useState<UploadedFileItem | null>(null);

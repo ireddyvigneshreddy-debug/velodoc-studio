@@ -13,7 +13,7 @@ import {
   Check,
   Loader2,
   AlertCircle,
-} from "lucide-react";
+} from "@/components/common/icons";
 
 export function PdfToTextTool() {
   const [fileItem, setFileItem] = useState<UploadedFileItem | null>(null);

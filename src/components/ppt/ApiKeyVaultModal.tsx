@@ -11,7 +11,7 @@ import {
   Sparkles,
   Cpu,
   Lock,
-} from "lucide-react";
+} from "@/components/common/icons";
 
 interface ApiKeyVaultModalProps {
   isOpen: boolean;
@@ -246,7 +246,7 @@ export function ApiKeyVaultModal({
           <button
             type="button"
             onClick={handleSave}
-            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(99,102,241,0.35)] transition-all cursor-pointer"
+            className="w-full py-3 rounded-lg bg-vermilion hover:bg-vermilion-hover text-white font-mono uppercase tracking-wider font-semibold text-xs flex items-center justify-center gap-2 shadow-paper transition-colors cursor-pointer"
           >
             {isSaved ? (
               <>

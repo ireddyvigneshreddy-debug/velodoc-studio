@@ -7,7 +7,7 @@ import {
   Printer,
   Eye,
   RefreshCw,
-} from "lucide-react";
+} from "@/components/common/icons";
 
 const TEMPLATES = [
   {
@@ -211,7 +211,7 @@ export function HtmlToPdfTool() {
             <button
               type="button"
               onClick={handlePrintPdf}
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(99,102,241,0.35)] transition-all cursor-pointer"
+              className="w-full py-3.5 rounded-2xl bg-vermilion hover:bg-vermilion-hover text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-paper transition-all cursor-pointer"
             >
               <Printer className="w-4 h-4" />
               <span>Print to PDF / Save Clean Document</span>
@@ -244,7 +244,7 @@ export function HtmlToPdfTool() {
         <button
           type="button"
           onClick={handlePrintPdf}
-          className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(99,102,241,0.35)] cursor-pointer"
+          className="w-full py-3.5 rounded-2xl bg-vermilion hover:bg-vermilion-hover text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-paper cursor-pointer"
         >
           <Printer className="w-4 h-4" />
           <span>Save Document as PDF</span>
