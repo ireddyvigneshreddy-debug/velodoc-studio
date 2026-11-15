@@ -130,15 +130,15 @@ export function PdfToTextTool() {
       ) : (
         <div className="space-y-6">
           {/* Header Bar */}
-          <div className="p-5 rounded-3xl bg-[#12141D] border border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
+          <div className="p-5 rounded-3xl bg-white dark:bg-[#12141D] border border-zinc-200 dark:border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
             <div>
-              <h3 className="font-semibold text-white text-base">
+              <h3 className="font-semibold text-zinc-950 dark:text-white text-base">
                 {fileItem.name}
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-zinc-600 dark:text-slate-400 mt-0.5">
                 {extractedData ? (
                   <>
-                    <span className="text-emerald-400 font-semibold font-mono">
+                    <span className="text-emerald-700 dark:text-emerald-400 font-semibold font-mono">
                       {extractedData.totalWords.toLocaleString()} words
                     </span>{" "}
                     • {extractedData.totalChars.toLocaleString()} characters •{" "}
@@ -157,7 +157,7 @@ export function PdfToTextTool() {
                   setFileItem(null);
                   setExtractedData(null);
                 }}
-                className="px-3.5 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 transition-colors"
+                className="px-3.5 py-1.5 rounded-xl text-xs font-medium text-zinc-700 hover:text-zinc-950 dark:text-slate-400 dark:hover:text-white bg-zinc-100 hover:bg-zinc-200 dark:bg-white/5 dark:hover:bg-white/10 transition-colors"
               >
                 Change PDF
               </button>
@@ -167,11 +167,11 @@ export function PdfToTextTool() {
                   <button
                     type="button"
                     onClick={handleCopy}
-                    className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-medium flex items-center gap-1.5 border border-white/10 transition-colors"
+                    className="px-3 py-1.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-white/5 dark:hover:bg-white/10 text-zinc-800 hover:text-zinc-950 dark:text-slate-300 dark:hover:text-white text-xs font-medium flex items-center gap-1.5 border border-zinc-200 dark:border-white/10 transition-colors"
                   >
                     {copied ? (
                       <>
-                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                         <span>Copied!</span>
                       </>
                     ) : (
@@ -186,7 +186,7 @@ export function PdfToTextTool() {
                     <button
                       type="button"
                       onClick={() => handleDownload("txt")}
-                      className="px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-semibold flex items-center gap-1"
+                      className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-950 dark:bg-emerald-600/20 dark:hover:bg-emerald-600/30 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30 text-xs font-semibold flex items-center gap-1 transition-colors"
                     >
                       <Download className="w-3.5 h-3.5" />
                       <span>.TXT</span>
@@ -194,7 +194,7 @@ export function PdfToTextTool() {
                     <button
                       type="button"
                       onClick={() => handleDownload("md")}
-                      className="px-3 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-semibold flex items-center gap-1"
+                      className="px-3 py-1.5 rounded-xl bg-orange-50 hover:bg-orange-100 text-orange-950 dark:bg-indigo-600/20 dark:hover:bg-indigo-600/30 dark:text-indigo-300 border border-orange-300 dark:border-indigo-500/30 text-xs font-semibold flex items-center gap-1 transition-colors"
                     >
                       <Download className="w-3.5 h-3.5" />
                       <span>.MD</span>
@@ -202,7 +202,7 @@ export function PdfToTextTool() {
                     <button
                       type="button"
                       onClick={() => handleDownload("json")}
-                      className="px-3 py-1.5 rounded-xl bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-300 border border-cyan-500/30 text-xs font-semibold flex items-center gap-1"
+                      className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 dark:bg-cyan-600/20 dark:hover:bg-cyan-600/30 dark:text-cyan-300 border border-slate-300 dark:border-cyan-500/30 text-xs font-semibold flex items-center gap-1 transition-colors"
                     >
                       <Download className="w-3.5 h-3.5" />
                       <span>.JSON</span>
@@ -214,21 +214,21 @@ export function PdfToTextTool() {
           </div>
 
           {isProcessing ? (
-            <div className="p-16 rounded-3xl bg-[#12141D] border border-white/10 text-center space-y-3">
-              <Loader2 className="w-8 h-8 text-emerald-400 animate-spin mx-auto" />
-              <p className="text-sm text-white font-medium">Extracting layout streams...</p>
+            <div className="p-16 rounded-3xl bg-white dark:bg-[#12141D] border border-zinc-200 dark:border-white/10 text-center space-y-3 shadow-sm">
+              <Loader2 className="w-8 h-8 text-[#C2410C] dark:text-emerald-400 animate-spin mx-auto" />
+              <p className="text-sm text-zinc-950 dark:text-white font-medium">Extracting layout streams...</p>
             </div>
           ) : extractedData ? (
-            <div className="rounded-3xl bg-[#12141D] border border-white/10 overflow-hidden shadow-2xl space-y-0">
+            <div className="rounded-3xl bg-white dark:bg-[#12141D] border border-zinc-200 dark:border-white/10 overflow-hidden shadow-sm space-y-0">
               {/* Tabs & Search */}
-              <div className="p-3 bg-[#0E1017] border-b border-white/5 flex flex-wrap items-center justify-between gap-3 text-xs">
-                <div className="flex rounded-xl bg-white/5 p-1 border border-white/10">
+              <div className="p-3 bg-zinc-50 dark:bg-[#0E1017] border-b border-zinc-200 dark:border-white/5 flex flex-wrap items-center justify-between gap-3 text-xs">
+                <div className="flex rounded-xl bg-zinc-100 dark:bg-white/5 p-1 border border-zinc-200 dark:border-white/10">
                   <button
                     onClick={() => setActiveTab("text")}
                     className={`px-3 py-1 rounded-lg font-medium transition-all ${
                       activeTab === "text"
-                        ? "bg-emerald-600 text-white shadow"
-                        : "text-slate-400 hover:text-white"
+                        ? "bg-[#C2410C] text-white shadow-sm font-semibold"
+                        : "text-zinc-700 hover:text-zinc-950 dark:text-slate-400 dark:hover:text-white"
                     }`}
                   >
                     Raw Text
@@ -237,8 +237,8 @@ export function PdfToTextTool() {
                     onClick={() => setActiveTab("markdown")}
                     className={`px-3 py-1 rounded-lg font-medium transition-all ${
                       activeTab === "markdown"
-                        ? "bg-emerald-600 text-white shadow"
-                        : "text-slate-400 hover:text-white"
+                        ? "bg-[#C2410C] text-white shadow-sm font-semibold"
+                        : "text-zinc-700 hover:text-zinc-950 dark:text-slate-400 dark:hover:text-white"
                     }`}
                   >
                     Markdown (.md)
@@ -247,28 +247,28 @@ export function PdfToTextTool() {
                     onClick={() => setActiveTab("json")}
                     className={`px-3 py-1 rounded-lg font-medium transition-all ${
                       activeTab === "json"
-                        ? "bg-emerald-600 text-white shadow"
-                        : "text-slate-400 hover:text-white"
+                        ? "bg-[#C2410C] text-white shadow-sm font-semibold"
+                        : "text-zinc-700 hover:text-zinc-950 dark:text-slate-400 dark:hover:text-white"
                     }`}
                   >
                     JSON Stream
                   </button>
                 </div>
 
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/40 border border-white/10 w-full sm:w-64">
-                  <Search className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white dark:bg-black/40 border border-zinc-300 dark:border-white/10 w-full sm:w-64">
+                  <Search className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search inside text..."
-                    className="w-full bg-transparent text-white placeholder-slate-500 text-xs focus:outline-none"
+                    className="w-full bg-transparent text-zinc-950 dark:text-white placeholder-zinc-500 text-xs focus:outline-none"
                   />
                 </div>
               </div>
 
               {/* Text viewer */}
-              <div className="p-6 max-h-[500px] overflow-auto font-mono text-xs text-slate-300 leading-relaxed bg-[#07080C] whitespace-pre-wrap selection:bg-emerald-500/30">
+              <div className="p-6 max-h-[500px] overflow-auto font-mono text-xs text-zinc-900 dark:text-slate-300 leading-relaxed bg-white dark:bg-[#07080C] whitespace-pre-wrap selection:bg-orange-500/20 dark:selection:bg-emerald-500/30">
                 {activeTab === "text" && extractedData.fullText}
                 {activeTab === "markdown" && extractedData.markdown}
                 {activeTab === "json" && JSON.stringify(extractedData.json, null, 2)}
@@ -285,19 +285,19 @@ export function PdfToTextTool() {
 
           {/* Mobile Sticky Thumb-Zone Action Bar */}
           {extractedData && (
-            <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-safe bg-[#05060B]/90 backdrop-blur-xl border-t border-white/10 md:hidden flex items-center justify-between gap-3 shadow-2xl">
+            <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-safe bg-white/95 dark:bg-[#05060B]/90 backdrop-blur-xl border-t border-zinc-200 dark:border-white/10 md:hidden flex items-center justify-between gap-3 shadow-lg">
               <button
                 type="button"
                 onClick={handleCopy}
-                className="flex-1 py-3 px-3 rounded-xl bg-white/10 active:bg-white/20 text-white font-semibold text-xs flex items-center justify-center gap-1.5"
+                className="flex-1 py-3 px-3 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-white/10 text-zinc-800 dark:text-white font-semibold text-xs flex items-center justify-center gap-1.5 border border-zinc-200 dark:border-transparent"
               >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                {copied ? <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copied ? "Copied!" : "Copy Text"}</span>
               </button>
               <button
                 type="button"
                 onClick={() => handleDownload("txt")}
-                className="flex-1 py-3 px-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 active:from-emerald-600 active:to-teal-700 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-lg"
+                className="flex-1 py-3 px-3 rounded-xl bg-[#C2410C] active:bg-[#A8370A] text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-sm"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Save .TXT</span>

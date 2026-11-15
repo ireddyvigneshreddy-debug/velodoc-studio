@@ -111,28 +111,28 @@ export function MarkdownToPdfTool() {
       ) : (
         <div className="space-y-6">
           {/* Controls Bar */}
-          <div className="p-5 rounded-3xl bg-[#12141D] border border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
+          <div className="p-5 rounded-3xl bg-white dark:bg-[#12141D] border border-zinc-200 dark:border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
             <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
               <div className="space-y-1">
-                <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                <span className="text-[10px] uppercase font-bold text-zinc-700 dark:text-slate-400 block">
                   Document Title
                 </span>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="px-3 py-1.5 rounded-xl bg-black/40 border border-white/10 text-white text-xs focus:outline-none focus:border-indigo-500 w-60 font-medium"
+                  className="px-3 py-1.5 rounded-xl bg-white dark:bg-black/40 border border-zinc-300 dark:border-white/10 text-zinc-950 dark:text-white text-xs focus:outline-none focus:border-orange-500 w-60 font-medium"
                 />
               </div>
 
               <div className="space-y-1">
-                <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                <span className="text-[10px] uppercase font-bold text-zinc-700 dark:text-slate-400 block">
                   Typography
                 </span>
                 <select
                   value={fontFamily}
                   onChange={(e) => setFontFamily(e.target.value as "Helvetica" | "TimesRoman" | "Courier")}
-                  className="px-3 py-1.5 rounded-xl bg-black/40 border border-white/10 text-white text-xs focus:outline-none focus:border-indigo-500"
+                  className="px-3 py-1.5 rounded-xl bg-white dark:bg-black/40 border border-zinc-300 dark:border-white/10 text-zinc-950 dark:text-white text-xs focus:outline-none focus:border-orange-500"
                 >
                   <option value="Helvetica">Modern Sans (Helvetica)</option>
                   <option value="TimesRoman">Editorial Serif (Times)</option>
@@ -141,13 +141,13 @@ export function MarkdownToPdfTool() {
               </div>
 
               <div className="space-y-1">
-                <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                <span className="text-[10px] uppercase font-bold text-zinc-700 dark:text-slate-400 block">
                   Size ({fontSize}pt)
                 </span>
                 <select
                   value={fontSize}
                   onChange={(e) => setFontSize(Number(e.target.value))}
-                  className="px-3 py-1.5 rounded-xl bg-black/40 border border-white/10 text-white text-xs focus:outline-none focus:border-indigo-500"
+                  className="px-3 py-1.5 rounded-xl bg-white dark:bg-black/40 border border-zinc-300 dark:border-white/10 text-zinc-950 dark:text-white text-xs focus:outline-none focus:border-orange-500"
                 >
                   <option value={9}>9pt</option>
                   <option value={10}>10pt</option>
@@ -159,7 +159,7 @@ export function MarkdownToPdfTool() {
             </div>
 
             <div className="flex items-center gap-2 w-full md:w-auto justify-end">
-              <label className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-medium cursor-pointer border border-white/10 transition-colors flex items-center gap-1.5">
+              <label className="px-3.5 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-white/5 text-zinc-800 dark:text-slate-300 hover:text-zinc-950 dark:hover:text-white text-xs font-medium cursor-pointer border border-zinc-200 dark:border-white/10 transition-colors flex items-center gap-1.5">
                 <Upload className="w-3.5 h-3.5" />
                 <span>Upload .md / .txt</span>
                 <input
@@ -174,7 +174,7 @@ export function MarkdownToPdfTool() {
                 type="button"
                 disabled={isProcessing}
                 onClick={handleGenerate}
-                className="px-6 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-40 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 shadow-paper transition-all"
+                className="px-6 py-2 rounded-xl bg-[#C2410C] hover:bg-[#A8370A] disabled:opacity-40 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 shadow-sm transition-all cursor-pointer"
               >
                 {isProcessing ? (
                   <>
@@ -194,9 +194,9 @@ export function MarkdownToPdfTool() {
           {/* Split-Screen Markdown Editor & Live Preview */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Left: Raw Markdown Editor */}
-            <div className="rounded-3xl bg-[#12141D] border border-white/10 p-4 space-y-2 flex flex-col">
-              <div className="flex items-center justify-between text-xs text-slate-400 border-b border-white/5 pb-2">
-                <span className="font-semibold uppercase tracking-wider text-indigo-400">
+            <div className="rounded-3xl bg-white dark:bg-[#12141D] border border-zinc-200 dark:border-white/10 p-4 space-y-2 flex flex-col shadow-sm">
+              <div className="flex items-center justify-between text-xs text-zinc-600 dark:text-slate-400 border-b border-zinc-200 dark:border-white/5 pb-2">
+                <span className="font-semibold uppercase tracking-wider text-[#C2410C] dark:text-indigo-400">
                   Markdown Source Editor
                 </span>
                 <span>Supports # Headers, - Lists, Tables &amp; Quotes</span>
@@ -206,23 +206,23 @@ export function MarkdownToPdfTool() {
                 onChange={(e) => setMarkdown(e.target.value)}
                 placeholder="Type Markdown or plain text here..."
                 rows={18}
-                className="w-full h-full min-h-[360px] bg-black/40 border border-white/5 rounded-2xl p-4 text-xs font-mono text-slate-200 focus:outline-none focus:border-indigo-500/50 leading-relaxed resize-y selection:bg-indigo-500/30"
+                className="w-full h-full min-h-[360px] bg-zinc-50 dark:bg-black/40 border border-zinc-200 dark:border-white/5 rounded-2xl p-4 text-xs font-mono text-zinc-900 dark:text-slate-200 focus:outline-none focus:border-orange-500 leading-relaxed resize-y selection:bg-orange-500/20 dark:selection:bg-indigo-500/30"
               />
             </div>
 
             {/* Right: Live Simulated Layout Preview */}
-            <div className="rounded-3xl bg-[#12141D] border border-white/10 p-4 space-y-2 flex flex-col">
-              <div className="flex items-center justify-between text-xs text-slate-400 border-b border-white/5 pb-2">
-                <span className="font-semibold uppercase tracking-wider text-cyan-400">
+            <div className="rounded-3xl bg-white dark:bg-[#12141D] border border-zinc-200 dark:border-white/10 p-4 space-y-2 flex flex-col shadow-sm">
+              <div className="flex items-center justify-between text-xs text-zinc-600 dark:text-slate-400 border-b border-zinc-200 dark:border-white/5 pb-2">
+                <span className="font-semibold uppercase tracking-wider text-teal-700 dark:text-cyan-400">
                   Visual Layout Preview
                 </span>
                 <span>Page Layout Simulator</span>
               </div>
-              <div className="w-full h-full min-h-[360px] bg-white rounded-2xl p-6 text-slate-900 shadow-inner overflow-auto font-sans text-xs space-y-3">
-                <h1 className="text-xl font-bold border-b pb-2 text-slate-900">
+              <div className="w-full h-full min-h-[360px] bg-zinc-50 dark:bg-white rounded-2xl p-6 text-zinc-900 shadow-inner overflow-auto font-sans text-xs space-y-3 border border-zinc-200 dark:border-transparent">
+                <h1 className="text-xl font-bold border-b border-zinc-300 pb-2 text-zinc-950">
                   {title}
                 </h1>
-                <div className="space-y-2 whitespace-pre-wrap leading-relaxed text-[11px] text-slate-700">
+                <div className="space-y-2 whitespace-pre-wrap leading-relaxed text-[11px] text-zinc-800">
                   {markdown}
                 </div>
               </div>
@@ -238,15 +238,15 @@ export function MarkdownToPdfTool() {
 
           {/* Mobile Sticky Thumb-Zone Action Bar */}
           {!metrics && (
-            <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-safe bg-[#05060B]/90 backdrop-blur-xl border-t border-white/10 md:hidden flex items-center justify-between gap-3 shadow-2xl">
-              <div className="text-xs text-zinc-300 font-mono truncate max-w-[120px]">
+            <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-safe bg-white/95 dark:bg-[#05060B]/90 backdrop-blur-xl border-t border-zinc-200 dark:border-white/10 md:hidden flex items-center justify-between gap-3 shadow-lg">
+              <div className="text-xs text-zinc-800 dark:text-zinc-300 font-mono truncate max-w-[120px]">
                 {fontFamily} • {fontSize}pt
               </div>
               <button
                 type="button"
                 disabled={isProcessing || !markdown.trim()}
                 onClick={handleGenerate}
-                className="flex-1 py-3 px-4 rounded-xl bg-vermilion active:bg-vermilion-hover text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg disabled:opacity-40"
+                className="flex-1 py-3 px-4 rounded-xl bg-[#C2410C] active:bg-[#A8370A] text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-sm disabled:opacity-40"
               >
                 {isProcessing ? (
                   <>

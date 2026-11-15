@@ -248,7 +248,7 @@ export function ImageStudioTool() {
           {images.length > 0 && (
             <div className="space-y-6">
               {/* Segmented Hardware Mode Switcher */}
-              <div className="p-1.5 rounded-2xl glass-pill grid grid-cols-1 sm:grid-cols-3 gap-2 relative">
+              <div className="p-1.5 rounded-2xl bg-zinc-100 dark:bg-white/[0.04] border border-zinc-200 dark:border-white/10 grid grid-cols-1 sm:grid-cols-3 gap-2 relative">
                 {[
                   {
                     id: "exact-kb",
@@ -274,19 +274,19 @@ export function ImageStudioTool() {
                       onClick={() => setMode(m.id as "exact-kb" | "percentage" | "manual")}
                       className={`relative py-3 px-3.5 rounded-xl text-left transition-all cursor-pointer z-10 ${
                         isSelected
-                          ? "text-white font-semibold"
-                          : "text-zinc-400 hover:text-zinc-200"
+                          ? "text-zinc-950 dark:text-white font-semibold"
+                          : "text-zinc-700 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-200"
                       }`}
                     >
                       {isSelected && (
                         <motion.div
                           layoutId="imageStudioMode"
-                          className="absolute inset-0 rounded-xl bg-teal-600/25 border border-teal-500/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_4px_16px_rgba(20,184,166,0.25)] backdrop-blur-md"
+                          className="absolute inset-0 rounded-xl bg-white border border-zinc-300 shadow-sm dark:bg-teal-600/25 dark:border-teal-500/40"
                           transition={{ type: "spring", stiffness: 420, damping: 32 }}
                         />
                       )}
                       <div className="relative z-10 text-xs font-semibold">{m.label}</div>
-                      <div className="relative z-10 text-[10px] text-zinc-400 mt-0.5">{m.desc}</div>
+                      <div className="relative z-10 text-[10px] text-zinc-600 dark:text-zinc-400 mt-0.5">{m.desc}</div>
                     </button>
                   );
                 })}
@@ -297,7 +297,7 @@ export function ImageStudioTool() {
                 {mode === "exact-kb" && (
                   <div className="space-y-4">
                     <div>
-                      <label className="text-xs font-semibold text-slate-300 mb-2 block">
+                      <label className="text-xs font-semibold text-zinc-800 dark:text-slate-300 mb-2 block">
                         Quick Passport & Government Portal Presets
                       </label>
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
@@ -308,14 +308,14 @@ export function ImageStudioTool() {
                             onClick={() => setTargetKb(pst.kb)}
                             className={`p-2.5 rounded-xl text-left border transition-all ${
                               targetKb === pst.kb
-                                ? "bg-indigo-600/20 border-indigo-500 text-indigo-200"
-                                : "bg-white/5 border-white/10 text-slate-400 hover:text-white"
+                                ? "bg-orange-50 border-orange-400 text-orange-950 dark:bg-indigo-600/20 dark:border-indigo-500 dark:text-indigo-200"
+                                : "bg-white dark:bg-white/5 border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-slate-400 hover:text-zinc-950 dark:hover:text-white"
                             }`}
                           >
-                            <div className="text-xs font-bold text-white">
+                            <div className="text-xs font-bold text-zinc-950 dark:text-white">
                               {pst.label}
                             </div>
-                            <div className="text-[10px] text-slate-400 truncate">
+                            <div className="text-[10px] text-zinc-600 dark:text-slate-400 truncate">
                               {pst.desc}
                             </div>
                           </button>
@@ -324,7 +324,7 @@ export function ImageStudioTool() {
                     </div>
 
                     <div className="max-w-xs">
-                      <label className="text-xs font-medium text-slate-300 mb-1 block">
+                      <label className="text-xs font-medium text-zinc-800 dark:text-slate-300 mb-1 block">
                         Exact Target Size (KB)
                       </label>
                       <div className="flex items-center gap-2">
@@ -334,9 +334,9 @@ export function ImageStudioTool() {
                           max={10000}
                           value={targetKb}
                           onChange={(e) => setTargetKb(Math.max(5, Number(e.target.value)))}
-                          className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs font-mono font-bold"
+                          className="w-full px-3 py-2 rounded-xl bg-white dark:bg-black/40 border border-zinc-300 dark:border-white/10 text-zinc-950 dark:text-white text-xs font-mono font-bold"
                         />
-                        <span className="text-xs text-slate-400 font-semibold">KB</span>
+                        <span className="text-xs text-zinc-700 dark:text-slate-400 font-semibold">KB</span>
                       </div>
                     </div>
                   </div>
@@ -466,7 +466,7 @@ export function ImageStudioTool() {
                   type="button"
                   onClick={handleProcess}
                   disabled={isProcessing}
-                  className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-semibold text-sm shadow-xl shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                  className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-[#C2410C] hover:bg-[#A8370A] disabled:opacity-50 text-white font-semibold text-sm shadow-sm flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
                   {isProcessing ? (
                     <>
@@ -483,12 +483,12 @@ export function ImageStudioTool() {
               </div>
 
               {/* Mobile Thumb-Zone Sticky Action Bar */}
-              <div className="fixed bottom-0 inset-x-0 z-40 pb-safe md:hidden p-3 bg-[#05060B]/95 backdrop-blur-2xl border-t border-white/15 shadow-[0_-8px_30px_rgba(0,0,0,0.8)]">
+              <div className="fixed bottom-0 inset-x-0 z-40 pb-safe md:hidden p-3 bg-white/95 dark:bg-[#05060B]/95 backdrop-blur-2xl border-t border-zinc-200 dark:border-white/15 shadow-lg">
                 <button
                   type="button"
                   onClick={handleProcess}
                   disabled={isProcessing || images.length === 0}
-                  className="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-paper active:scale-[0.98] transition-all cursor-pointer"
+                  className="w-full py-3.5 rounded-2xl bg-[#C2410C] hover:bg-[#A8370A] disabled:opacity-50 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-all cursor-pointer"
                 >
                   {isProcessing ? (
                     <>

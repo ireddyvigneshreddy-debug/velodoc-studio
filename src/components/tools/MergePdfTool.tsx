@@ -177,27 +177,27 @@ export function MergePdfTool() {
           {files.length > 0 && (
             <div className="space-y-4">
               {/* Per-file custom page range inputs */}
-              <div className="p-5 sm:p-6 rounded-3xl premium-card space-y-3 shadow-xl">
-                <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400 block font-mono">
+              <div className="p-5 sm:p-6 rounded-3xl premium-card space-y-3 shadow-sm">
+                <span className="text-xs font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-400 block font-mono">
                   Fine-Tune Page Ranges Per File (Optional)
                 </span>
                 <div className="space-y-2">
                   {files.map((file, idx) => (
                     <div
                       key={file.id}
-                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-2xl glass-pill text-xs"
+                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-2xl bg-zinc-50 dark:bg-white/[0.04] border border-zinc-200 dark:border-white/10 text-xs"
                     >
                       <div className="truncate flex items-center gap-2">
-                        <span className="font-mono text-indigo-400 font-bold tabular-nums">
+                        <span className="font-mono text-[#C2410C] dark:text-indigo-400 font-bold tabular-nums">
                           #{idx + 1}
                         </span>
-                        <span className="text-white truncate font-medium">{file.name}</span>
-                        <span className="text-zinc-500 font-mono tabular-nums">
+                        <span className="text-zinc-950 dark:text-white truncate font-medium">{file.name}</span>
+                        <span className="text-zinc-600 dark:text-zinc-400 font-mono tabular-nums">
                           ({file.pageCount || 0} pages)
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-zinc-400 text-[11px] shrink-0 font-mono">
+                        <span className="text-zinc-700 dark:text-zinc-400 text-[11px] shrink-0 font-mono">
                           Pages:
                         </span>
                         <input
@@ -212,7 +212,7 @@ export function MergePdfTool() {
                             );
                           }}
                           placeholder={`All (e.g. 1-${file.pageCount || 5})`}
-                          className="px-3 py-1.5 rounded-xl bg-black/60 border border-white/10 text-white font-mono tabular-nums text-xs w-36 focus:outline-none focus:border-indigo-500 shadow-inner"
+                          className="px-3 py-1.5 rounded-xl bg-white dark:bg-black/60 border border-zinc-300 dark:border-white/10 text-zinc-950 dark:text-white font-mono tabular-nums text-xs w-36 focus:outline-none focus:border-orange-500 shadow-inner"
                         />
                       </div>
                     </div>
@@ -221,7 +221,7 @@ export function MergePdfTool() {
               </div>
 
               {/* Merge Actions & Interleave Toggle */}
-              <div className="p-4 sm:p-5 rounded-3xl premium-card flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+              <div className="p-4 sm:p-5 rounded-3xl premium-card flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
                 <div className="flex items-center gap-3">
                   {files.length === 2 && (
                     <button
@@ -229,15 +229,15 @@ export function MergePdfTool() {
                       onClick={() => setInterleave(!interleave)}
                       className={`px-3.5 py-2 rounded-xl text-xs font-medium flex items-center gap-1.5 border transition-all cursor-pointer ${
                         interleave
-                          ? "bg-indigo-600 border-indigo-500 text-white shadow-md shadow-indigo-600/30"
-                          : "glass-pill text-zinc-400 hover:text-white"
+                          ? "bg-[#C2410C] border-orange-600 text-white shadow-sm"
+                          : "bg-white hover:bg-zinc-100 dark:bg-white/[0.04] text-zinc-800 dark:text-zinc-300 border-zinc-200 dark:border-white/10"
                       }`}
                     >
-                      <Shuffle className="w-3.5 h-3.5 text-indigo-400" />
+                      <Shuffle className="w-3.5 h-3.5 text-[#C2410C] dark:text-indigo-400" />
                       <span>Interleave Duplex Scans</span>
                     </button>
                   )}
-                  <span className="text-xs text-zinc-400 font-mono tabular-nums">
+                  <span className="text-xs text-zinc-700 dark:text-zinc-400 font-mono tabular-nums">
                     {files.length} documents • {totalPages} pages queued
                   </span>
                 </div>
@@ -246,7 +246,7 @@ export function MergePdfTool() {
                   type="button"
                   disabled={files.length < 2 || isProcessing}
                   onClick={handleMerge}
-                  className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-vermilion hover:bg-vermilion-hover disabled:opacity-40 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-paper hover:shadow-paper hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                  className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#C2410C] hover:bg-[#A8370A] disabled:opacity-40 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-all cursor-pointer"
                 >
                   {isProcessing ? (
                     <>
@@ -266,9 +266,9 @@ export function MergePdfTool() {
 
           {/* Mobile Sticky Thumb-Zone Action Bar */}
           {files.length >= 2 && !metrics && (
-            <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-safe bg-[#05060B]/90 backdrop-blur-xl border-t border-white/10 md:hidden flex items-center justify-between gap-3 shadow-2xl">
-              <div className="text-xs text-zinc-300 font-mono">
-                <span className="font-semibold text-indigo-400">{files.length}</span> PDFs ({totalPages} p)
+            <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-safe bg-white/95 dark:bg-[#05060B]/90 backdrop-blur-xl border-t border-zinc-200 dark:border-white/10 md:hidden flex items-center justify-between gap-3 shadow-lg">
+              <div className="text-xs text-zinc-800 dark:text-zinc-300 font-mono">
+                <span className="font-semibold text-[#C2410C] dark:text-indigo-400">{files.length}</span> PDFs ({totalPages} p)
               </div>
               <button
                 type="button"

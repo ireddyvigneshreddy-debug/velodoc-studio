@@ -446,14 +446,14 @@ export function SignPdfTool() {
               <div className="lg:col-span-5 space-y-5">
                 <div className="p-5 rounded-3xl premium-card space-y-4 shadow-xl">
                   {/* Signature Mode tabs */}
-                  <div className="flex rounded-xl glass-pill p-1 text-xs">
+                  <div className="flex rounded-xl bg-zinc-100 dark:bg-white/[0.04] p-1 text-xs border border-zinc-200 dark:border-white/10">
                     <button
                       type="button"
                       onClick={() => setSigMode("draw")}
                       className={`flex-1 py-1.5 rounded-lg font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                         sigMode === "draw"
-                          ? "bg-indigo-600 text-white shadow font-semibold"
-                          : "text-zinc-400 hover:text-white"
+                          ? "bg-[#C2410C] text-white shadow-sm font-semibold"
+                          : "text-zinc-700 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white"
                       }`}
                     >
                       <PenTool className="w-3 h-3" />
@@ -464,8 +464,8 @@ export function SignPdfTool() {
                       onClick={() => setSigMode("type")}
                       className={`flex-1 py-1.5 rounded-lg font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                         sigMode === "type"
-                          ? "bg-indigo-600 text-white shadow font-semibold"
-                          : "text-zinc-400 hover:text-white"
+                          ? "bg-[#C2410C] text-white shadow-sm font-semibold"
+                          : "text-zinc-700 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white"
                       }`}
                     >
                       <Type className="w-3 h-3" />
@@ -476,8 +476,8 @@ export function SignPdfTool() {
                       onClick={() => setSigMode("upload")}
                       className={`flex-1 py-1.5 rounded-lg font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                         sigMode === "upload"
-                          ? "bg-indigo-600 text-white shadow font-semibold"
-                          : "text-zinc-400 hover:text-white"
+                          ? "bg-[#C2410C] text-white shadow-sm font-semibold"
+                          : "text-zinc-700 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white"
                       }`}
                     >
                       <ImageIcon className="w-3 h-3" />
@@ -638,32 +638,32 @@ export function SignPdfTool() {
 
                 {/* Additional Quick Stamps: Date, Text, Checkmark */}
                 <div className="p-4 rounded-3xl premium-card space-y-2.5">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 block font-mono">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-400 block font-mono">
                     Quick Annotations &amp; Stamps
                   </span>
                   <div className="grid grid-cols-3 gap-2">
                     <button
                       type="button"
                       onClick={() => handleAddTextOrStamp("date")}
-                      className="py-2 px-2.5 rounded-xl glass-pill hover:bg-white/[0.08] text-xs text-zinc-300 hover:text-white flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="py-2 px-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-white/[0.04] text-xs text-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-white/10 hover:text-zinc-950 dark:hover:text-white flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
                     >
-                      <Calendar className="w-3.5 h-3.5 text-cyan-400" />
+                      <Calendar className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
                       <span>Date</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => handleAddTextOrStamp("text")}
-                      className="py-2 px-2.5 rounded-xl glass-pill hover:bg-white/[0.08] text-xs text-zinc-300 hover:text-white flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="py-2 px-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-white/[0.04] text-xs text-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-white/10 hover:text-zinc-950 dark:hover:text-white flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
                     >
-                      <Type className="w-3.5 h-3.5 text-indigo-400" />
+                      <Type className="w-3.5 h-3.5 text-[#C2410C] dark:text-indigo-400" />
                       <span>Text</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => handleAddTextOrStamp("checkmark")}
-                      className="py-2 px-2.5 rounded-xl glass-pill hover:bg-white/[0.08] text-xs text-zinc-300 hover:text-white flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="py-2 px-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-white/[0.04] text-xs text-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-white/10 hover:text-zinc-950 dark:hover:text-white flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
                     >
-                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                       <span>Checkmark</span>
                     </button>
                   </div>
@@ -671,8 +671,8 @@ export function SignPdfTool() {
 
                 {/* Selected Annotation Scale & Controls */}
                 {selectedAnnotationId && (
-                  <div className="p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-between text-xs">
-                    <span className="text-indigo-300 font-mono text-[11px] flex items-center gap-1">
+                  <div className="p-3.5 rounded-2xl bg-orange-50 dark:bg-indigo-500/10 border border-orange-200 dark:border-indigo-500/20 flex items-center justify-between text-xs">
+                    <span className="text-orange-950 dark:text-indigo-300 font-mono text-[11px] flex items-center gap-1">
                       <Move className="w-3.5 h-3.5" />
                       <span>Drag to move • Scale:</span>
                     </span>
@@ -680,14 +680,14 @@ export function SignPdfTool() {
                       <button
                         type="button"
                         onClick={() => handleScaleAnnotation(selectedAnnotationId, 0.85)}
-                        className="px-2 py-1 rounded-lg bg-black/40 hover:bg-black/60 text-zinc-200 border border-white/10 cursor-pointer flex items-center gap-1"
+                        className="px-2 py-1 rounded-lg bg-white hover:bg-zinc-100 dark:bg-black/40 dark:hover:bg-black/60 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-white/10 cursor-pointer flex items-center gap-1 transition-colors"
                       >
                         <ZoomOut className="w-3 h-3" /> Smaller
                       </button>
                       <button
                         type="button"
                         onClick={() => handleScaleAnnotation(selectedAnnotationId, 1.15)}
-                        className="px-2 py-1 rounded-lg bg-black/40 hover:bg-black/60 text-zinc-200 border border-white/10 cursor-pointer flex items-center gap-1"
+                        className="px-2 py-1 rounded-lg bg-white hover:bg-zinc-100 dark:bg-black/40 dark:hover:bg-black/60 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-white/10 cursor-pointer flex items-center gap-1 transition-colors"
                       >
                         <ZoomIn className="w-3 h-3" /> Larger
                       </button>
@@ -700,7 +700,7 @@ export function SignPdfTool() {
                   type="button"
                   disabled={isProcessing || annotations.length === 0}
                   onClick={handleSaveDocument}
-                  className="w-full py-3.5 rounded-2xl bg-vermilion hover:bg-vermilion-hover disabled:opacity-40 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-paper transition-all cursor-pointer"
+                  className="w-full py-3.5 rounded-2xl bg-[#C2410C] hover:bg-[#A8370A] disabled:opacity-40 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
                 >
                   {isProcessing ? (
                     <>
@@ -725,21 +725,21 @@ export function SignPdfTool() {
 
               {/* Right Column: Interactive Placement Canvas */}
               <div className="lg:col-span-7 space-y-3 flex flex-col items-center">
-                <div className="flex items-center justify-between w-full text-xs text-zinc-400 px-2 font-mono">
+                <div className="flex items-center justify-between w-full text-xs text-zinc-700 dark:text-zinc-400 px-2 font-mono">
                   <span>Page {currentPage} of {totalPages}</span>
                   <div className="flex items-center gap-1.5">
                     <button
                       disabled={currentPage <= 1}
                       onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      className="p-1 rounded-lg glass-pill text-zinc-300 hover:text-white disabled:opacity-20 cursor-pointer"
+                      className="p-1 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-white/[0.04] text-zinc-800 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white border border-zinc-200 dark:border-white/10 disabled:opacity-20 cursor-pointer transition-colors"
                     >
                       <ChevronLeft className="w-3.5 h-3.5" />
                     </button>
-                    <span className="px-1 text-zinc-300">{currentPage}/{totalPages}</span>
+                    <span className="px-1 text-zinc-800 dark:text-zinc-300 font-semibold">{currentPage}/{totalPages}</span>
                     <button
                       disabled={currentPage >= totalPages}
                       onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                      className="p-1 rounded-lg glass-pill text-zinc-300 hover:text-white disabled:opacity-20 cursor-pointer"
+                      className="p-1 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-white/[0.04] text-zinc-800 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white border border-zinc-200 dark:border-white/10 disabled:opacity-20 cursor-pointer transition-colors"
                     >
                       <ChevronRight className="w-3.5 h-3.5" />
                     </button>
@@ -825,15 +825,15 @@ export function SignPdfTool() {
 
           {/* Mobile Sticky Thumb-Zone Action Bar */}
           {annotations.length > 0 && !metrics && (
-            <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-safe bg-[#05060B]/90 backdrop-blur-xl border-t border-white/10 md:hidden flex items-center justify-between gap-3 shadow-2xl">
-              <div className="text-xs text-zinc-300 font-mono">
-                <span className="font-semibold text-white">{annotations.length}</span> annotation{annotations.length > 1 ? "s" : ""}
+            <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-safe bg-white/95 dark:bg-[#05060B]/90 backdrop-blur-xl border-t border-zinc-200 dark:border-white/10 md:hidden flex items-center justify-between gap-3 shadow-lg">
+              <div className="text-xs text-zinc-800 dark:text-zinc-300 font-mono">
+                <span className="font-semibold text-zinc-950 dark:text-white">{annotations.length}</span> annotation{annotations.length > 1 ? "s" : ""}
               </div>
               <button
                 type="button"
                 disabled={isProcessing}
                 onClick={handleSaveDocument}
-                className="flex-1 py-3 px-4 rounded-xl bg-vermilion active:bg-vermilion-hover text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg disabled:opacity-40"
+                className="flex-1 py-3 px-4 rounded-xl bg-[#C2410C] active:bg-[#A8370A] text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-sm disabled:opacity-40"
               >
                 {isProcessing ? (
                   <>

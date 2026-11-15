@@ -253,28 +253,28 @@ export function ComparePdfTool() {
       {files.length >= 2 && baseDoc && (
         <div className="space-y-6 animate-in fade-in duration-200">
           {/* Base Document Selector Banner */}
-          <div className="p-4 rounded-2xl bg-[#12141D] border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#12141D] border border-zinc-200 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
+              <div className="p-2.5 rounded-xl bg-orange-50 text-[#C2410C] dark:bg-purple-500/10 dark:text-purple-400 border border-orange-200 dark:border-purple-500/20">
                 <GitCompare className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-semibold text-white text-sm">
+                <h3 className="font-semibold text-zinc-950 dark:text-white text-sm">
                   Base Reference Document:{" "}
-                  <span className="text-purple-300 font-mono">{baseDoc.name}</span>
+                  <span className="text-orange-700 dark:text-purple-300 font-mono">{baseDoc.name}</span>
                 </h3>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-zinc-600 dark:text-slate-400">
                   {baseDoc.pageCount || 1} pages • {formatFileSize(baseDoc.size)}
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400">Switch Base:</span>
+              <span className="text-xs text-zinc-700 dark:text-slate-400">Switch Base:</span>
               <select
                 value={baseDocId}
                 onChange={(e) => setBaseDocId(e.target.value)}
-                className="px-3 py-1.5 rounded-xl bg-black/60 border border-white/10 text-white text-xs font-mono focus:outline-none focus:border-purple-500"
+                className="px-3 py-1.5 rounded-xl bg-white dark:bg-black/60 border border-zinc-300 dark:border-white/10 text-zinc-950 dark:text-white text-xs font-mono focus:outline-none focus:border-orange-500"
               >
                 {files.map((f) => (
                   <option key={f.id} value={f.id}>
@@ -370,24 +370,24 @@ export function ComparePdfTool() {
           {/* Synchronized Live Viewport */}
           {hasPair && (
             <div className="space-y-4">
-              {/* Controls Toolbar with Premium Glass Specular Rim Lit Styling */}
-              <div className="p-4 sm:p-5 rounded-3xl premium-card flex flex-wrap items-center justify-between gap-4 shadow-xl text-xs">
+              {/* Controls Toolbar */}
+              <div className="p-4 sm:p-5 rounded-3xl premium-card flex flex-wrap items-center justify-between gap-4 shadow-sm text-xs">
                 <div>
-                  <h4 className="font-semibold text-white tracking-tight">
-                    Synchronized Viewport: <span className="text-purple-300">{baseDoc.name}</span>{" "}
-                    vs. <span className="text-cyan-300">{compDoc.name}</span>
+                  <h4 className="font-semibold text-zinc-950 dark:text-white tracking-tight">
+                    Synchronized Viewport: <span className="text-[#C2410C] dark:text-purple-300 font-mono">{baseDoc.name}</span>{" "}
+                    vs. <span className="text-[#1E3A5F] dark:text-cyan-300 font-mono">{compDoc.name}</span>
                   </h4>
-                  <p className="text-zinc-400 mt-1 text-[11px] flex items-center gap-1.5">
-                    {isProcessing && <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-400" />}
+                  <p className="text-zinc-600 dark:text-zinc-400 mt-1 text-[11px] flex items-center gap-1.5">
+                    {isProcessing && <Loader2 className="w-3.5 h-3.5 animate-spin text-orange-600 dark:text-cyan-400" />}
                     {errorMessage ? (
-                      <span className="text-rose-400">{errorMessage}</span>
+                      <span className="text-rose-600 dark:text-rose-400 font-medium">{errorMessage}</span>
                     ) : diffStats ? (
                       diffStats.diffPercentage > 0 ? (
-                        <span className="text-rose-400 font-mono tabular-nums font-semibold">
+                        <span className="text-rose-600 dark:text-rose-400 font-mono tabular-nums font-semibold">
                           Page {currentPage}: {diffStats.diffPercentage}% Visual Variance ({diffStats.diffPixels} altered pixels)
                         </span>
                       ) : (
-                        <span className="text-emerald-400 font-mono font-semibold">Page {currentPage}: 100% Identical</span>
+                        <span className="text-emerald-700 dark:text-emerald-400 font-mono font-semibold">Page {currentPage}: 100% Identical</span>
                       )
                     ) : (
                       "Calculating pixel diff..."
@@ -397,34 +397,34 @@ export function ComparePdfTool() {
 
                 <div className="flex items-center gap-3">
                   {/* Page Nav */}
-                  <div className="flex items-center gap-1.5 text-zinc-300 glass-pill px-2.5 py-1 rounded-xl">
+                  <div className="flex items-center gap-1.5 text-zinc-800 dark:text-zinc-300 bg-zinc-100 dark:bg-white/[0.04] border border-zinc-200 dark:border-white/10 px-2.5 py-1 rounded-xl">
                     <button
                       disabled={currentPage <= 1}
                       onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      className="p-1 rounded-lg hover:bg-white/10 text-zinc-300 disabled:opacity-25 cursor-pointer"
+                      className="p-1 rounded-lg hover:bg-zinc-200 dark:hover:bg-white/10 text-zinc-800 dark:text-zinc-300 disabled:opacity-25 cursor-pointer"
                     >
                       <ChevronLeft className="w-3.5 h-3.5" />
                     </button>
-                    <span className="font-mono tabular-nums text-xs px-1">
+                    <span className="font-mono tabular-nums text-xs px-1 font-semibold">
                       {currentPage} / {totalPages}
                     </span>
                     <button
                       disabled={currentPage >= totalPages}
                       onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                      className="p-1 rounded-lg hover:bg-white/10 text-zinc-300 disabled:opacity-25 cursor-pointer"
+                      className="p-1 rounded-lg hover:bg-zinc-200 dark:hover:bg-white/10 text-zinc-800 dark:text-zinc-300 disabled:opacity-25 cursor-pointer"
                     >
                       <ChevronRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
 
                   {/* Mode Toggle */}
-                  <div className="flex rounded-xl glass-pill p-1 text-xs">
+                  <div className="flex rounded-xl bg-zinc-100 dark:bg-white/[0.04] border border-zinc-200 dark:border-white/10 p-1 text-xs">
                     <button
                       onClick={() => setViewMode("side-by-side")}
                       className={`px-3 py-1 rounded-lg font-medium transition-all cursor-pointer ${
                         viewMode === "side-by-side"
-                          ? "bg-purple-600 text-white shadow-md shadow-purple-600/30"
-                          : "text-zinc-400 hover:text-white"
+                          ? "bg-[#C2410C] text-white shadow-sm font-semibold"
+                          : "text-zinc-700 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white"
                       }`}
                     >
                       Side-by-Side
@@ -433,8 +433,8 @@ export function ComparePdfTool() {
                       onClick={() => setViewMode("neon-diff")}
                       className={`px-3 py-1 rounded-lg font-medium transition-all cursor-pointer ${
                         viewMode === "neon-diff"
-                          ? "bg-rose-600 text-white shadow-md shadow-rose-600/30"
-                          : "text-zinc-400 hover:text-white"
+                          ? "bg-[#1E3A5F] text-white shadow-sm font-semibold"
+                          : "text-zinc-700 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white"
                       }`}
                     >
                       Visual Red Diff
@@ -444,33 +444,33 @@ export function ComparePdfTool() {
               </div>
 
               {/* Canvas Render Area */}
-              <div className="p-6 rounded-3xl bg-[#090A0F] border border-white/10 min-h-[400px] flex items-center justify-center shadow-2xl">
+              <div className="p-6 rounded-3xl bg-zinc-100 dark:bg-[#090A0F] border border-zinc-200 dark:border-white/10 min-h-[400px] flex items-center justify-center shadow-sm">
                 {viewMode === "side-by-side" ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-5xl">
                     <div className="flex flex-col items-center">
-                      <span className="text-[11px] font-bold text-slate-400 uppercase mb-2">
+                      <span className="text-[11px] font-bold text-zinc-700 dark:text-slate-400 uppercase mb-2">
                         Base Reference: {baseDoc.name}
                       </span>
-                      <div className="p-2 rounded-xl bg-black/40 border border-white/10 shadow-lg max-w-full overflow-hidden">
+                      <div className="p-2 rounded-xl bg-white dark:bg-black/40 border border-zinc-300 dark:border-white/10 shadow-sm max-w-full overflow-hidden">
                         <canvas ref={canvasARef} className="max-w-full h-auto rounded" />
                       </div>
                     </div>
 
                     <div className="flex flex-col items-center">
-                      <span className="text-[11px] font-bold text-purple-400 uppercase mb-2">
+                      <span className="text-[11px] font-bold text-[#C2410C] dark:text-purple-400 uppercase mb-2">
                         Revision: {compDoc.name}
                       </span>
-                      <div className="p-2 rounded-xl bg-black/40 border border-purple-500/30 shadow-lg max-w-full overflow-hidden">
+                      <div className="p-2 rounded-xl bg-white dark:bg-black/40 border border-zinc-300 dark:border-purple-500/30 shadow-sm max-w-full overflow-hidden">
                         <canvas ref={canvasBRef} className="max-w-full h-auto rounded" />
                       </div>
                     </div>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center max-w-xl">
-                    <span className="text-[11px] font-bold text-rose-400 uppercase mb-2">
+                    <span className="text-[11px] font-bold text-rose-700 dark:text-rose-400 uppercase mb-2">
                       Visual Neon Diff Overlay (Red/Magenta = Changed Pixels)
                     </span>
-                    <div className="p-2 rounded-2xl bg-black/40 border border-rose-500/40 shadow-paper max-w-full overflow-hidden">
+                    <div className="p-2 rounded-2xl bg-white dark:bg-black/40 border border-rose-300 dark:border-rose-500/40 shadow-sm max-w-full overflow-hidden">
                       <canvas ref={canvasDiffRef} className="max-w-full h-auto rounded-xl" />
                     </div>
                   </div>

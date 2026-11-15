@@ -152,7 +152,7 @@ export function HtmlToPdfTool() {
                 key={tmpl.id}
                 type="button"
                 onClick={() => setHtmlContent(tmpl.html)}
-                className="text-xs px-2.5 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.1] text-zinc-300 hover:text-white transition-colors"
+                className="text-xs px-2.5 py-1 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-white/[0.04] text-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-transparent transition-colors"
               >
                 {tmpl.name}
               </button>
@@ -165,7 +165,7 @@ export function HtmlToPdfTool() {
           <select
             value={pageSize}
             onChange={(e) => setPageSize(e.target.value as typeof pageSize)}
-            className="bg-zinc-900 border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-white"
+            className="bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-zinc-950 dark:text-white"
           >
             <option value="A4">A4 Paper</option>
             <option value="Letter">US Letter</option>
@@ -173,7 +173,7 @@ export function HtmlToPdfTool() {
           <select
             value={orientation}
             onChange={(e) => setOrientation(e.target.value as typeof orientation)}
-            className="bg-zinc-900 border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-white"
+            className="bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-zinc-950 dark:text-white"
           >
             <option value="portrait">Portrait</option>
             <option value="landscape">Landscape</option>
@@ -185,16 +185,16 @@ export function HtmlToPdfTool() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* HTML Editor Column */}
         <div className="lg:col-span-6 space-y-4">
-          <div className="premium-card p-5 rounded-3xl space-y-3 border border-white/[0.08]">
+          <div className="paper-card p-5 rounded-3xl space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
-                <Code className="w-4 h-4 text-indigo-400" />
-                HTML & CSS Editor
+              <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
+                <Code className="w-4 h-4 text-[#C2410C] dark:text-indigo-400" />
+                HTML &amp; CSS Editor
               </span>
               <button
                 type="button"
                 onClick={() => setHtmlContent(TEMPLATES[0].html)}
-                className="text-xs text-zinc-500 hover:text-indigo-400 flex items-center gap-1"
+                className="text-xs text-zinc-500 hover:text-orange-600 flex items-center gap-1"
               >
                 <RefreshCw className="w-3 h-3" /> Reset Code
               </button>
@@ -204,14 +204,14 @@ export function HtmlToPdfTool() {
               value={htmlContent}
               onChange={(e) => setHtmlContent(e.target.value)}
               rows={18}
-              className="w-full bg-zinc-950 font-mono text-xs text-zinc-300 border border-white/[0.08] rounded-2xl p-4 focus:outline-none focus:border-indigo-500 leading-relaxed resize-y"
+              className="w-full bg-white dark:bg-zinc-950 font-mono text-xs text-zinc-900 dark:text-zinc-300 border border-zinc-300 dark:border-white/[0.08] rounded-2xl p-4 focus:outline-none focus:border-orange-500 leading-relaxed resize-y"
               spellCheck={false}
             />
 
             <button
               type="button"
               onClick={handlePrintPdf}
-              className="w-full py-3.5 rounded-2xl bg-vermilion hover:bg-vermilion-hover text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-paper transition-all cursor-pointer"
+              className="w-full py-3.5 rounded-2xl bg-[#C2410C] hover:bg-[#A8370A] text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
             >
               <Printer className="w-4 h-4" />
               <span>Print to PDF / Save Clean Document</span>
@@ -221,13 +221,13 @@ export function HtmlToPdfTool() {
 
         {/* Live Rendered Iframe Preview */}
         <div className="lg:col-span-6 space-y-4">
-          <div className="premium-card p-5 rounded-3xl space-y-3 border border-white/[0.08]">
-            <span className="text-xs font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
-              <Eye className="w-4 h-4 text-emerald-400" />
+          <div className="paper-card p-5 rounded-3xl space-y-3">
+            <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
+              <Eye className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               Live Document Render Preview
             </span>
 
-            <div className="w-full rounded-2xl overflow-hidden border border-zinc-300 bg-white shadow-2xl min-h-[460px]">
+            <div className="w-full rounded-2xl overflow-hidden border border-zinc-300 bg-white shadow-sm min-h-[460px]">
               <iframe
                 ref={iframeRef}
                 title="HTML Preview"
@@ -240,7 +240,7 @@ export function HtmlToPdfTool() {
       </div>
 
       {/* Mobile Sticky Bar */}
-      <div className="fixed bottom-0 inset-x-0 z-40 pb-safe md:hidden bg-zinc-950/90 backdrop-blur-xl border-t border-white/[0.12] p-3 shadow-2xl">
+      <div className="fixed bottom-0 inset-x-0 z-40 pb-safe md:hidden bg-white/95 dark:bg-zinc-950/90 backdrop-blur-xl border-t border-zinc-200 dark:border-white/[0.12] p-3 shadow-lg">
         <button
           type="button"
           onClick={handlePrintPdf}

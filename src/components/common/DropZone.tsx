@@ -213,7 +213,7 @@ export function DropZone({
                 type="button"
                 onClick={handleLoadSingleSample}
                 disabled={isGeneratingSample || isGeneratingBatch}
-                className="px-3.5 py-2 rounded-xl glass-pill hover:bg-white/[0.08] text-indigo-300 hover:text-white text-xs font-medium flex items-center gap-1.5 transition-all shadow-sm cursor-pointer disabled:opacity-50"
+                className="px-3.5 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-zinc-900 dark:text-white border border-zinc-300 dark:border-charcoal-border text-xs font-medium flex items-center gap-1.5 transition-all shadow-paper cursor-pointer disabled:opacity-50"
               >
                 {isGeneratingSample ? (
                   <>
@@ -222,7 +222,7 @@ export function DropZone({
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                    <Sparkles className="w-3.5 h-3.5 text-[#C2410C] dark:text-cyan-400" />
                     <span>Load Instant Sample PDF (1x)</span>
                   </>
                 )}
@@ -234,7 +234,7 @@ export function DropZone({
                 type="button"
                 onClick={handleLoadBatchSample}
                 disabled={isGeneratingSample || isGeneratingBatch}
-                className="px-3.5 py-2 rounded-xl glass-pill hover:bg-white/[0.08] text-cyan-300 hover:text-white text-xs font-medium flex items-center gap-1.5 transition-all shadow-sm cursor-pointer disabled:opacity-50"
+                className="px-3.5 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-zinc-900 dark:text-white border border-zinc-300 dark:border-charcoal-border text-xs font-medium flex items-center gap-1.5 transition-all shadow-paper cursor-pointer disabled:opacity-50"
               >
                 {isGeneratingBatch ? (
                   <>
@@ -244,9 +244,9 @@ export function DropZone({
                 ) : (
                   <>
                     {isImageTool ? (
-                      <ImageIcon className="w-3.5 h-3.5 text-emerald-400" />
+                      <ImageIcon className="w-3.5 h-3.5 text-[#2E5A44] dark:text-emerald-400" />
                     ) : (
-                      <Layers className="w-3.5 h-3.5 text-cyan-400" />
+                      <Layers className="w-3.5 h-3.5 text-[#1E3A5F] dark:text-cyan-400" />
                     )}
                     <span>Load 10x Batch Sample</span>
                   </>
@@ -262,10 +262,10 @@ export function DropZone({
         <div className="space-y-2 pt-1">
           <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+              <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider font-mono">
                 Document Queue
               </span>
-              <span className="text-[11px] font-mono tabular-nums px-2 py-0.5 rounded-full bg-white/[0.06] border border-white/[0.09] text-zinc-300">
+              <span className="text-[11px] font-mono tabular-nums px-2 py-0.5 rounded-full bg-slate-100 text-slate-900 border border-slate-300 dark:bg-white/[0.06] dark:border-white/[0.09] dark:text-zinc-300">
                 {files.length} {files.length === 1 ? "document" : "documents"} (Max 35)
               </span>
             </div>
@@ -275,7 +275,7 @@ export function DropZone({
                 <button
                   type="button"
                   onClick={onOpenScanner}
-                  className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-medium transition-colors cursor-pointer"
+                  className="text-xs text-[#1E3A5F] dark:text-cyan-400 hover:text-[#C2410C] dark:hover:text-cyan-300 flex items-center gap-1 font-medium transition-colors cursor-pointer"
                 >
                   <Camera className="w-3 h-3" />
                   <span>+ Scan More</span>
@@ -285,7 +285,7 @@ export function DropZone({
                 <button
                   type="button"
                   onClick={onClearAll}
-                  className="text-xs text-rose-400 hover:text-rose-300 transition-colors cursor-pointer"
+                  className="text-xs text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors cursor-pointer"
                 >
                   Clear all
                 </button>
@@ -305,74 +305,74 @@ export function DropZone({
               return (
                 <div
                   key={item.id}
-                  className="flex items-center justify-between p-2.5 sm:p-3 rounded-2xl premium-card text-xs transition-all hover:border-white/[0.18]"
+                  className="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-white dark:bg-charcoal-800 border border-zinc-200 dark:border-charcoal-border text-xs transition-all hover:border-zinc-400 dark:hover:border-white/[0.18] shadow-paper"
                 >
                   <div className="flex items-center gap-2.5 overflow-hidden flex-1 min-w-0">
-                    <span className="text-[11px] font-mono tabular-nums text-zinc-500 w-5 text-right shrink-0">
+                    <span className="text-[11px] font-mono tabular-nums text-zinc-600 dark:text-zinc-500 w-5 text-right shrink-0">
                       #{index + 1}
                     </span>
-                    <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0">
+                    <div className="p-2 rounded-xl bg-orange-50 dark:bg-indigo-500/10 text-[#C2410C] dark:text-indigo-400 border border-orange-200 dark:border-indigo-500/20 shrink-0">
                       <FileText className="w-3.5 h-3.5" />
                     </div>
 
                     <div className="min-w-0 flex-1 truncate">
                       <div className="flex items-center gap-2">
-                        <p className="font-semibold text-white truncate text-xs">
+                        <p className="font-semibold text-zinc-950 dark:text-white truncate text-xs font-sans">
                           {item.name}
                         </p>
-                        <span className="text-[10px] text-zinc-400 font-mono tabular-nums">
+                        <span className="text-[10px] text-zinc-600 dark:text-zinc-400 font-mono tabular-nums">
                           {formatFileSize(item.size)}
                         </span>
 
                         {/* Live Before / After Byte Savings Pill */}
                         {hasProcessedMetrics && savedPct !== null && savedPct > 0 && (
-                          <span className="hidden sm:inline-flex items-center px-1.5 py-0.2 rounded-md bg-emerald-500/15 border border-emerald-500/25 text-emerald-300 font-mono tabular-nums text-[10px]">
+                          <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded-md bg-emerald-50 border border-emerald-300 text-emerald-950 dark:bg-emerald-500/15 dark:border-emerald-500/25 dark:text-emerald-300 font-mono tabular-nums text-[10px] font-semibold">
                             -{savedPct}% ({formatFileSize(item.processedSize!)})
                           </span>
                         )}
                       </div>
 
                       {/* Memory & Progress Status */}
-                      <div className="flex items-center gap-2 text-[11px] text-zinc-400 mt-0.5">
+                      <div className="flex items-center gap-2 text-[11px] text-zinc-600 dark:text-zinc-400 mt-0.5">
                         {item.pageCount !== undefined && (
-                          <span className="text-indigo-400 font-medium font-mono tabular-nums">
+                          <span className="text-zinc-800 dark:text-indigo-300 font-medium font-mono tabular-nums">
                             {item.pageCount} {item.pageCount === 1 ? "page" : "pages"}
                           </span>
                         )}
 
                         {item.status === "queued" && (
-                          <span className="text-zinc-500 font-mono text-[10px]">
+                          <span className="text-zinc-600 dark:text-zinc-500 font-mono text-[10px]">
                             Queued
                           </span>
                         )}
                         {item.status === "loading" && (
-                          <span className="text-amber-400 animate-pulse text-[10px] font-mono">
+                          <span className="text-amber-700 dark:text-amber-400 animate-pulse text-[10px] font-mono font-medium">
                             Reading memory...
                           </span>
                         )}
                         {item.status === "processing" && (
                           <div className="flex items-center gap-1.5">
-                            <span className="text-cyan-400 font-mono tabular-nums text-[10px]">
+                            <span className="text-zinc-800 dark:text-cyan-400 font-mono tabular-nums text-[10px] font-medium">
                               {item.progressMsg || `Optimizing ${item.progress ? `${Math.round(item.progress)}%` : "..."}`}
                             </span>
-                            <div className="w-16 h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
+                            <div className="w-16 h-1.5 rounded-full bg-zinc-200 dark:bg-white/[0.08] overflow-hidden">
                               <div
-                                className="h-full bg-gradient-to-r from-cyan-400 to-indigo-500 rounded-full transition-all duration-200"
+                                className="h-full bg-gradient-to-r from-orange-500 to-amber-500 rounded-full transition-all duration-200"
                                 style={{ width: `${Math.max(item.progress || 15, 8)}%` }}
                               />
                             </div>
                           </div>
                         )}
                         {item.status === "done" && (
-                          <span className="text-emerald-400 flex items-center gap-1 text-[10px] font-medium font-mono">
-                            <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Done
+                          <span className="text-emerald-700 dark:text-emerald-400 flex items-center gap-1 text-[10px] font-medium font-mono">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" /> Done
                           </span>
                         )}
                         {item.status === "ready" && (
-                          <span className="text-zinc-400 text-[10px] font-mono">Ready</span>
+                          <span className="text-zinc-700 dark:text-zinc-400 text-[10px] font-mono">Ready</span>
                         )}
                         {item.status === "error" && (
-                          <span className="text-rose-400 flex items-center gap-0.5 text-[10px] font-mono">
+                          <span className="text-rose-600 dark:text-rose-400 flex items-center gap-0.5 text-[10px] font-mono">
                             <AlertCircle className="w-3 h-3" /> Error
                           </span>
                         )}
@@ -389,7 +389,7 @@ export function DropZone({
                           disabled={index === 0}
                           onClick={() => onMoveFile(index, "up")}
                           aria-label="Move file up"
-                          className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.08] disabled:opacity-20 transition-colors"
+                          className="p-1 rounded-lg text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-white/[0.08] disabled:opacity-20 transition-colors"
                         >
                           <ArrowUp className="w-3 h-3" />
                         </button>
@@ -398,7 +398,7 @@ export function DropZone({
                           disabled={index === files.length - 1}
                           onClick={() => onMoveFile(index, "down")}
                           aria-label="Move file down"
-                          className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.08] disabled:opacity-20 transition-colors"
+                          className="p-1 rounded-lg text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-white/[0.08] disabled:opacity-20 transition-colors"
                         >
                           <ArrowDown className="w-3 h-3" />
                         </button>
@@ -409,7 +409,7 @@ export function DropZone({
                       type="button"
                       onClick={() => onRemoveFile(item.id)}
                       aria-label="Remove file"
-                      className="p-1 rounded-lg text-zinc-400 hover:text-rose-400 hover:bg-rose-500/15 transition-colors ml-1"
+                      className="p-1 rounded-lg text-zinc-600 hover:text-rose-600 hover:bg-rose-50 dark:text-zinc-400 dark:hover:text-rose-400 dark:hover:bg-rose-500/15 transition-colors ml-1"
                     >
                       <Trash2 className="w-3 h-3" />
                     </button>

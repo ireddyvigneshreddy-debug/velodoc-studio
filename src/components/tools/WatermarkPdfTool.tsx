@@ -282,10 +282,10 @@ export function WatermarkPdfTool() {
           {/* Left Column: Interactive Controls */}
           <div className="lg:col-span-7 space-y-6">
             {/* File info banner */}
-            <div className="p-4 rounded-2xl bg-[#12141D] border border-white/10 flex items-center justify-between">
+            <div className="p-4 rounded-2xl bg-white dark:bg-[#12141D] border border-zinc-200 dark:border-white/10 flex items-center justify-between shadow-sm">
               <div>
-                <h3 className="font-semibold text-white text-sm">{fileItem.name}</h3>
-                <p className="text-xs text-slate-400">
+                <h3 className="font-semibold text-zinc-950 dark:text-white text-sm">{fileItem.name}</h3>
+                <p className="text-xs text-zinc-600 dark:text-slate-400">
                   {formatFileSize(fileItem.size)} • {fileItem.pageCount} pages
                 </p>
               </div>
@@ -295,22 +295,22 @@ export function WatermarkPdfTool() {
                   setFileItem(null);
                   setPreviewThumbnail(null);
                 }}
-                className="text-xs text-slate-400 hover:text-white px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 transition-colors"
+                className="text-xs text-zinc-700 hover:text-zinc-950 dark:text-slate-400 dark:hover:text-white px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-white/5 border border-zinc-200 dark:border-white/10 transition-colors"
               >
                 Change PDF
               </button>
             </div>
 
             {/* Mode Switch: Text vs Image Logo */}
-            <div className="p-5 rounded-2xl bg-[#12141D] border border-white/10 space-y-4">
-              <div className="flex items-center gap-3 border-b border-white/10 pb-4">
+            <div className="p-5 rounded-2xl bg-white dark:bg-[#12141D] border border-zinc-200 dark:border-white/10 space-y-4 shadow-sm">
+              <div className="flex items-center gap-3 border-b border-zinc-200 dark:border-white/10 pb-4">
                 <button
                   type="button"
                   onClick={() => setWatermark((p) => ({ ...p, type: "text" }))}
                   className={`flex-1 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border transition-all ${
                     watermark.type === "text"
-                      ? "bg-indigo-600 text-white border-indigo-500 shadow-lg shadow-indigo-600/30"
-                      : "bg-white/5 text-slate-300 border-white/10 hover:bg-white/10"
+                      ? "bg-[#C2410C] text-white border-orange-600 shadow-sm"
+                      : "bg-zinc-100 hover:bg-zinc-200 dark:bg-white/5 text-zinc-800 dark:text-slate-300 border-zinc-200 dark:border-white/10"
                   }`}
                 >
                   <Type className="w-4 h-4" />
@@ -321,8 +321,8 @@ export function WatermarkPdfTool() {
                   onClick={() => setWatermark((p) => ({ ...p, type: "image" }))}
                   className={`flex-1 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border transition-all ${
                     watermark.type === "image"
-                      ? "bg-indigo-600 text-white border-indigo-500 shadow-lg shadow-indigo-600/30"
-                      : "bg-white/5 text-slate-300 border-white/10 hover:bg-white/10"
+                      ? "bg-[#C2410C] text-white border-orange-600 shadow-sm"
+                      : "bg-zinc-100 hover:bg-zinc-200 dark:bg-white/5 text-zinc-800 dark:text-slate-300 border-zinc-200 dark:border-white/10"
                   }`}
                 >
                   <ImageIcon className="w-4 h-4" />
@@ -333,7 +333,7 @@ export function WatermarkPdfTool() {
               {watermark.type === "text" ? (
                 <div className="space-y-4">
                   <div>
-                    <label className="text-xs font-medium text-slate-300 mb-1.5 block">
+                    <label className="text-xs font-semibold text-zinc-800 dark:text-slate-300 mb-1.5 block">
                       Quick Preset Stamps
                     </label>
                     <div className="flex flex-wrap gap-2">
@@ -350,8 +350,8 @@ export function WatermarkPdfTool() {
                           }
                           className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
                             watermark.text === pst.label
-                              ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
-                              : "bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10"
+                              ? "bg-[#C2410C] text-white shadow-sm"
+                              : "bg-white hover:bg-zinc-100 dark:bg-white/5 text-zinc-800 dark:text-slate-300 border border-zinc-200 dark:border-white/10"
                           }`}
                         >
                           {pst.label}
@@ -361,7 +361,7 @@ export function WatermarkPdfTool() {
                   </div>
 
                   <div>
-                    <label className="text-xs font-medium text-slate-300 mb-1.5 block">
+                    <label className="text-xs font-semibold text-zinc-800 dark:text-slate-300 mb-1.5 block">
                       Custom Watermark Text
                     </label>
                     <input
@@ -370,7 +370,7 @@ export function WatermarkPdfTool() {
                       onChange={(e) =>
                         setWatermark((p) => ({ ...p, text: e.target.value }))
                       }
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/10 text-white text-xs focus:outline-none focus:border-indigo-500 font-semibold"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-black/40 border border-zinc-300 dark:border-white/10 text-zinc-950 dark:text-white text-xs focus:outline-none focus:border-orange-500 font-semibold"
                       placeholder="e.g. STRICTLY CONFIDENTIAL"
                     />
                   </div>
@@ -712,7 +712,7 @@ export function WatermarkPdfTool() {
               type="button"
               onClick={handleApply}
               disabled={isProcessing}
-              className="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-semibold text-sm shadow-xl shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer"
+              className="w-full py-3.5 rounded-2xl bg-[#C2410C] hover:bg-[#A8370A] disabled:opacity-50 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
             >
               {isProcessing ? (
                 <>
@@ -730,27 +730,27 @@ export function WatermarkPdfTool() {
 
           {/* Right Column: Live Interactive First-Page Watermark Canvas */}
           <div className="lg:col-span-5 space-y-3">
-            <div className="flex items-center justify-between text-xs text-slate-400 px-1">
-              <span className="font-medium text-slate-300">Live Visual Preview (Page 1)</span>
+            <div className="flex items-center justify-between text-xs text-zinc-600 dark:text-slate-400 px-1">
+              <span className="font-medium text-zinc-900 dark:text-slate-300">Live Visual Preview (Page 1)</span>
               <span>Updates instantly</span>
             </div>
 
-            <div className="p-4 rounded-2xl bg-[#12141D] border border-white/10 flex items-center justify-center min-h-[440px] relative overflow-hidden shadow-2xl">
+            <div className="p-4 rounded-2xl bg-white dark:bg-[#12141D] border border-zinc-200 dark:border-white/10 flex items-center justify-center min-h-[440px] relative overflow-hidden shadow-sm">
               {isLoadingThumbnail ? (
-                <div className="flex flex-col items-center gap-2 text-slate-400 text-xs">
-                  <Loader2 className="w-6 h-6 animate-spin text-indigo-400" />
+                <div className="flex flex-col items-center gap-2 text-zinc-600 dark:text-slate-400 text-xs">
+                  <Loader2 className="w-6 h-6 animate-spin text-[#C2410C] dark:text-indigo-400" />
                   <span>Rendering preview canvas...</span>
                 </div>
               ) : previewThumbnail ? (
-                <div className="relative shadow-2xl rounded-lg overflow-hidden border border-white/20">
+                <div className="relative shadow-sm rounded-lg overflow-hidden border border-zinc-200 dark:border-white/20">
                   <canvas
                     ref={previewCanvasRef}
                     className="max-h-[500px] w-auto max-w-full rounded"
                   />
                 </div>
               ) : (
-                <div className="text-center text-xs text-slate-500 space-y-2">
-                  <Stamp className="w-8 h-8 mx-auto opacity-30 text-indigo-400" />
+                <div className="text-center text-xs text-zinc-500 space-y-2">
+                  <Stamp className="w-8 h-8 mx-auto opacity-30 text-[#C2410C] dark:text-indigo-400" />
                   <p>Upload a PDF to view live interactive watermark preview</p>
                 </div>
               )}
@@ -759,15 +759,15 @@ export function WatermarkPdfTool() {
 
           {/* Mobile Sticky Thumb-Zone Action Bar */}
           {fileItem && !metrics && (
-            <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-safe bg-[#05060B]/90 backdrop-blur-xl border-t border-white/10 md:hidden flex items-center justify-between gap-3 shadow-2xl">
-              <div className="text-xs text-zinc-300 font-mono truncate max-w-[120px]">
+            <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-safe bg-white/95 dark:bg-[#05060B]/90 backdrop-blur-xl border-t border-zinc-200 dark:border-white/10 md:hidden flex items-center justify-between gap-3 shadow-lg">
+              <div className="text-xs text-zinc-800 dark:text-zinc-300 font-mono truncate max-w-[120px]">
                 {watermark.text || "Watermark"}
               </div>
               <button
                 type="button"
                 onClick={handleApply}
                 disabled={isProcessing}
-                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 active:from-indigo-700 active:to-indigo-800 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg disabled:opacity-50"
+                className="flex-1 py-3 px-4 rounded-xl bg-[#C2410C] active:bg-[#A8370A] text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
               >
                 {isProcessing ? (
                   <>

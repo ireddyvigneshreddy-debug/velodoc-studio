@@ -116,7 +116,7 @@ export function ToolWorkspaceView({ tool }: ToolWorkspaceViewProps) {
         return <PresentationPdfTool />;
       default:
         return (
-          <div className="p-8 text-center text-zinc-400">
+          <div className="p-8 text-center text-zinc-700 dark:text-zinc-400 font-sans">
             Tool workspace &ldquo;{tool.name}&rdquo; not found.
           </div>
         );
@@ -127,24 +127,24 @@ export function ToolWorkspaceView({ tool }: ToolWorkspaceViewProps) {
     <div className="min-h-screen pb-20 relative">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6 relative z-10">
         {/* Navigation Breadcrumb Bar & Quick Switcher */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-4">
-          <nav className="flex items-center gap-2 text-xs text-zinc-400">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-paper-300 dark:border-charcoal-border pb-4">
+          <nav className="flex items-center gap-2 text-xs font-mono text-zinc-600 dark:text-zinc-400">
             <Link
               href="/"
-              className="hover:text-white transition-colors flex items-center gap-1.5"
+              className="text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white transition-colors flex items-center gap-1.5"
             >
               <ArrowLeft className="w-3 h-3" />
               <span>Studio Home</span>
             </Link>
-            <ChevronRight className="w-3.5 h-3.5 text-zinc-600" />
+            <ChevronRight className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-600" />
             <Link
-              href="/#all-tools"
-              className="hover:text-white transition-colors"
+              href="/#tools"
+              className="text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white transition-colors"
             >
               Catalog
             </Link>
-            <ChevronRight className="w-3.5 h-3.5 text-zinc-600" />
-            <span className="text-white font-medium">{tool.name}</span>
+            <ChevronRight className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-600" />
+            <span className="text-zinc-950 dark:text-white font-semibold">{tool.name}</span>
           </nav>
 
           {/* Quick Tool Switcher Dropdown */}
@@ -152,11 +152,11 @@ export function ToolWorkspaceView({ tool }: ToolWorkspaceViewProps) {
             <button
               type="button"
               onClick={() => setSwitcherOpen((prev) => !prev)}
-              className="glass-pill flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs text-zinc-300 hover:text-white hover:bg-white/[0.08] transition-all shadow-sm cursor-pointer"
+              className="bg-white dark:bg-charcoal-800 text-zinc-800 dark:text-zinc-100 border border-zinc-300 dark:border-charcoal-border hover:bg-zinc-100 dark:hover:bg-charcoal-700 flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium transition-all shadow-paper cursor-pointer"
             >
-              <LayoutGrid className="w-3.5 h-3.5 text-indigo-400" />
+              <LayoutGrid className="w-3.5 h-3.5 text-[#1E3A5F] dark:text-indigo-400" />
               <span>Switch Tool</span>
-              <ChevronDown className="w-3 h-3 text-zinc-400" />
+              <ChevronDown className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
             </button>
 
             {switcherOpen && (
@@ -165,12 +165,12 @@ export function ToolWorkspaceView({ tool }: ToolWorkspaceViewProps) {
                   className="fixed inset-0 z-30"
                   onClick={() => setSwitcherOpen(false)}
                 />
-                <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto rounded-2xl bg-[#0F111A] border border-white/[0.12] shadow-2xl z-40 p-2 space-y-3 animate-in fade-in zoom-in-95 duration-150 backdrop-blur-2xl">
+                <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto rounded-2xl bg-white dark:bg-[#0F111A] border border-zinc-200 dark:border-white/[0.12] shadow-paper-modal z-40 p-2 space-y-3 animate-in fade-in zoom-in-95 duration-150">
                   {/* PDF Tools Section */}
                   <div>
-                    <div className="px-3 py-1 text-[10px] font-bold text-cyan-400 uppercase tracking-wider flex items-center justify-between font-mono">
+                    <div className="px-3 py-1 text-[10px] font-bold text-zinc-700 dark:text-cyan-400 uppercase tracking-wider flex items-center justify-between font-mono">
                       <span>PDF Tools</span>
-                      <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-cyan-500/10 text-cyan-300">
+                      <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-900 dark:bg-cyan-500/10 dark:text-cyan-300 font-semibold border border-slate-200 dark:border-transparent">
                         {PDF_TOOLS.length}
                       </span>
                     </div>
@@ -186,13 +186,11 @@ export function ToolWorkspaceView({ tool }: ToolWorkspaceViewProps) {
                             }}
                             className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-left text-xs transition-all cursor-pointer ${
                               isCurrent
-                                ? "bg-indigo-600/25 text-indigo-200 font-semibold border border-indigo-500/40"
-                                : "text-zinc-300 hover:text-white hover:bg-white/[0.06]"
+                                ? "bg-orange-50 text-orange-950 font-semibold border border-orange-200 dark:bg-indigo-600/25 dark:text-indigo-200 dark:border-indigo-500/40"
+                                : "text-zinc-700 hover:text-zinc-950 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:text-white dark:hover:bg-white/[0.06]"
                             }`}
                           >
-                            <div
-                              className={`p-1 rounded-lg bg-gradient-to-br ${t.color} text-white shrink-0 shadow-sm`}
-                            >
+                            <div className="p-1 rounded-lg bg-zinc-100 dark:bg-charcoal-700 text-zinc-800 dark:text-white shrink-0 shadow-sm border border-zinc-200 dark:border-transparent">
                               <ToolIcon name={t.icon} className="w-3 h-3" />
                             </div>
                             <span className="truncate">{t.name}</span>
@@ -203,10 +201,10 @@ export function ToolWorkspaceView({ tool }: ToolWorkspaceViewProps) {
                   </div>
 
                   {/* Image Tools Section */}
-                  <div className="border-t border-white/5 pt-2">
-                    <div className="px-3 py-1 text-[10px] font-bold text-pink-400 uppercase tracking-wider flex items-center justify-between font-mono">
+                  <div className="border-t border-zinc-200 dark:border-white/5 pt-2">
+                    <div className="px-3 py-1 text-[10px] font-bold text-zinc-700 dark:text-pink-400 uppercase tracking-wider flex items-center justify-between font-mono">
                       <span>Image Tools &amp; Converters</span>
-                      <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-pink-500/10 text-pink-300">
+                      <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-900 dark:bg-pink-500/10 dark:text-pink-300 font-semibold border border-slate-200 dark:border-transparent">
                         {IMAGE_TOOLS.length}
                       </span>
                     </div>
@@ -222,13 +220,11 @@ export function ToolWorkspaceView({ tool }: ToolWorkspaceViewProps) {
                             }}
                             className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-left text-xs transition-all cursor-pointer ${
                               isCurrent
-                                ? "bg-pink-600/25 text-pink-200 font-semibold border border-pink-500/40"
-                                : "text-zinc-300 hover:text-white hover:bg-white/[0.06]"
+                                ? "bg-orange-50 text-orange-950 font-semibold border border-orange-200 dark:bg-pink-600/25 dark:text-pink-200 dark:border-pink-500/40"
+                                : "text-zinc-700 hover:text-zinc-950 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:text-white dark:hover:bg-white/[0.06]"
                             }`}
                           >
-                            <div
-                              className={`p-1 rounded-lg bg-gradient-to-br ${t.color} text-white shrink-0 shadow-sm`}
-                            >
+                            <div className="p-1 rounded-lg bg-zinc-100 dark:bg-charcoal-700 text-zinc-800 dark:text-white shrink-0 shadow-sm border border-zinc-200 dark:border-transparent">
                               <ToolIcon name={t.icon} className="w-3 h-3" />
                             </div>
                             <span className="truncate">{t.name}</span>
@@ -243,59 +239,59 @@ export function ToolWorkspaceView({ tool }: ToolWorkspaceViewProps) {
           </div>
         </div>
 
-        {/* Tool Header Banner with Specular Rim Lighting */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 p-6 sm:p-7 rounded-3xl premium-card shadow-2xl relative overflow-hidden">
+        {/* Tool Header Banner */}
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 p-6 sm:p-7 rounded-2xl bg-white dark:bg-charcoal-800 border border-zinc-200 dark:border-charcoal-border shadow-paper relative overflow-hidden">
           <div className="flex items-start sm:items-center gap-4">
             <div
-              className={`p-3.5 rounded-2xl bg-gradient-to-br ${tool.color} text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_8px_20px_rgba(99,102,241,0.35)] shrink-0`}
+              className={`p-3.5 rounded-xl bg-orange-50 text-[#C2410C] border border-orange-200 dark:bg-gradient-to-br ${tool.color} dark:text-white shrink-0`}
             >
               <ToolIcon name={tool.icon} className="w-7 h-7" />
             </div>
 
             <div>
               <div className="flex flex-wrap items-center gap-2.5 mb-1">
-                <h1 className="text-xl sm:text-2xl font-bold text-white tracking-[-0.03em]">
+                <h1 className="text-xl sm:text-2xl font-bold text-zinc-950 dark:text-white tracking-[-0.03em]">
                   {tool.name}
                 </h1>
-                <span className="text-[11px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-white/[0.05] border border-white/[0.09] text-zinc-400 font-mono">
+                <span className="text-[11px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-white/[0.05] border border-slate-300 dark:border-white/[0.09] text-slate-900 dark:text-zinc-300 font-mono">
                   {tool.category}
                 </span>
                 {tool.badge && (
-                  <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 font-mono">
+                  <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-orange-50 dark:bg-orange-500/15 border border-orange-300 dark:border-orange-500/30 text-orange-950 dark:text-orange-300 font-mono">
                     {tool.badge}
                   </span>
                 )}
               </div>
 
-              <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl leading-normal">
+              <p className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 max-w-2xl leading-normal font-sans">
                 {tool.description}
               </p>
             </div>
           </div>
 
-          <div className="shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium font-mono tabular-nums">
-            <ShieldCheck className="w-4 h-4 shrink-0 text-emerald-400" />
+          <div className="shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/20 text-emerald-950 dark:text-emerald-300 text-xs font-medium font-mono tabular-nums">
+            <ShieldCheck className="w-4 h-4 shrink-0 text-[#2E5A44] dark:text-emerald-400" />
             <span className="hidden sm:inline">100% In-Browser Sandbox</span>
             <span className="sm:hidden">100% Private</span>
           </div>
         </div>
 
         {/* Visual 1 -> 2 -> 3 Step Guide Bar */}
-        <div className="flex items-center justify-between max-w-xl mx-auto px-4 py-2 rounded-2xl glass-pill text-xs shadow-inner">
-          <div className="flex items-center gap-1.5 font-semibold text-emerald-400">
-            <span className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-[10px] font-bold font-mono">1</span>
+        <div className="flex items-center justify-between max-w-xl mx-auto px-4 py-2 rounded-xl bg-white dark:bg-charcoal-800 border border-zinc-200 dark:border-charcoal-border text-xs shadow-paper">
+          <div className="flex items-center gap-1.5 font-semibold text-zinc-900 dark:text-zinc-100">
+            <span className="w-5 h-5 rounded-full bg-[#EDF5F2] dark:bg-[#143A2F]/40 border border-[#C4DFD5] dark:border-[#143A2F] text-[#2E5A44] dark:text-[#6ee7b7] flex items-center justify-center text-[10px] font-bold font-mono">1</span>
             <span className="hidden sm:inline">Select or Scan Files</span>
             <span className="sm:hidden">1. Select</span>
           </div>
-          <ChevronRight className="w-3.5 h-3.5 text-zinc-600" />
-          <div className="flex items-center gap-1.5 font-semibold text-indigo-300">
-            <span className="w-5 h-5 rounded-full bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-[10px] font-bold font-mono">2</span>
+          <ChevronRight className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-600" />
+          <div className="flex items-center gap-1.5 font-medium text-zinc-600 dark:text-zinc-400">
+            <span className="w-5 h-5 rounded-full bg-zinc-100 dark:bg-charcoal-700 border border-zinc-300 dark:border-charcoal-border text-zinc-700 dark:text-zinc-300 flex items-center justify-center text-[10px] font-bold font-mono">2</span>
             <span className="hidden sm:inline">Pick Your Option</span>
             <span className="sm:hidden">2. Options</span>
           </div>
-          <ChevronRight className="w-3.5 h-3.5 text-zinc-600" />
-          <div className="flex items-center gap-1.5 font-semibold text-cyan-300">
-            <span className="w-5 h-5 rounded-full bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-[10px] font-bold font-mono">3</span>
+          <ChevronRight className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-600" />
+          <div className="flex items-center gap-1.5 font-medium text-zinc-600 dark:text-zinc-400">
+            <span className="w-5 h-5 rounded-full bg-zinc-100 dark:bg-charcoal-700 border border-zinc-300 dark:border-charcoal-border text-zinc-700 dark:text-zinc-300 flex items-center justify-center text-[10px] font-bold font-mono">3</span>
             <span className="hidden sm:inline">Preview &amp; Save</span>
             <span className="sm:hidden">3. Save</span>
           </div>

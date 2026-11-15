@@ -244,19 +244,19 @@ export function SplitPdfTool() {
           ) : (
             <div className="space-y-6">
               {/* Header Configuration Panel */}
-              <div className="p-5 sm:p-6 rounded-3xl premium-card space-y-4 shadow-xl">
-                <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 border-b border-white/[0.08] pb-4">
+              <div className="p-5 sm:p-6 rounded-3xl premium-card space-y-4 shadow-sm">
+                <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 border-b border-zinc-200 dark:border-white/[0.08] pb-4">
                   <div>
-                    <h3 className="font-semibold text-white text-base">
+                    <h3 className="font-semibold text-zinc-950 dark:text-white text-base">
                       {fileItem.name}
                     </h3>
-                    <p className="text-xs text-zinc-400 mt-0.5 font-mono tabular-nums">
+                    <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5 font-mono tabular-nums">
                       {thumbnails.length} total pages • {splitMode === "visual-scissors" ? `${splitPoints.size} cut dividers active (${splitPoints.size + 1} segments)` : "Choose split mode"}
                     </p>
                   </div>
 
                   {/* Mode Selector Tabs */}
-                  <div className="flex flex-wrap rounded-2xl glass-pill p-1 text-xs">
+                  <div className="flex flex-wrap rounded-2xl bg-zinc-100 dark:bg-white/[0.04] p-1 text-xs border border-zinc-200 dark:border-white/10">
                     {[
                       { id: "visual-scissors", label: "✂️ Visual Scissors" },
                       { id: "extract", label: "Extract Pages" },
@@ -279,8 +279,8 @@ export function SplitPdfTool() {
                         }
                         className={`px-3 py-1.5 rounded-xl font-medium transition-all cursor-pointer ${
                           splitMode === m.id
-                            ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md font-semibold"
-                            : "text-zinc-400 hover:text-white"
+                            ? "bg-[#C2410C] text-white shadow-sm font-semibold"
+                            : "text-zinc-700 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white"
                         }`}
                       >
                         {m.label}
@@ -291,22 +291,22 @@ export function SplitPdfTool() {
 
                 {/* Sub-mode parameters */}
                 {splitMode === "visual-scissors" && (
-                  <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/20 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
-                      <Scissors className="w-4 h-4 text-amber-400 shrink-0" />
-                      <span className="text-amber-200">
-                        Click any glowing divider between pages below to place or remove a split cut.
+                      <Scissors className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                      <span className="text-amber-950 dark:text-amber-200 font-medium">
+                        Click any divider between pages below to place or remove a split cut.
                       </span>
                     </div>
                     {splitPoints.size > 0 && (
                       <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-mono text-zinc-300 bg-black/40 px-2 py-1 rounded-lg border border-white/10">
+                        <span className="text-[11px] font-mono text-zinc-800 dark:text-zinc-300 bg-white dark:bg-black/40 px-2 py-1 rounded-lg border border-zinc-300 dark:border-white/10">
                           {visualRanges}
                         </span>
                         <button
                           type="button"
                           onClick={() => setSplitPoints(new Set())}
-                          className="text-[11px] text-zinc-400 hover:text-rose-400 underline cursor-pointer"
+                          className="text-[11px] text-zinc-600 dark:text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 underline cursor-pointer"
                         >
                           Clear Cuts
                         </button>
@@ -316,7 +316,7 @@ export function SplitPdfTool() {
                 )}
 
                 {splitMode === "every-n" && (
-                  <div className="flex items-center gap-3 text-xs text-zinc-300">
+                  <div className="flex items-center gap-3 text-xs text-zinc-800 dark:text-zinc-300">
                     <span>Split document into chunks of:</span>
                     <input
                       type="number"
@@ -326,7 +326,7 @@ export function SplitPdfTool() {
                       onChange={(e) =>
                         setEveryNCount(Math.max(1, parseInt(e.target.value) || 1))
                       }
-                      className="w-20 px-3 py-1.5 rounded-xl bg-black/60 border border-white/10 text-white font-mono text-center focus:outline-none focus:border-amber-500"
+                      className="w-20 px-3 py-1.5 rounded-xl bg-white dark:bg-black/60 border border-zinc-300 dark:border-white/10 text-zinc-950 dark:text-white font-mono text-center focus:outline-none focus:border-orange-500"
                     />
                     <span>pages per file</span>
                   </div>
@@ -334,7 +334,7 @@ export function SplitPdfTool() {
 
                 {splitMode === "custom-ranges" && (
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-zinc-300 block">
+                    <label className="text-xs font-semibold text-zinc-800 dark:text-zinc-300 block">
                       Custom Page Ranges (semicolon or comma separated)
                     </label>
                     <input
@@ -342,7 +342,7 @@ export function SplitPdfTool() {
                       value={customRangeText}
                       onChange={(e) => setCustomRangeText(e.target.value)}
                       placeholder="e.g. 1-3; 4-6; 7-10"
-                      className="w-full px-3 py-2 rounded-xl bg-black/60 border border-white/10 text-white font-mono text-xs focus:outline-none focus:border-amber-500"
+                      className="w-full px-3 py-2 rounded-xl bg-white dark:bg-black/60 border border-zinc-300 dark:border-white/10 text-zinc-950 dark:text-white font-mono text-xs focus:outline-none focus:border-orange-500"
                     />
                     <div className="flex items-center gap-2 pt-1">
                       <input
@@ -350,9 +350,9 @@ export function SplitPdfTool() {
                         id="merge-ranges"
                         checked={mergeRanges}
                         onChange={(e) => setMergeRanges(e.target.checked)}
-                        className="rounded accent-amber-500"
+                        className="rounded accent-orange-600"
                       />
-                      <label htmlFor="merge-ranges" className="text-xs text-zinc-400 cursor-pointer">
+                      <label htmlFor="merge-ranges" className="text-xs text-zinc-600 dark:text-zinc-400 cursor-pointer">
                         Merge all specified ranges into a single continuous PDF (instead of separate ZIP files)
                       </label>
                     </div>
@@ -360,8 +360,8 @@ export function SplitPdfTool() {
                 )}
 
                 {/* Primary Action Button */}
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-white/[0.08]">
-                  <span className="text-xs text-zinc-400 font-mono">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-zinc-200 dark:border-white/[0.08]">
+                  <span className="text-xs text-zinc-600 dark:text-zinc-400 font-mono">
                     {splitMode === "visual-scissors" && `${splitPoints.size + 1} output documents will be packaged in ZIP`}
                     {splitMode === "burst-all" && `Every page (${thumbnails.length}) extracted as individual PDF in ZIP`}
                     {splitMode === "extract" && `${selectedIndices.size} pages selected for extraction`}
@@ -400,17 +400,17 @@ export function SplitPdfTool() {
               {/* Interactive Visual Page Cards Grid with Scissors Dividers */}
               <div className="space-y-4">
                 {isLoadingThumbnails && (
-                  <div className="p-8 text-center text-zinc-400 font-mono text-xs flex items-center justify-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
+                  <div className="p-8 text-center text-zinc-600 dark:text-zinc-400 font-mono text-xs flex items-center justify-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin text-[#C2410C] dark:text-amber-400" />
                     <span>Rendering page cards...</span>
                   </div>
                 )}
                 <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-400 font-mono">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-800 dark:text-zinc-400 font-mono">
                     Visual Page Cards ({thumbnails.length} Pages)
                   </h4>
                   {splitMode === "visual-scissors" && (
-                    <span className="text-[11px] text-amber-400 font-mono">
+                    <span className="text-[11px] text-[#C2410C] dark:text-amber-400 font-mono font-semibold">
                       ✂️ Click the divider between cards to cut
                     </span>
                   )}
@@ -428,26 +428,26 @@ export function SplitPdfTool() {
                           onClick={() => {
                             if (splitMode === "extract") handleToggleSelect(index);
                           }}
-                          className={`group relative rounded-2xl overflow-hidden border transition-all duration-200 premium-card flex flex-col ${
+                          className={`group relative rounded-2xl overflow-hidden border transition-all duration-200 paper-card flex flex-col ${
                             splitMode === "extract"
                               ? isSelected
-                                ? "border-amber-500 shadow-paper ring-2 ring-amber-500/50 cursor-pointer"
-                                : "border-white/10 hover:border-white/25 cursor-pointer"
-                              : "border-white/10 hover:border-white/20 cursor-default"
+                                ? "border-orange-500 shadow-sm ring-2 ring-orange-500/50 cursor-pointer"
+                                : "border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/25 cursor-pointer"
+                              : "border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 cursor-default"
                           }`}
                         >
                           {/* Header Badge */}
-                          <div className="flex items-center justify-between px-2.5 py-1.5 bg-black/40 border-b border-white/5 text-[11px] font-medium text-zinc-300">
+                          <div className="flex items-center justify-between px-2.5 py-1.5 bg-zinc-100 dark:bg-black/40 border-b border-zinc-200 dark:border-white/5 text-[11px] font-medium text-zinc-800 dark:text-zinc-300">
                             <span className="font-mono">Page {thumb.pageNumber}</span>
                             {splitMode === "extract" && isSelected && (
-                              <span className="flex items-center gap-1 text-[10px] text-amber-400 font-bold uppercase tracking-wider">
+                              <span className="flex items-center gap-1 text-[10px] text-orange-600 dark:text-amber-400 font-bold uppercase tracking-wider">
                                 <CheckCircle2 className="w-3 h-3" /> Selected
                               </span>
                             )}
                           </div>
 
                           {/* Thumbnail */}
-                          <div className="relative aspect-[1/1.35] w-full bg-[#05060B] p-2 flex items-center justify-center overflow-hidden">
+                          <div className="relative aspect-[1/1.35] w-full bg-zinc-100 dark:bg-[#05060B] p-2 flex items-center justify-center overflow-hidden">
                             <Image
                               src={thumb.dataUrl}
                               alt={`Page ${thumb.pageNumber}`}
@@ -467,11 +467,11 @@ export function SplitPdfTool() {
                               onClick={() => toggleSplitPoint(index)}
                               className={`w-full py-1.5 px-3 rounded-xl border flex items-center justify-center gap-2 text-xs transition-all cursor-pointer font-mono ${
                                 isCutAfter
-                                  ? "bg-amber-500/20 border-amber-400 text-amber-300 shadow-paper ring-1 ring-amber-400"
-                                  : "bg-white/[0.02] border-dashed border-white/15 text-zinc-400 hover:text-white hover:border-amber-400/50 hover:bg-amber-500/5"
+                                  ? "bg-orange-50 dark:bg-amber-500/20 border-orange-300 dark:border-amber-400 text-orange-950 dark:text-amber-300 shadow-sm ring-1 ring-orange-400 dark:ring-amber-400 font-semibold"
+                                  : "bg-white dark:bg-white/[0.02] border-dashed border-zinc-300 dark:border-white/15 text-zinc-700 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:border-orange-400/50 hover:bg-orange-50/50"
                               }`}
                             >
-                              <Scissors className={`w-3.5 h-3.5 ${isCutAfter ? "text-amber-400 animate-pulse" : ""}`} />
+                              <Scissors className={`w-3.5 h-3.5 ${isCutAfter ? "text-orange-600 dark:text-amber-400 animate-pulse" : ""}`} />
                               <span>
                                 {isCutAfter
                                   ? `✂️ Split Breakpoint: End of Segment (Page ${thumb.pageNumber} | Page ${thumb.pageNumber + 1})`
@@ -490,15 +490,15 @@ export function SplitPdfTool() {
 
           {/* Mobile Sticky Thumb-Zone Action Bar */}
           {fileItem && !metrics && (
-            <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-safe bg-[#05060B]/90 backdrop-blur-xl border-t border-white/10 md:hidden flex items-center justify-between gap-3 shadow-2xl">
-              <div className="text-xs text-zinc-300 font-mono">
-                <span className="font-semibold text-amber-400 capitalize">{splitMode.replace("-", " ")}</span>
+            <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-safe bg-white/95 dark:bg-[#05060B]/90 backdrop-blur-xl border-t border-zinc-200 dark:border-white/10 md:hidden flex items-center justify-between gap-3 shadow-lg">
+              <div className="text-xs text-zinc-800 dark:text-zinc-300 font-mono">
+                <span className="font-semibold text-[#C2410C] dark:text-amber-400 capitalize">{splitMode.replace("-", " ")}</span>
               </div>
               <button
                 type="button"
                 disabled={isProcessing}
                 onClick={handleProcess}
-                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 active:from-amber-600 active:to-amber-700 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg disabled:opacity-40"
+                className="flex-1 py-3 px-4 rounded-xl bg-[#C2410C] active:bg-[#A8370A] text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-sm disabled:opacity-40"
               >
                 {isProcessing ? (
                   <>

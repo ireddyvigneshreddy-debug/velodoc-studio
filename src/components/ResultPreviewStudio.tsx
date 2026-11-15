@@ -292,26 +292,26 @@ export function ResultPreviewStudio({
   }, [isImage, currentOutputBytes, outputMimeType]);
 
   return (
-    <div className="w-full premium-card rounded-3xl overflow-hidden shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+    <div className="w-full bg-white dark:bg-charcoal-800 border border-zinc-200 dark:border-charcoal-border rounded-2xl overflow-hidden shadow-paper relative animate-in fade-in zoom-in-95 duration-200">
       {/* 1. TOP TELEMETRY & ACCURACY METRICS BAR */}
-      <div className="p-4 sm:p-5 bg-gradient-to-r from-white/[0.04] via-white/[0.02] to-white/[0.04] border-b border-white/[0.08]">
+      <div className="p-4 sm:p-5 bg-paper-100/50 dark:bg-white/[0.02] border-b border-zinc-200 dark:border-white/[0.08]">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
           {/* Title & Editable Filename */}
           <div className="space-y-1.5">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="p-1.5 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 shadow-sm">
+              <span className="p-1.5 rounded-xl bg-emerald-50 text-[#2E5A44] border border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/25 shadow-sm">
                 <Sparkles className="w-4 h-4" />
               </span>
-              <h3 className="text-sm sm:text-base font-bold text-white tracking-[-0.02em]">
+              <h3 className="text-sm sm:text-base font-bold text-zinc-950 dark:text-white tracking-[-0.02em] font-sans">
                 {title}
               </h3>
               {hasMultipleBatch && (
-                <span className="text-[11px] font-mono tabular-nums px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                <span className="text-[11px] font-mono tabular-nums px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-900 border border-slate-300 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-indigo-500/30 font-medium">
                   {batchItems.length}-Document Batch
                 </span>
               )}
               {activeMetrics.targetAccuracy && (
-                <span className="text-[11px] font-mono tabular-nums px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/25">
+                <span className="text-[11px] font-mono tabular-nums px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-950 border border-emerald-300 dark:bg-cyan-500/10 dark:text-cyan-300 dark:border-cyan-500/25 font-semibold">
                   {activeMetrics.targetAccuracy}
                 </span>
               )}
@@ -325,24 +325,24 @@ export function ResultPreviewStudio({
                     type="text"
                     value={filename}
                     onChange={(e) => setFilename(e.target.value)}
-                    className="px-2.5 py-0.5 rounded-lg bg-black/60 border border-indigo-500 text-xs text-white font-mono focus:outline-none"
+                    className="px-2.5 py-0.5 rounded-lg bg-white dark:bg-black/60 border border-[#C2410C] dark:border-indigo-500 text-xs text-zinc-950 dark:text-white font-mono focus:outline-none"
                     autoFocus
                   />
                   <button
                     onClick={() => setIsEditingName(false)}
-                    className="p-1 rounded bg-indigo-600 text-white hover:bg-indigo-500 cursor-pointer"
+                    className="p-1 rounded bg-[#C2410C] text-white hover:bg-[#9A3412] cursor-pointer"
                   >
                     <Check className="w-3 h-3" />
                   </button>
                 </div>
               ) : (
                 <div className="flex items-center gap-2 group">
-                  <span className="text-xs text-zinc-300 font-mono truncate max-w-[280px] sm:max-w-md">
+                  <span className="text-xs text-zinc-700 dark:text-zinc-300 font-mono truncate max-w-[280px] sm:max-w-md font-medium">
                     {filename}
                   </span>
                   <button
                     onClick={() => setIsEditingName(true)}
-                    className="text-zinc-500 hover:text-white transition-colors cursor-pointer"
+                    className="text-zinc-500 hover:text-zinc-950 dark:hover:text-white transition-colors cursor-pointer"
                     title="Rename Output File"
                   >
                     <Edit2 className="w-3 h-3" />
@@ -354,50 +354,50 @@ export function ResultPreviewStudio({
 
           {/* Telemetry Metric Badges with Monospace Tabular Figures */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full lg:w-auto">
-            <div className="px-3.5 py-2 rounded-2xl glass-pill">
-              <span className="text-[10px] text-zinc-400 block uppercase font-medium">
+            <div className="px-3.5 py-2 rounded-xl bg-white dark:bg-charcoal-700/50 border border-zinc-200 dark:border-charcoal-border shadow-paper">
+              <span className="text-[10px] text-zinc-600 dark:text-zinc-400 block uppercase font-medium font-mono">
                 Original Size
               </span>
-              <span className="text-xs sm:text-sm font-semibold text-white font-mono tabular-nums block">
+              <span className="text-xs sm:text-sm font-semibold text-zinc-950 dark:text-white font-mono tabular-nums block">
                 {formatFileSize(activeMetrics.originalSize)}
               </span>
             </div>
 
-            <div className="px-3.5 py-2 rounded-2xl glass-pill">
-              <span className="text-[10px] text-zinc-400 block uppercase font-medium">
+            <div className="px-3.5 py-2 rounded-xl bg-white dark:bg-charcoal-700/50 border border-zinc-200 dark:border-charcoal-border shadow-paper">
+              <span className="text-[10px] text-zinc-600 dark:text-zinc-400 block uppercase font-medium font-mono">
                 Output Size
               </span>
-              <span className="text-xs sm:text-sm font-semibold text-indigo-300 font-mono tabular-nums block">
+              <span className="text-xs sm:text-sm font-semibold text-[#C2410C] dark:text-indigo-300 font-mono tabular-nums block">
                 {formatFileSize(activeMetrics.processedSize)}
               </span>
             </div>
 
             {/* Animated Savings Ring / Badge */}
-            <div className="px-3.5 py-2 rounded-2xl glass-pill relative overflow-hidden">
-              <span className="text-[10px] text-zinc-400 block uppercase font-medium flex items-center gap-1">
-                <TrendingDown className="w-3 h-3 text-emerald-400" />
+            <div className="px-3.5 py-2 rounded-xl bg-white dark:bg-charcoal-700/50 border border-zinc-200 dark:border-charcoal-border shadow-paper relative overflow-hidden">
+              <span className="text-[10px] text-zinc-600 dark:text-zinc-400 block uppercase font-medium flex items-center gap-1 font-mono">
+                <TrendingDown className="w-3 h-3 text-[#2E5A44] dark:text-emerald-400" />
                 {isSaving ? "Saved" : "Ratio"}
               </span>
               <div className="flex items-center gap-1.5">
                 <span
                   className={`text-xs sm:text-sm font-bold font-mono tabular-nums block ${
-                    isSaving ? "text-emerald-400" : "text-zinc-300"
+                    isSaving ? "text-[#2E5A44] dark:text-emerald-400" : "text-zinc-900 dark:text-zinc-300"
                   }`}
                 >
                   {isSaving ? `-${activeMetrics.savedPercentage}%` : "Optimized"}
                 </span>
                 {isSaving && (
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                  <span className="w-2 h-2 rounded-full bg-[#2E5A44] dark:bg-emerald-400 animate-pulse shrink-0" />
                 )}
               </div>
             </div>
 
-            <div className="px-3.5 py-2 rounded-2xl glass-pill">
-              <span className="text-[10px] text-zinc-400 block uppercase font-medium flex items-center gap-1">
-                <Clock className="w-3 h-3 text-cyan-400" />
+            <div className="px-3.5 py-2 rounded-xl bg-white dark:bg-charcoal-700/50 border border-zinc-200 dark:border-charcoal-border shadow-paper">
+              <span className="text-[10px] text-zinc-600 dark:text-zinc-400 block uppercase font-medium flex items-center gap-1 font-mono">
+                <Clock className="w-3 h-3 text-[#1E3A5F] dark:text-cyan-400" />
                 Speed
               </span>
-              <span className="text-xs sm:text-sm font-semibold text-cyan-300 font-mono tabular-nums block">
+              <span className="text-xs sm:text-sm font-semibold text-zinc-950 dark:text-cyan-300 font-mono tabular-nums block">
                 {formatTimeMs(activeMetrics.durationMs)}
               </span>
             </div>
@@ -597,13 +597,13 @@ export function ResultPreviewStudio({
       </div>
 
       {/* 3. BOTTOM ACTION & CHAINING TOOLBAR */}
-      <div className="p-4 bg-white/[0.02] border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="p-4 bg-paper-100/40 dark:bg-white/[0.02] border-t border-zinc-200 dark:border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-3">
         {/* Left: Adjust Settings & Re-Run */}
         <div className="flex items-center gap-2.5 w-full sm:w-auto">
           <button
             type="button"
             onClick={onAdjustSettings}
-            className="w-full sm:w-auto px-4 py-2 rounded-xl glass-pill hover:bg-white/[0.08] text-zinc-300 hover:text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer"
+            className="w-full sm:w-auto px-4 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-zinc-800 hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white border border-zinc-300 dark:border-charcoal-border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-paper cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Adjust Settings &amp; Re-Run</span>

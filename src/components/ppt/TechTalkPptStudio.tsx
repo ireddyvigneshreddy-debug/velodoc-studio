@@ -428,8 +428,8 @@ export function TechTalkPptStudio() {
                   onClick={() => setAssessmentType(type)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border cursor-pointer ${
                     assessmentType === type
-                      ? "bg-amber-500 text-black border-amber-400 shadow-md font-bold"
-                      : "bg-white/[0.03] border-white/[0.08] text-zinc-300 hover:border-amber-500/40 hover:text-white"
+                      ? "bg-[#C2410C] text-white border-orange-600 shadow-sm font-bold"
+                      : "bg-zinc-100 hover:bg-zinc-200 dark:bg-white/[0.03] border-zinc-200 dark:border-white/[0.08] text-zinc-800 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white"
                   }`}
                 >
                   {type}
@@ -444,22 +444,22 @@ export function TechTalkPptStudio() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Student Name */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider block">
-                  Student Full Name <span className="text-rose-400">*</span>
+                <label className="text-xs font-semibold text-zinc-800 dark:text-zinc-300 uppercase tracking-wider block">
+                  Student Full Name <span className="text-rose-600 dark:text-rose-400">*</span>
                 </label>
                 <input
                   type="text"
                   value={studentName}
                   onChange={(e) => setStudentName(e.target.value)}
                   placeholder="Enter your full name"
-                  className={`w-full bg-zinc-900 border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-zinc-500 focus:outline-none transition-colors ${
+                  className={`w-full bg-white dark:bg-zinc-900 border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-zinc-950 dark:text-white placeholder-zinc-500 focus:outline-none transition-colors ${
                     isNameMissing
                       ? "border-rose-500 ring-1 ring-rose-500"
-                      : "border-white/[0.1] focus:border-amber-500"
+                      : "border-zinc-300 dark:border-white/[0.1] focus:border-orange-500"
                   }`}
                 />
                 {isNameMissing && (
-                  <span className="text-[11px] text-rose-400 block font-medium">
+                  <span className="text-[11px] text-rose-600 dark:text-rose-400 block font-medium">
                     Name is required.
                   </span>
                 )}
@@ -467,22 +467,22 @@ export function TechTalkPptStudio() {
 
               {/* Roll Number */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider block">
-                  Student Roll Number <span className="text-rose-400">*</span>
+                <label className="text-xs font-semibold text-zinc-800 dark:text-zinc-300 uppercase tracking-wider block">
+                  Student Roll Number <span className="text-rose-600 dark:text-rose-400">*</span>
                 </label>
                 <input
                   type="text"
                   value={rollNumber}
                   onChange={(e) => setRollNumber(e.target.value.toUpperCase())}
                   placeholder="e.g., 26951A67XX"
-                  className={`w-full bg-zinc-900 border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-mono font-semibold uppercase text-amber-300 placeholder-zinc-500 focus:outline-none transition-colors ${
+                  className={`w-full bg-white dark:bg-zinc-900 border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-mono font-semibold uppercase text-zinc-950 dark:text-amber-300 placeholder-zinc-500 focus:outline-none transition-colors ${
                     isRollMissing
                       ? "border-rose-500 ring-1 ring-rose-500"
-                      : "border-white/[0.1] focus:border-amber-500"
+                      : "border-zinc-300 dark:border-white/[0.1] focus:border-orange-500"
                   }`}
                 />
                 {isRollMissing && (
-                  <span className="text-[11px] text-rose-400 block font-medium">
+                  <span className="text-[11px] text-rose-600 dark:text-rose-400 block font-medium">
                     Roll number is required.
                   </span>
                 )}
@@ -490,22 +490,22 @@ export function TechTalkPptStudio() {
 
               {/* Branch */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider block">
-                  Branch / Dept <span className="text-rose-400">*</span>
+                <label className="text-xs font-semibold text-zinc-800 dark:text-zinc-300 uppercase tracking-wider block">
+                  Branch / Dept <span className="text-rose-600 dark:text-rose-400">*</span>
                 </label>
                 <input
                   type="text"
                   value={branch}
                   onChange={(e) => setBranch(e.target.value)}
                   placeholder="e.g., CSE or CSD"
-                  className={`w-full bg-zinc-900 border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-zinc-500 focus:outline-none transition-colors ${
+                  className={`w-full bg-white dark:bg-zinc-900 border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-zinc-950 dark:text-white placeholder-zinc-500 focus:outline-none transition-colors ${
                     isBranchMissing
                       ? "border-rose-500 ring-1 ring-rose-500"
-                      : "border-white/[0.1] focus:border-amber-500"
+                      : "border-zinc-300 dark:border-white/[0.1] focus:border-orange-500"
                   }`}
                 />
                 {isBranchMissing && (
-                  <span className="text-[11px] text-rose-400 block font-medium">
+                  <span className="text-[11px] text-rose-600 dark:text-rose-400 block font-medium">
                     Branch is required.
                   </span>
                 )}
@@ -513,22 +513,22 @@ export function TechTalkPptStudio() {
 
               {/* Subject */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider block">
-                  Subject / Course Name <span className="text-rose-400">*</span>
+                <label className="text-xs font-semibold text-zinc-800 dark:text-zinc-300 uppercase tracking-wider block">
+                  Subject / Course Name <span className="text-rose-600 dark:text-rose-400">*</span>
                 </label>
                 <input
                   type="text"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                   placeholder="e.g., Essentials of Problem Solving"
-                  className={`w-full bg-zinc-900 border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-zinc-500 focus:outline-none transition-colors ${
+                  className={`w-full bg-white dark:bg-zinc-900 border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-zinc-950 dark:text-white placeholder-zinc-500 focus:outline-none transition-colors ${
                     isSubjectMissing
                       ? "border-rose-500 ring-1 ring-rose-500"
-                      : "border-white/[0.1] focus:border-amber-500"
+                      : "border-zinc-300 dark:border-white/[0.1] focus:border-orange-500"
                   }`}
                 />
                 {isSubjectMissing && (
-                  <span className="text-[11px] text-rose-400 block font-medium">
+                  <span className="text-[11px] text-rose-600 dark:text-rose-400 block font-medium">
                     Subject is required.
                   </span>
                 )}
@@ -537,7 +537,7 @@ export function TechTalkPptStudio() {
 
             {/* Quick Branch Select Chips */}
             <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
-              <span className="text-[11px] text-zinc-400 font-medium mr-1 font-mono">
+              <span className="text-[11px] text-zinc-600 dark:text-zinc-400 font-medium mr-1 font-mono">
                 Quick Branch:
               </span>
               {BRANCH_QUICK_CHIPS.map((chip) => {
@@ -549,8 +549,8 @@ export function TechTalkPptStudio() {
                     onClick={() => setBranch(chip)}
                     className={`px-2.5 py-1 rounded-lg text-xs font-mono font-semibold transition-all border cursor-pointer ${
                       isSelected
-                        ? "bg-amber-500 text-black border-amber-400 font-bold shadow-sm"
-                        : "bg-white/[0.04] text-zinc-300 border-white/[0.08] hover:border-amber-500/40 hover:text-white"
+                        ? "bg-[#C2410C] text-white border-orange-600 font-bold shadow-sm"
+                        : "bg-white hover:bg-zinc-100 dark:bg-white/[0.04] text-zinc-800 dark:text-zinc-300 border-zinc-200 dark:border-white/[0.08] hover:border-orange-500/40 hover:text-zinc-950 dark:hover:text-white"
                     }`}
                   >
                     {chip}
@@ -561,22 +561,22 @@ export function TechTalkPptStudio() {
 
             {/* Row 3: Topic Title */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider block">
-                Presentation Topic Title <span className="text-rose-400">*</span>
+              <label className="text-xs font-semibold text-zinc-800 dark:text-zinc-300 uppercase tracking-wider block">
+                Presentation Topic Title <span className="text-rose-600 dark:text-rose-400">*</span>
               </label>
               <input
                 type="text"
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
                 placeholder="e.g., Bagging and Boosting Fine-Tuning for Ensemble Learning"
-                className={`w-full bg-zinc-950 border rounded-2xl px-4 py-3 text-base sm:text-sm text-white placeholder-zinc-500 focus:outline-none font-medium shadow-inner transition-colors ${
+                className={`w-full bg-white dark:bg-zinc-950 border rounded-2xl px-4 py-3 text-base sm:text-sm text-zinc-950 dark:text-white placeholder-zinc-500 focus:outline-none font-medium shadow-sm transition-colors ${
                   isTopicMissing
                     ? "border-rose-500 ring-1 ring-rose-500"
-                    : "border-white/[0.1] focus:border-amber-500"
+                    : "border-zinc-300 dark:border-white/[0.1] focus:border-orange-500"
                 }`}
               />
               {isTopicMissing && (
-                <span className="text-[11px] text-rose-400 block font-medium">
+                <span className="text-[11px] text-rose-600 dark:text-rose-400 block font-medium">
                   Topic title is required.
                 </span>
               )}
@@ -584,7 +584,7 @@ export function TechTalkPptStudio() {
 
             {/* Row 4: Topic Details / Syllabus / Abstract */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider block">
+              <label className="text-xs font-semibold text-zinc-800 dark:text-zinc-300 uppercase tracking-wider block">
                 Topic Syllabus, Subtopics or Abstract (Optional)
               </label>
               <textarea
@@ -592,12 +592,12 @@ export function TechTalkPptStudio() {
                 onChange={(e) => setDetails(e.target.value)}
                 rows={3}
                 placeholder="Paste your topic syllabus, subtopics, or abstract here..."
-                className="w-full bg-zinc-950 border border-white/[0.1] rounded-2xl p-4 text-xs sm:text-sm text-zinc-300 placeholder-zinc-500 focus:outline-none focus:border-amber-500 leading-relaxed resize-y shadow-inner"
+                className="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-white/[0.1] rounded-2xl p-4 text-xs sm:text-sm text-zinc-950 dark:text-zinc-300 placeholder-zinc-500 focus:outline-none focus:border-orange-500 leading-relaxed resize-y shadow-sm"
               />
             </div>
 
             {/* Row 5: Institutional Crest & Custom Logo Uploader */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-zinc-50 dark:bg-white/[0.02] border border-zinc-200 dark:border-white/[0.06]">
               <div className="flex items-center gap-3.5">
                 {activeLogo ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
@@ -610,12 +610,12 @@ export function TechTalkPptStudio() {
                   <IareEmblem className="w-14 h-14 shrink-0" size={56} />
                 )}
                 <div>
-                  <span className="text-xs font-semibold text-white block">
+                  <span className="text-xs font-semibold text-zinc-950 dark:text-white block">
                     {customLogoBase64
                       ? "Custom College Logo Active"
                       : "Official High-DPI IARE Circular Emblem Active"}
                   </span>
-                  <span className="text-[11px] text-zinc-400 block">
+                  <span className="text-[11px] text-zinc-600 dark:text-zinc-400 block">
                     Rendered in pure high resolution onto Title Cover and exported
                     .pptx &amp; .pdf files.
                   </span>
@@ -633,9 +633,9 @@ export function TechTalkPptStudio() {
                 <button
                   type="button"
                   onClick={() => logoInputRef.current?.click()}
-                  className="px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.1] text-xs text-zinc-200 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="px-3 py-1.5 rounded-xl bg-white hover:bg-zinc-100 dark:bg-white/[0.05] dark:hover:bg-white/[0.1] border border-zinc-200 dark:border-white/[0.1] text-xs text-zinc-800 dark:text-zinc-200 hover:text-zinc-950 dark:hover:text-white transition-all flex items-center gap-1.5 cursor-pointer"
                 >
-                  <Upload className="w-3.5 h-3.5 text-amber-400" />
+                  <Upload className="w-3.5 h-3.5 text-orange-600 dark:text-amber-400" />
                   <span>Upload Custom Logo</span>
                 </button>
 
@@ -643,7 +643,7 @@ export function TechTalkPptStudio() {
                   <button
                     type="button"
                     onClick={handleResetLogo}
-                    className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition-all cursor-pointer"
+                    className="p-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 transition-all cursor-pointer"
                     title="Reset to default IARE circular crest"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
@@ -655,8 +655,8 @@ export function TechTalkPptStudio() {
             {/* Row 6: Slide Count & Submit Action */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
               <div className="flex items-center gap-3">
-                <span className="text-xs font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
-                  <Layers className="w-3.5 h-3.5 text-amber-400" />
+                <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <Layers className="w-3.5 h-3.5 text-orange-600 dark:text-amber-400" />
                   Slide Count:
                 </span>
                 <div className="flex items-center gap-1.5">
@@ -667,8 +667,8 @@ export function TechTalkPptStudio() {
                       onClick={() => setSlideCount(cnt)}
                       className={`px-3 py-1 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
                         slideCount === cnt
-                          ? "bg-amber-500 text-black border-amber-400 font-bold shadow-sm"
-                          : "bg-white/[0.03] text-zinc-400 border-white/[0.08] hover:text-white"
+                          ? "bg-[#C2410C] text-white border-orange-600 font-bold shadow-sm"
+                          : "bg-zinc-100 hover:bg-zinc-200 dark:bg-white/[0.03] text-zinc-800 dark:text-zinc-400 border border-zinc-200 dark:border-white/[0.08] hover:text-zinc-950 dark:hover:text-white"
                       }`}
                     >
                       {cnt} {cnt === 13 && "(IARE Default)"}
@@ -682,7 +682,7 @@ export function TechTalkPptStudio() {
                 type="button"
                 onClick={handleGenerateDeck}
                 disabled={isGenerating}
-                className="w-full sm:w-auto px-8 py-3.5 rounded-lg bg-vermilion hover:bg-vermilion-hover text-white font-mono uppercase tracking-wider font-semibold text-xs sm:text-sm flex items-center justify-center gap-2.5 transition-colors shadow-paper cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-lg bg-[#C2410C] hover:bg-[#9A3412] text-white font-mono uppercase tracking-wider font-semibold text-xs sm:text-sm flex items-center justify-center gap-2.5 transition-colors shadow-paper cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isGenerating ? (
                   <>
@@ -713,7 +713,7 @@ export function TechTalkPptStudio() {
               <p className="text-xs sm:text-sm text-ink-secondary dark:text-paper-400 leading-relaxed font-sans">
                 Enter your authentic topic, full name, roll number, engineering
                 branch, and subject above, then click{" "}
-                <strong className="text-vermilion">
+                <strong className="text-[#C2410C]">
                   &ldquo;Generate Presentation&rdquo;
                 </strong>{" "}
                 to build your OBE-compliant 13-slide IARE deck with speaker notes.
@@ -721,19 +721,19 @@ export function TechTalkPptStudio() {
             </div>
             <div className="pt-2 flex items-center justify-center gap-6 text-xs text-ink-muted flex-wrap font-mono">
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-vermilion" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#C2410C]" />
                 13 Official Master Slides
               </span>
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-vermilion" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#C2410C]" />
                 Cover + INDEX + 8 ALL CAPS Core
               </span>
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-vermilion" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#C2410C]" />
                 Embedded Verbal Speaker Notes
               </span>
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-vermilion" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#C2410C]" />
                 Direct .PPTX &amp; .PDF Download
               </span>
             </div>
@@ -744,21 +744,21 @@ export function TechTalkPptStudio() {
         {presentation && currentSlide && (
           <div className="space-y-6 animate-in fade-in duration-300">
             {/* Action Bar Above Canvas */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-white/[0.08]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-paper-300 dark:border-charcoal-border">
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xs font-mono font-bold text-amber-400">
+                  <span className="text-xs font-mono font-bold text-[#B45309] dark:text-amber-400">
                     SLIDE {activeSlideIndex + 1} OF {presentation.slides.length}
                   </span>
-                  <span className="text-zinc-600">•</span>
-                  <span className="text-xs text-zinc-400 uppercase tracking-wider font-semibold">
+                  <span className="text-zinc-400 dark:text-zinc-600">•</span>
+                  <span className="text-xs text-zinc-600 dark:text-zinc-400 uppercase tracking-wider font-semibold">
                     Layout: {currentSlide.layout}
                   </span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-950 border border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30 font-bold">
                     IARE Master Active
                   </span>
                 </div>
-                <h3 className="text-base sm:text-lg font-bold text-white truncate max-w-xl">
+                <h3 className="text-base sm:text-lg font-bold text-zinc-950 dark:text-white truncate max-w-xl font-sans">
                   {presentation.topic}
                 </h3>
               </div>
@@ -769,7 +769,7 @@ export function TechTalkPptStudio() {
                   type="button"
                   onClick={handleExportPptx}
                   disabled={isExportingPptx}
-                  className="px-4 py-2 rounded-lg bg-vermilion hover:bg-vermilion-hover text-white font-mono uppercase tracking-wider font-semibold text-xs flex items-center gap-2 transition-colors cursor-pointer shadow-paper disabled:opacity-50"
+                  className="px-4 py-2 rounded-lg bg-[#C2410C] hover:bg-[#9A3412] text-white font-mono uppercase tracking-wider font-semibold text-xs flex items-center gap-2 transition-colors cursor-pointer shadow-paper disabled:opacity-50"
                   title="Export PowerPoint (.pptx) with speaker notes"
                 >
                   {isExportingPptx ? (
@@ -784,7 +784,7 @@ export function TechTalkPptStudio() {
                   type="button"
                   onClick={handleExportPdf}
                   disabled={isExportingPdf}
-                  className="px-4 py-2 rounded-lg bg-ink-primary hover:bg-black text-white dark:bg-charcoal-700 dark:hover:bg-charcoal-600 font-mono uppercase tracking-wider font-semibold text-xs flex items-center gap-2 transition-colors cursor-pointer shadow-paper disabled:opacity-50"
+                  className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-black text-white dark:bg-charcoal-700 dark:hover:bg-charcoal-600 font-mono uppercase tracking-wider font-semibold text-xs flex items-center gap-2 transition-colors cursor-pointer shadow-paper disabled:opacity-50"
                   title="Export 16:9 PDF Presentation Deck"
                 >
                   {isExportingPdf ? (
@@ -801,7 +801,7 @@ export function TechTalkPptStudio() {
                   className="px-3.5 py-2 rounded-lg bg-paper-100 hover:bg-paper-200 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 border border-paper-300 dark:border-charcoal-border text-ink-primary dark:text-white font-mono text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-paper"
                   title="Download Speaker Script for your phone"
                 >
-                  <Copy className="w-3.5 h-3.5 text-vermilion" />
+                  <Copy className="w-3.5 h-3.5 text-[#C2410C]" />
                   <span>Speech Notes (.md)</span>
                 </button>
 
@@ -811,7 +811,7 @@ export function TechTalkPptStudio() {
                     setPresentation(null);
                     setHasAttemptedSubmit(false);
                   }}
-                  className="text-xs text-zinc-400 hover:text-white px-3 py-2 rounded-lg hover:bg-white/[0.06] transition-colors cursor-pointer"
+                  className="text-xs text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white px-3 py-2 rounded-lg hover:bg-paper-200 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
                 >
                   New Deck
                 </button>
@@ -1026,7 +1026,7 @@ export function TechTalkPptStudio() {
                 type="button"
                 disabled={activeSlideIndex <= 0}
                 onClick={() => setActiveSlideIndex((i) => Math.max(0, i - 1))}
-                className="p-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 disabled:opacity-30 shrink-0 cursor-pointer"
+                className="p-2 rounded-xl bg-paper-100 hover:bg-paper-200 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] text-zinc-700 dark:text-zinc-300 border border-paper-300 dark:border-transparent disabled:opacity-30 shrink-0 cursor-pointer"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
@@ -1039,8 +1039,8 @@ export function TechTalkPptStudio() {
                     onClick={() => setActiveSlideIndex(idx)}
                     className={`px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all border cursor-pointer ${
                       activeSlideIndex === idx
-                        ? "bg-amber-500 border-amber-400 text-black font-bold shadow-lg"
-                        : "bg-white/[0.02] border-white/[0.06] text-zinc-400 hover:border-white/[0.12]"
+                        ? "bg-[#C2410C] border-orange-600 text-white font-bold shadow-sm"
+                        : "bg-paper-100 dark:bg-white/[0.02] border-paper-300 dark:border-white/[0.06] text-zinc-700 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white hover:border-paper-400 dark:hover:border-white/[0.12]"
                     }`}
                   >
                     <span>{idx + 1}. </span>
@@ -1059,7 +1059,7 @@ export function TechTalkPptStudio() {
                     Math.min(presentation.slides.length - 1, i + 1)
                   )
                 }
-                className="p-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 disabled:opacity-30 shrink-0 cursor-pointer"
+                className="p-2 rounded-xl bg-paper-100 hover:bg-paper-200 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] text-zinc-700 dark:text-zinc-300 border border-paper-300 dark:border-transparent disabled:opacity-30 shrink-0 cursor-pointer"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -1068,22 +1068,22 @@ export function TechTalkPptStudio() {
             {/* Slide Editor & Verbal Stage Speaker Script Notes Drawer */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Quick Slide Content Editor */}
-              <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.08] space-y-3">
+              <div className="p-4 rounded-2xl bg-paper-100/60 dark:bg-white/[0.02] border border-paper-300 dark:border-white/[0.08] space-y-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider block">
+                  <label className="text-xs font-semibold text-zinc-800 dark:text-zinc-300 uppercase tracking-wider block font-sans">
                     Edit Slide Title
                   </label>
                   <input
                     type="text"
                     value={currentSlide.title}
                     onChange={(e) => handleUpdateSlideTitle(e.target.value)}
-                    className="w-full bg-zinc-950 border border-white/[0.1] rounded-xl px-3 py-2 text-xs sm:text-sm text-white font-medium focus:outline-none focus:border-amber-500"
+                    className="w-full bg-white dark:bg-zinc-950 border border-paper-300 dark:border-white/[0.1] rounded-xl px-3 py-2 text-xs sm:text-sm text-zinc-950 dark:text-white font-medium focus:outline-none focus:border-[#C2410C] dark:focus:border-amber-500 shadow-paper"
                   />
                 </div>
 
                 {currentSlide.layout === "paragraph" && (
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider block">
+                    <label className="text-xs font-semibold text-zinc-800 dark:text-zinc-300 uppercase tracking-wider block font-sans">
                       Edit Paragraph Text
                     </label>
                     <textarea
@@ -1096,7 +1096,7 @@ export function TechTalkPptStudio() {
                         handleUpdateSlideParagraph(e.target.value)
                       }
                       rows={4}
-                      className="w-full bg-zinc-950 border border-white/[0.1] rounded-xl p-3 text-xs sm:text-sm text-zinc-200 focus:outline-none focus:border-amber-500 leading-relaxed resize-y"
+                      className="w-full bg-white dark:bg-zinc-950 border border-paper-300 dark:border-white/[0.1] rounded-xl p-3 text-xs sm:text-sm text-zinc-900 dark:text-zinc-200 focus:outline-none focus:border-[#C2410C] dark:focus:border-amber-500 leading-relaxed resize-y shadow-paper"
                     />
                   </div>
                 )}
@@ -1104,14 +1104,14 @@ export function TechTalkPptStudio() {
                 {(currentSlide.layout === "bullets" ||
                   currentSlide.layout === "index") && (
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider block">
+                    <label className="text-xs font-semibold text-zinc-800 dark:text-zinc-300 uppercase tracking-wider block font-sans">
                       Edit Slide Points (One per line)
                     </label>
                     <textarea
                       value={(currentSlide.bulletPoints || []).join("\n")}
                       onChange={(e) => handleUpdateSlideBullets(e.target.value)}
                       rows={5}
-                      className="w-full bg-zinc-950 border border-white/[0.1] rounded-xl p-3 text-xs sm:text-sm text-zinc-200 focus:outline-none focus:border-amber-500 leading-relaxed resize-y font-mono"
+                      className="w-full bg-white dark:bg-zinc-950 border border-paper-300 dark:border-white/[0.1] rounded-xl p-3 text-xs sm:text-sm text-zinc-900 dark:text-zinc-200 focus:outline-none focus:border-[#C2410C] dark:focus:border-amber-500 leading-relaxed resize-y font-mono shadow-paper"
                     />
                   </div>
                 )}

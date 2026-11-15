@@ -66,9 +66,9 @@ export function ThumbnailGrid({
     <div className="w-full space-y-4">
       {/* Top Helper Toolbar (Select/Deselect/Range selection for Remove & Split) */}
       {(mode === "remove" || mode === "select") && (
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3.5 rounded-2xl premium-card text-xs">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-white dark:bg-charcoal-800 border border-zinc-200 dark:border-charcoal-border shadow-paper text-xs">
           <div className="flex items-center gap-2">
-            <span className="text-zinc-400 font-mono tabular-nums">
+            <span className="text-zinc-700 dark:text-zinc-300 font-mono tabular-nums font-medium">
               {mode === "remove"
                 ? `${selectedIndices.size} of ${thumbnails.length} pages marked for removal`
                 : `${selectedIndices.size} of ${thumbnails.length} pages selected`}
@@ -77,14 +77,14 @@ export function ThumbnailGrid({
               <button
                 type="button"
                 onClick={selectAll}
-                className="px-2.5 py-1 rounded-xl glass-pill hover:bg-white/[0.08] text-zinc-300 hover:text-white transition-colors cursor-pointer"
+                className="px-2.5 py-1 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-zinc-800 hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white border border-zinc-300 dark:border-charcoal-border transition-colors cursor-pointer font-medium"
               >
                 Select All
               </button>
               <button
                 type="button"
                 onClick={deselectAll}
-                className="px-2.5 py-1 rounded-xl glass-pill hover:bg-white/[0.08] text-zinc-300 hover:text-white transition-colors cursor-pointer"
+                className="px-2.5 py-1 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-zinc-800 hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white border border-zinc-300 dark:border-charcoal-border transition-colors cursor-pointer font-medium"
               >
                 Deselect All
               </button>
@@ -93,17 +93,17 @@ export function ThumbnailGrid({
 
           {onApplyRange && (
             <form onSubmit={handleApplyRange} className="flex items-center gap-2">
-              <span className="text-zinc-400 hidden md:inline font-mono text-[11px]">Select range:</span>
+              <span className="text-zinc-600 dark:text-zinc-400 hidden md:inline font-mono text-[11px]">Select range:</span>
               <input
                 type="text"
                 value={rangeInput}
                 onChange={(e) => setRangeInput(e.target.value)}
                 placeholder="e.g. 1, 3-5, 8"
-                className="px-2.5 py-1 rounded-xl bg-black/40 border border-white/10 text-white placeholder-zinc-500 focus:outline-none focus:border-indigo-500 text-xs w-32 font-mono tabular-nums shadow-inner"
+                className="px-2.5 py-1 rounded-lg bg-white dark:bg-charcoal-900 border border-zinc-300 dark:border-charcoal-border text-zinc-950 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-[#C2410C] text-xs w-32 font-mono tabular-nums shadow-inner"
               />
               <button
                 type="submit"
-                className="px-3 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition-colors cursor-pointer"
+                className="px-3 py-1 rounded-lg bg-[#C2410C] hover:bg-[#9A3412] text-white font-medium transition-colors cursor-pointer font-mono"
               >
                 Apply
               </button>
