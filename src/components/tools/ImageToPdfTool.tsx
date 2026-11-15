@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { DropZone } from "@/components/common/DropZone";
 import { ResultPreviewStudio } from "@/components/ResultPreviewStudio";
-import { CameraScannerModal } from "@/components/CameraScannerModal";
 import { FileArrangerGrid, ArrangerItem } from "@/components/common/FileArrangerGrid";
 import { ProcessingMetrics } from "@/types";
 import { convertImagesToPdf, ImagesToPdfOptions } from "@/lib/pdf-engine";
@@ -11,7 +10,6 @@ import {
   FileImage,
   CircleNotch,
   AlertCircle,
-  Camera,
   Maximize2,
   Layers,
   Check,
@@ -40,9 +38,6 @@ export function ImageToPdfTool() {
   const [outputBytes, setOutputBytes] = useState<Uint8Array | null>(null);
   const [originalBytes, setOriginalBytes] = useState<ArrayBuffer | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  // Pro Camera Scanner Studio State
-  const [isScannerOpen, setIsScannerOpen] = useState(false);
 
   // Eliminate Async Race-Condition Scrambling using Promise.all over indexed promises
   const handleFilesAdded = useCallback(async (newFiles: File[]) => {
@@ -102,13 +97,6 @@ export function ImageToPdfTool() {
         handleFilesAdded([file]);
       }
     }
-
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get("scan") === "true" || params.get("camera") === "true") {
-        setIsScannerOpen(true);
-      }
-    }
   }, [handleFilesAdded]);
 
   const handleRemove = (id: string) => {
@@ -143,7 +131,7 @@ export function ImageToPdfTool() {
 
   const handleConvert = async () => {
     if (images.length === 0) {
-      setErrorMessage("Please upload or scan at least one image.");
+      setErrorMessage("Please upload at least one image.");
       return;
     }
 
@@ -215,7 +203,7 @@ export function ImageToPdfTool() {
 
       sessionHistory.recordExecution({
         toolId: "image-to-pdf",
-        toolName: "Images & Camera to PDF",
+        toolName: "Images to PDF",
         inputFiles: images.map((i) => i.name),
         outputFileName: filename,
         outputSizeBytes: pdfBytes.byteLength,
@@ -232,90 +220,8 @@ export function ImageToPdfTool() {
     }
   };
 
-  const handleInstantGeneratePdf = async (scannedFiles: File[]) => {
-    if (scannedFiles.length === 0) return;
-    setIsProcessing(true);
-    setErrorMessage(null);
-    const startTime = performance.now();
-
-    try {
-      const imageInputs = [];
-      let totalOriginalSize = 0;
-
-      for (const file of scannedFiles) {
-        totalOriginalSize += file.size;
-        const buf = await file.arrayBuffer();
-        imageInputs.push({
-          file,
-          buffer: buf,
-          type: file.type || "image/jpeg",
-          rotation: 0,
-        });
-      }
-
-      const options: ImagesToPdfOptions = {
-        pageSize: "fit-image",
-        layoutMode: "fit-image",
-        margin: "none",
-        targetSizeKb: targetKbEnabled && targetKb > 0 ? targetKb : undefined,
-      };
-
-      const pdfBytes = await convertImagesToPdf(imageInputs, options);
-      const endTime = performance.now();
-      const durationMs = endTime - startTime;
-
-      const blob = createPdfBlob(pdfBytes);
-      const downloadUrl = URL.createObjectURL(blob);
-      const filename = `Camera_Scan_${new Date().toISOString().slice(0, 10)}.pdf`;
-
-      setOutputBytes(pdfBytes);
-      if (imageInputs.length > 0) {
-        setOriginalBytes(imageInputs[0].buffer);
-      }
-
-      setMetrics({
-        originalSize: totalOriginalSize,
-        processedSize: pdfBytes.byteLength,
-        savedBytes: 0,
-        savedPercentage: 0,
-        durationMs: Math.round(durationMs),
-        downloadUrl,
-        downloadFilename: filename,
-        pageCount: scannedFiles.length,
-        targetAccuracy: "Zero-Border Full Bleed",
-      });
-
-      sessionHistory.recordExecution({
-        toolId: "image-to-pdf",
-        toolName: "Images & Camera to PDF",
-        inputFiles: scannedFiles.map((f) => f.name),
-        outputFileName: filename,
-        outputSizeBytes: pdfBytes.byteLength,
-        durationMs: Math.round(durationMs),
-        outputData: pdfBytes,
-      });
-
-      await handleFilesAdded(scannedFiles);
-    } catch (err: unknown) {
-      console.error("Instant PDF generation error:", err);
-      setErrorMessage(
-        err instanceof Error ? err.message : "Failed to generate PDF from camera scans."
-      );
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
   return (
     <div className="space-y-6">
-      {/* Pro Camera Scanner Modal */}
-      <CameraScannerModal
-        isOpen={isScannerOpen}
-        onClose={() => setIsScannerOpen(false)}
-        onAddScansToQueue={handleFilesAdded}
-        onInstantGeneratePdf={handleInstantGeneratePdf}
-      />
-
       {metrics ? (
         <ResultPreviewStudio
           metrics={metrics}
@@ -326,51 +232,21 @@ export function ImageToPdfTool() {
         />
       ) : (
         <>
-          {/* Pro Camera Banner */}
-          <div className="paper-card p-4 sm:p-5 rounded-xl bg-white dark:bg-charcoal-800 border border-paper-300 dark:border-charcoal-border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-lg bg-[#FEF3C7] dark:bg-[#B45309]/20 text-[#B45309] dark:text-[#fde68a] border border-[#FDE68A] dark:border-[#B45309]/30 flex items-center justify-center shrink-0">
-                <Camera className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2 mb-0.5">
-                  <h3 className="text-sm font-semibold text-zinc-950 dark:text-white">
-                    4K Pro Camera &amp; Document Scanner
-                  </h3>
-                  <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-300 uppercase">
-                    Rapid Batch
-                  </span>
-                </div>
-                <p className="text-xs text-zinc-600 dark:text-zinc-400 max-w-md">
-                  Snap documents, ID cards, and homework pages with automatic boundary cropping, contrast filters, and multi-shot batching.
-                </p>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setIsScannerOpen(true)}
-              className="px-4 py-2.5 rounded-lg bg-[#C2410C] hover:bg-[#A8370A] text-white font-mono text-xs font-medium flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
-            >
-              <Camera className="w-4 h-4" />
-              <span>Scan with Camera</span>
-            </button>
-          </div>
-
-          {/* Dropzone only shown when queue is empty */}
+          {/* Dropzone shown when queue is empty */}
           {images.length === 0 && (
             <DropZone
               files={[]}
               onFilesAdded={handleFilesAdded}
               onRemoveFile={() => {}}
-              onOpenScanner={() => setIsScannerOpen(true)}
               acceptedFileTypes={{
                 "image/jpeg": [".jpg", ".jpeg"],
                 "image/png": [".png"],
                 "image/webp": [".webp"],
+                "image/gif": [".gif"],
+                "image/bmp": [".bmp"],
               }}
               multiple={true}
-              title="Drop JPG, PNG, or WebP Photos (Up to 30 Files)"
+              title="Drop JPG, PNG, WebP, GIF, or BMP Photos (Up to 30+ Files)"
               subtitle="Zero white borders default • Order is preserved automatically • Instant Smart Arranger"
             />
           )}
@@ -586,8 +462,15 @@ export function ImageToPdfTool() {
                 onRemove={handleRemove}
                 onDuplicate={handleDuplicate}
                 onAddMore={handleFilesAdded}
+                acceptedFileTypes={{
+                  "image/jpeg": [".jpg", ".jpeg"],
+                  "image/png": [".png"],
+                  "image/webp": [".webp"],
+                  "image/gif": [".gif"],
+                  "image/bmp": [".bmp"],
+                }}
                 itemTypeLabel="Photo"
-                subtitle="Drag cards to rearrange, use Smart Sort pills (1, 2, 10 or capture time), or rotate sideways camera photos."
+                subtitle="Drag cards to rearrange, use Smart Sort pills (1, 2, 10 or capture time), or rotate sideways photos."
               />
 
               {errorMessage && (

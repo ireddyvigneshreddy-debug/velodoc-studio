@@ -47,6 +47,7 @@ function getToolFamilyTheme(tool: ToolDefinition) {
 
   if (
     tool.id === "image-to-pdf" ||
+    tool.id === "camera-to-pdf" ||
     tool.id === "pdf-to-image" ||
     tool.id === "presentation-pdf" ||
     tool.id === "passport-photo" ||

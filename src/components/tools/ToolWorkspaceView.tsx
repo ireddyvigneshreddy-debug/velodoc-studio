@@ -24,6 +24,7 @@ import { OrganizePdfTool } from "./OrganizePdfTool";
 import { CompressPdfTool } from "./CompressPdfTool";
 import { PdfToImageTool } from "./PdfToImageTool";
 import { ImageToPdfTool } from "./ImageToPdfTool";
+import { CameraToPdfTool } from "./CameraToPdfTool";
 import { WatermarkPdfTool } from "./WatermarkPdfTool";
 import { ImageStudioTool } from "./ImageStudioTool";
 import { SignPdfTool } from "./SignPdfTool";
@@ -99,6 +100,8 @@ export function ToolWorkspaceView({ tool }: ToolWorkspaceViewProps) {
         return <PdfToImageTool />;
       case "image-to-pdf":
         return <ImageToPdfTool />;
+      case "camera-to-pdf":
+        return <CameraToPdfTool />;
       case "image-studio":
         return <ImageStudioTool />;
       case "flatten-pdf":

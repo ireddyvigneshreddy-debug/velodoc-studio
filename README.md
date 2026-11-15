@@ -31,7 +31,8 @@
 | **Add & Insert Pages** | `/tools/add-pages` | Sequence | Visual timeline with insertion slots to add blank, lined, grid, or external PDF pages. |
 | **Remove / Delete Pages** | `/tools/remove-pages` | Security | Visual thumbnail grid with instant odd/even page selection, inverted selection, and range filters. |
 | **Crop & Resize Margins** | `/tools/crop-pdf` | Security | Visually trim margins or standardize documents into A4, US Letter, or Legal bounds. |
-| **Images & Camera to PDF** | `/tools/image-to-pdf` | Conversion | Scan documents with 4K camera studio or compile multi-image collections into formatted PDFs. |
+| **Images to PDF** | `/tools/image-to-pdf` | Conversion | Compile multi-image collections into formatted PDFs with smart sorting and zero-border full-bleed layout. |
+| **Camera to PDF** | `/tools/camera-to-pdf` | Conversion | Hardware webcam and phone camera scanner with auto-shutter, scan filters, alignment guides, and PDF export. |
 | **PDF to Images Studio** | `/tools/pdf-to-image` | Conversion | Render pages to high-resolution PNG, JPG, or WebP images up to 600 DPI with ZIP export. |
 | **Extract Text & Markdown** | `/tools/pdf-to-text` | Conversion | Extract structured text preserving layout flow with live editor and JSON/MD export. |
 | **Markdown to PDF** | `/tools/markdown-to-pdf` | Conversion | Split-screen Markdown editor with live preview, headings, tables, and instant PDF rendering. |

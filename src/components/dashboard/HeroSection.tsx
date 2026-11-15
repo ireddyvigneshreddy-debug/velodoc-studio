@@ -77,7 +77,7 @@ export function HeroSection() {
         console.error("Camera scan chain error:", err);
       }
       setCameraModalOpen(false);
-      router.push("/tools/image-to-pdf");
+      router.push("/tools/camera-to-pdf");
     }
   };
 
@@ -202,14 +202,22 @@ export function HeroSection() {
                 <p className="text-xs text-ink-secondary dark:text-paper-400 leading-relaxed font-sans">
                   Capture physical paper notes or IDs with real-time perspective alignment and automatic archival contrast filtering.
                 </p>
-                <button
-                  type="button"
-                  onClick={() => setCameraModalOpen(true)}
-                  className="w-full py-2.5 px-4 rounded text-xs font-mono uppercase tracking-wider font-semibold bg-[#18181B] dark:bg-white text-white dark:text-[#18181B] hover:bg-black dark:hover:bg-paper-100 transition-colors flex items-center justify-center gap-2 shadow-paper cursor-pointer"
-                >
-                  <Camera className="w-4 h-4" />
-                  Launch Camera Scanner
-                </button>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setCameraModalOpen(true)}
+                    className="flex-1 py-2.5 px-4 rounded text-xs font-mono uppercase tracking-wider font-semibold bg-[#18181B] dark:bg-white text-white dark:text-[#18181B] hover:bg-black dark:hover:bg-paper-100 transition-colors flex items-center justify-center gap-2 shadow-paper cursor-pointer"
+                  >
+                    <Camera className="w-4 h-4" />
+                    Quick Scanner
+                  </button>
+                  <Link
+                    href="/tools/camera-to-pdf"
+                    className="py-2.5 px-3 rounded text-xs font-mono uppercase tracking-wider font-semibold bg-white dark:bg-charcoal-700 text-ink-primary dark:text-white border border-paper-300 dark:border-charcoal-border hover:border-[#C2410C] hover:text-[#C2410C] transition-colors flex items-center justify-center gap-1.5 shadow-paper text-center"
+                  >
+                    Dedicated Studio →
+                  </Link>
+                </div>
               </div>
 
               {/* 30-File Batch Drop Target Dock */}
