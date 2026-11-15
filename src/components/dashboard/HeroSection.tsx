@@ -92,12 +92,12 @@ export function HeroSection() {
     <>
       <section className="pt-6 sm:pt-10 pb-6 border-b border-paper-300 dark:border-charcoal-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Asymmetric Editorial Workbench Split Header */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-            {/* Left Column (7 cols): Editorial Headline & Telemetry */}
-            <div className="lg:col-span-7 space-y-5">
+          {/* Asymmetric 2-Column Split Header (No 3-col grid) */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+            {/* Left Column: Editorial Headline & 4-Item Telemetry */}
+            <div className="space-y-5">
               <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[11px] font-mono tracking-wider uppercase bg-[#EDF5F2] text-[#1B4D3E] dark:bg-[#143A2F]/40 dark:text-[#6ee7b7] border border-[#C4DFD5] dark:border-[#143A2F]">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-mono tracking-wider uppercase bg-[#EDF5F2] text-[#2E5A44] dark:bg-[#143A2F]/40 dark:text-[#6ee7b7] border border-[#C4DFD5] dark:border-[#143A2F]">
                   <ShieldCheck className="w-3.5 h-3.5" />
                   Air-Gapped Client Engine
                 </span>
@@ -106,34 +106,40 @@ export function HeroSection() {
 
               <h1 className="text-3xl sm:text-5xl lg:text-6xl font-sans font-bold tracking-tight text-ink-primary dark:text-white leading-[1.08]">
                 Private Document Studio,{" "}
-                <span className="font-serif italic font-normal text-vermilion">
+                <span className="font-serif italic font-normal text-[#C2410C]">
                   Direct on Your Hardware.
                 </span>
               </h1>
 
-              <p className="text-sm sm:text-base text-ink-secondary dark:text-paper-400 font-sans leading-relaxed max-w-2xl">
+              <p className="text-sm sm:text-base text-ink-secondary dark:text-paper-400 font-sans leading-relaxed max-w-xl">
                 Exact KB/MB binary-search compression, 30-document zero-crash batch pipelines, and official academic presentation generation. Zero server uploads, zero accounts, zero tracking.
               </p>
 
-              {/* Local Hardware Telemetry Bar */}
-              <div className="grid grid-cols-3 gap-2 sm:gap-3 py-3 px-4 rounded-lg bg-white dark:bg-charcoal-800 border border-paper-300 dark:border-charcoal-border text-xs">
+              {/* Local Hardware Telemetry Bar: 4-Column Grid (No 3-col grid) */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 py-3 px-4 rounded-lg bg-white dark:bg-charcoal-800 border border-paper-300 dark:border-charcoal-border text-xs">
                 <div>
                   <div className="text-[10px] font-mono uppercase tracking-wider text-ink-muted">Wasm Sandbox</div>
                   <div className="font-mono font-medium text-ink-primary dark:text-white flex items-center gap-1.5 mt-0.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#2E5A44]" />
                     Isolated RAM
                   </div>
                 </div>
                 <div>
                   <div className="text-[10px] font-mono uppercase tracking-wider text-ink-muted">Network Ingress</div>
-                  <div className="font-mono font-medium text-emerald-600 dark:text-emerald-400 mt-0.5">
-                    0.00 KB Outbound
+                  <div className="font-mono font-medium text-[#2E5A44] dark:text-[#6ee7b7] mt-0.5">
+                    0.00 KB Egress
                   </div>
                 </div>
                 <div>
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-ink-muted">Batch Concurrency</div>
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-ink-muted">Batch Safety</div>
                   <div className="font-mono font-medium text-ink-primary dark:text-white mt-0.5">
-                    30 Files Safe
+                    30 Files Bound
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-ink-muted">Audit Protocol</div>
+                  <div className="font-mono font-medium text-[#1E3A5F] dark:text-sky-300 mt-0.5">
+                    DevTools Clean
                   </div>
                 </div>
               </div>
@@ -150,9 +156,9 @@ export function HeroSection() {
                       <Link
                         key={chip.id}
                         href={chip.href}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono bg-white dark:bg-charcoal-800 border border-paper-300 dark:border-charcoal-border hover:border-vermilion hover:text-vermilion text-ink-secondary dark:text-paper-400 transition-colors shadow-paper group"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono bg-white dark:bg-charcoal-800 border border-paper-300 dark:border-charcoal-border hover:border-[#C2410C] hover:text-[#C2410C] text-ink-secondary dark:text-paper-400 transition-colors shadow-paper group"
                       >
-                        <Icon className="w-3.5 h-3.5 text-vermilion group-hover:scale-110 transition-transform" />
+                        <Icon className="w-3.5 h-3.5 text-[#C2410C]" />
                         <span className="font-medium">{chip.label}</span>
                         <span className="text-[10px] text-ink-muted">({chip.badge})</span>
                       </Link>
@@ -162,17 +168,17 @@ export function HeroSection() {
               </div>
             </div>
 
-            {/* Right Column (5 cols): Tactile Quick-Action Dock */}
-            <div className="lg:col-span-5 space-y-4">
+            {/* Right Column: Tactile Quick-Action Dock */}
+            <div className="space-y-4">
               {/* Camera Scanner Trigger Card */}
               <div className="paper-card p-5 rounded-lg dark:bg-charcoal-800 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded bg-vermilion-light text-vermilion dark:bg-vermilion/20 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded bg-[#FDF2ED] text-[#C2410C] dark:bg-[#C2410C]/20 flex items-center justify-center">
                       <Camera className="w-4 h-4" />
                     </div>
                     <div>
-                      <h2 className="text-sm font-semibold text-ink-primary dark:text-white">
+                      <h2 className="text-sm font-semibold text-ink-primary dark:text-white font-sans">
                         Pro Camera Scanner
                       </h2>
                       <p className="text-[11px] text-ink-muted font-mono">
@@ -190,7 +196,7 @@ export function HeroSection() {
                 <button
                   type="button"
                   onClick={() => setCameraModalOpen(true)}
-                  className="w-full py-2.5 px-4 rounded text-xs font-mono uppercase tracking-wider font-semibold bg-ink-primary dark:bg-white text-white dark:text-ink-primary hover:bg-black dark:hover:bg-paper-100 transition-colors flex items-center justify-center gap-2 shadow-paper cursor-pointer"
+                  className="w-full py-2.5 px-4 rounded text-xs font-mono uppercase tracking-wider font-semibold bg-[#18181B] dark:bg-white text-white dark:text-[#18181B] hover:bg-black dark:hover:bg-paper-100 transition-colors flex items-center justify-center gap-2 shadow-paper cursor-pointer"
                 >
                   <Camera className="w-4 h-4" />
                   Launch Camera Scanner
@@ -207,12 +213,12 @@ export function HeroSection() {
                 onDrop={handleBatchDrop}
                 className={`border-2 border-dashed rounded-lg p-5 text-center transition-colors ${
                   isDragging
-                    ? "border-vermilion bg-vermilion-light/40 dark:bg-vermilion/10"
-                    : "border-paper-300 dark:border-charcoal-border bg-white/60 dark:bg-charcoal-800/60 hover:border-vermilion/60"
+                    ? "border-[#C2410C] bg-[#FDF2ED]/60 dark:bg-[#C2410C]/10"
+                    : "border-paper-300 dark:border-charcoal-border bg-white/60 dark:bg-charcoal-800/60 hover:border-[#C2410C]/60"
                 }`}
               >
                 <div className="w-9 h-9 rounded-full bg-paper-200 dark:bg-charcoal-700 flex items-center justify-center mx-auto text-ink-secondary dark:text-paper-400 mb-2">
-                  <UploadSimple className="w-5 h-5 text-vermilion" />
+                  <UploadSimple className="w-5 h-5 text-[#C2410C]" />
                 </div>
                 <h2 className="text-xs font-mono font-semibold uppercase tracking-wider text-ink-primary dark:text-white">
                   30-Document Fast Drop Target
@@ -221,8 +227,8 @@ export function HeroSection() {
                   Drag and drop up to 30 PDFs or images here to instantly open the Batch Workbench.
                 </p>
                 <div className="mt-3 flex items-center justify-center gap-2 text-[10px] font-mono text-ink-secondary dark:text-paper-400">
-                  <span className="inline-flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#2E5A44]" />
                     Zero Cloud Upload
                   </span>
                   <span>•</span>

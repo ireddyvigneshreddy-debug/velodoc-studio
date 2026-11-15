@@ -1,6 +1,6 @@
 import React from "react";
 import { HeroSection } from "@/components/dashboard/HeroSection";
-import { BentoGrid } from "@/components/dashboard/BentoGrid";
+import { ToolDirectory } from "@/components/dashboard/ToolDirectory";
 import { TechTalkPptStudio } from "@/components/ppt/TechTalkPptStudio";
 import {
   CheckCircle,
@@ -15,15 +15,15 @@ export default function HomePage() {
       {/* 1. Asymmetric Editorial Workbench Split Header */}
       <HeroSection />
 
-      {/* 2. 5-Column Precision Tool Directory */}
+      {/* 2. Uniform 4-Column Precision Tool Directory */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <BentoGrid />
+        <ToolDirectory />
       </div>
 
       {/* 3. The Client-Side Advantage (Comparison Matrix) */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         <div className="text-center space-y-2 mb-8">
-          <span className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-[#1B4D3E] dark:text-[#6ee7b7] px-2.5 py-0.5 rounded bg-[#EDF5F2] dark:bg-[#143A2F]/40 border border-[#C4DFD5] dark:border-[#143A2F]">
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-[#2E5A44] dark:text-[#6ee7b7] px-2.5 py-0.5 rounded bg-[#EDF5F2] dark:bg-[#143A2F]/40 border border-[#C4DFD5] dark:border-[#143A2F]">
             <Lock className="w-3 h-3" />
             Air-Gapped Privacy Architecture
           </span>
@@ -77,38 +77,38 @@ export default function HomePage() {
             <div className="p-6 sm:p-8 space-y-5 bg-white dark:bg-charcoal-800 relative">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded bg-[#EDF5F2] text-[#1B4D3E] dark:bg-[#143A2F]/40 dark:text-[#6ee7b7] flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded bg-[#EDF5F2] text-[#2E5A44] dark:bg-[#143A2F]/40 dark:text-[#6ee7b7] flex items-center justify-center shrink-0">
                     <CheckCircle className="w-4 h-4" />
                   </div>
                   <div>
                     <h3 className="font-sans font-semibold text-ink-primary dark:text-white text-sm">
                       VeloDoc Local Engine
                     </h3>
-                    <span className="text-xs text-[#1B4D3E] dark:text-[#6ee7b7] font-mono">
+                    <span className="text-xs text-[#2E5A44] dark:text-[#6ee7b7] font-mono">
                       100% Local In-Memory WebAssembly
                     </span>
                   </div>
                 </div>
-                <span className="text-[10px] font-mono font-semibold text-[#1B4D3E] bg-[#EDF5F2] dark:bg-[#143A2F]/50 dark:text-[#6ee7b7] px-2 py-0.5 rounded border border-[#C4DFD5] dark:border-[#143A2F]">
+                <span className="text-[10px] font-mono font-semibold text-[#2E5A44] bg-[#EDF5F2] dark:bg-[#143A2F]/50 dark:text-[#6ee7b7] px-2 py-0.5 rounded border border-[#C4DFD5] dark:border-[#143A2F]">
                   100% Private
                 </span>
               </div>
 
               <ul className="space-y-3 text-xs sm:text-sm text-ink-primary dark:text-white font-sans">
                 <li className="flex items-start gap-2.5">
-                  <span className="text-emerald-600 dark:text-emerald-400 font-bold shrink-0">✓</span>
+                  <span className="text-[#2E5A44] dark:text-[#6ee7b7] font-bold shrink-0">✓</span>
                   <span>Zero server uploads: Files never leave your local browser RAM</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <span className="text-emerald-600 dark:text-emerald-400 font-bold shrink-0">✓</span>
+                  <span className="text-[#2E5A44] dark:text-[#6ee7b7] font-bold shrink-0">✓</span>
                   <span>No artificial file size caps: Hardware-accelerated typed ArrayBuffers</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <span className="text-emerald-600 dark:text-emerald-400 font-bold shrink-0">✓</span>
+                  <span className="text-[#2E5A44] dark:text-[#6ee7b7] font-bold shrink-0">✓</span>
                   <span>Instant processing: Zero network latency, queue waits, or server downtime</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <span className="text-emerald-600 dark:text-emerald-400 font-bold shrink-0">✓</span>
+                  <span className="text-[#2E5A44] dark:text-[#6ee7b7] font-bold shrink-0">✓</span>
                   <span>Completely open-source, free, and unrestricted for academic &amp; personal use</span>
                 </li>
               </ul>
@@ -131,7 +131,7 @@ export default function HomePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="paper-card p-5 rounded-lg dark:bg-charcoal-800 space-y-2">
             <h4 className="text-sm font-semibold text-ink-primary dark:text-white flex items-center gap-2">
-              <Question className="w-4 h-4 text-vermilion shrink-0" />
+              <Question className="w-4 h-4 text-[#C2410C] shrink-0" />
               Are my documents uploaded to any server?
             </h4>
             <p className="text-xs text-ink-secondary dark:text-paper-400 leading-relaxed font-sans">
@@ -141,7 +141,7 @@ export default function HomePage() {
 
           <div className="paper-card p-5 rounded-lg dark:bg-charcoal-800 space-y-2">
             <h4 className="text-sm font-semibold text-ink-primary dark:text-white flex items-center gap-2">
-              <Question className="w-4 h-4 text-vermilion shrink-0" />
+              <Question className="w-4 h-4 text-[#C2410C] shrink-0" />
               What is the maximum file size limit?
             </h4>
             <p className="text-xs text-ink-secondary dark:text-paper-400 leading-relaxed font-sans">
@@ -151,7 +151,7 @@ export default function HomePage() {
 
           <div className="paper-card p-5 rounded-lg dark:bg-charcoal-800 space-y-2">
             <h4 className="text-sm font-semibold text-ink-primary dark:text-white flex items-center gap-2">
-              <Question className="w-4 h-4 text-vermilion shrink-0" />
+              <Question className="w-4 h-4 text-[#C2410C] shrink-0" />
               Can I operate VeloDoc Studio offline?
             </h4>
             <p className="text-xs text-ink-secondary dark:text-paper-400 leading-relaxed font-sans">
@@ -161,7 +161,7 @@ export default function HomePage() {
 
           <div className="paper-card p-5 rounded-lg dark:bg-charcoal-800 space-y-2">
             <h4 className="text-sm font-semibold text-ink-primary dark:text-white flex items-center gap-2">
-              <Question className="w-4 h-4 text-vermilion shrink-0" />
+              <Question className="w-4 h-4 text-[#C2410C] shrink-0" />
               Is VeloDoc Studio free for educational use?
             </h4>
             <p className="text-xs text-ink-secondary dark:text-paper-400 leading-relaxed font-sans">

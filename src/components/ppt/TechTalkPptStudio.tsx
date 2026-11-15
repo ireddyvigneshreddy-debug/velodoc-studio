@@ -440,8 +440,8 @@ export function TechTalkPptStudio() {
 
           {/* Form Fields Grid */}
           <div className="space-y-5">
-            {/* Row 1: Student Credentials (Name, Roll No, Subject) */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Row 1: Student Credentials (Name, Roll No, Branch, Subject) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Student Name */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider block">
@@ -488,6 +488,29 @@ export function TechTalkPptStudio() {
                 )}
               </div>
 
+              {/* Branch */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider block">
+                  Branch / Dept <span className="text-rose-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={branch}
+                  onChange={(e) => setBranch(e.target.value)}
+                  placeholder="e.g., CSE or CSD"
+                  className={`w-full bg-zinc-900 border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-zinc-500 focus:outline-none transition-colors ${
+                    isBranchMissing
+                      ? "border-rose-500 ring-1 ring-rose-500"
+                      : "border-white/[0.1] focus:border-amber-500"
+                  }`}
+                />
+                {isBranchMissing && (
+                  <span className="text-[11px] text-rose-400 block font-medium">
+                    Branch is required.
+                  </span>
+                )}
+              </div>
+
               {/* Subject */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider block">
@@ -512,53 +535,28 @@ export function TechTalkPptStudio() {
               </div>
             </div>
 
-            {/* Row 2: Branch Selection (Input + Quick Select Chips) */}
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider block">
-                Engineering Branch / Department{" "}
-                <span className="text-rose-400">*</span>
-              </label>
-              <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
-                <input
-                  type="text"
-                  value={branch}
-                  onChange={(e) => setBranch(e.target.value)}
-                  placeholder="e.g., CSE (Data Science) or CSD"
-                  className={`flex-1 bg-zinc-900 border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-zinc-500 focus:outline-none transition-colors ${
-                    isBranchMissing
-                      ? "border-rose-500 ring-1 ring-rose-500"
-                      : "border-white/[0.1] focus:border-amber-500"
-                  }`}
-                />
-                {/* Branch Quick Select Chips (None Pre-selected) */}
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[11px] text-zinc-400 font-medium mr-1">
-                    Quick Chips:
-                  </span>
-                  {BRANCH_QUICK_CHIPS.map((chip) => {
-                    const isSelected = branch.trim().toUpperCase() === chip;
-                    return (
-                      <button
-                        key={chip}
-                        type="button"
-                        onClick={() => setBranch(chip)}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-mono font-semibold transition-all border cursor-pointer ${
-                          isSelected
-                            ? "bg-amber-500 text-black border-amber-400 font-bold shadow-sm"
-                            : "bg-white/[0.04] text-zinc-300 border-white/[0.08] hover:border-amber-500/40 hover:text-white"
-                        }`}
-                      >
-                        {chip}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-              {isBranchMissing && (
-                <span className="text-[11px] text-rose-400 block font-medium">
-                  Branch is required.
-                </span>
-              )}
+            {/* Quick Branch Select Chips */}
+            <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+              <span className="text-[11px] text-zinc-400 font-medium mr-1 font-mono">
+                Quick Branch:
+              </span>
+              {BRANCH_QUICK_CHIPS.map((chip) => {
+                const isSelected = branch.trim().toUpperCase() === chip;
+                return (
+                  <button
+                    key={chip}
+                    type="button"
+                    onClick={() => setBranch(chip)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-mono font-semibold transition-all border cursor-pointer ${
+                      isSelected
+                        ? "bg-amber-500 text-black border-amber-400 font-bold shadow-sm"
+                        : "bg-white/[0.04] text-zinc-300 border-white/[0.08] hover:border-amber-500/40 hover:text-white"
+                    }`}
+                  >
+                    {chip}
+                  </button>
+                );
+              })}
             </div>
 
             {/* Row 3: Topic Title */}

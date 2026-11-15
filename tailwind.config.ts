@@ -15,31 +15,51 @@ const config: Config = {
         mono: ["var(--font-mono)", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
       },
       colors: {
-        // Archival Paper Light Theme (Default)
+        // Warm Archival Paper Light Theme (Default)
         paper: {
-          50: "#FBFBFA",
-          100: "#F6F5F1",
-          200: "#EEECE5",
-          300: "#E2DFD7",
+          50: "#FAF9F5",
+          100: "#F7F6F2",
+          200: "#EFECE4",
+          300: "#E2E0D8",
           400: "#CBC7BD",
           500: "#A8A397",
         },
         ink: {
-          primary: "#141413",
-          secondary: "#57554E",
-          muted: "#88867E",
-          faint: "#B5B2A8",
+          primary: "#18181B",
+          secondary: "#52525B",
+          muted: "#71717A",
+          faint: "#A1A1AA",
         },
-        // Accents
-        vermilion: {
-          DEFAULT: "#D94E28",
-          hover: "#C2411C",
+        // Editorial Accents
+        terracotta: {
+          DEFAULT: "#C2410C",
+          hover: "#9A3412",
           light: "#FDF2ED",
-          dark: "#A33718",
+          dark: "#7C2D12",
+        },
+        rust: {
+          DEFAULT: "#C2410C",
+          hover: "#9A3412",
+          light: "#FDF2ED",
+        },
+        vermilion: {
+          DEFAULT: "#C2410C",
+          hover: "#9A3412",
+          light: "#FDF2ED",
+        },
+        navy: {
+          DEFAULT: "#1E3A5F",
+          hover: "#142740",
+          light: "#EBF1F7",
         },
         forest: {
-          DEFAULT: "#1B4D3E",
-          hover: "#143A2F",
+          DEFAULT: "#2E5A44",
+          hover: "#224332",
+          light: "#EDF5F2",
+        },
+        sage: {
+          DEFAULT: "#2E5A44",
+          hover: "#224332",
           light: "#EDF5F2",
         },
         ochre: {
@@ -55,22 +75,22 @@ const config: Config = {
           600: "#363633",
           border: "#2A2A28",
         },
-        // Backwards compatibility mappings
+        // Compatibility mappings
         darkBg: "#161615",
         darkCard: "#1C1C1B",
         darkCardHover: "#262624",
         darkBorder: "#2A2A28",
-        lightBg: "#F6F5F1",
+        lightBg: "#F7F6F2",
         lightCard: "#FFFFFF",
-        lightBorder: "#E2DFD7",
-        accentIndigo: "#D94E28",
-        accentViolet: "#1B4D3E",
-        accentCyan: "#B45309",
+        lightBorder: "#E2E0D8",
+        accentIndigo: "#C2410C",
+        accentViolet: "#1E3A5F",
+        accentCyan: "#2E5A44",
       },
       boxShadow: {
-        "paper": "0 1px 2px rgba(20, 20, 19, 0.05), 0 1px 3px rgba(20, 20, 19, 0.03)",
-        "paper-elevated": "0 4px 12px -2px rgba(20, 20, 19, 0.06), 0 2px 4px -1px rgba(20, 20, 19, 0.04)",
-        "paper-modal": "0 20px 40px -8px rgba(20, 20, 19, 0.12), 0 0 1px rgba(20, 20, 19, 0.2)",
+        "paper": "0 1px 2px rgba(24, 24, 27, 0.04), 0 1px 1px rgba(24, 24, 27, 0.02)",
+        "paper-elevated": "0 2px 6px rgba(24, 24, 27, 0.06)",
+        "paper-modal": "0 16px 36px -8px rgba(24, 24, 27, 0.12), 0 0 1px rgba(24, 24, 27, 0.2)",
       },
     },
   },

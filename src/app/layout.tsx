@@ -75,10 +75,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#F6F5F1" },
-    { media: "(prefers-color-scheme: dark)", color: "#161615" },
-  ],
+  themeColor: "#F7F6F2",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
@@ -93,14 +90,15 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${serifFont.variable} ${sansFont.variable} ${monoFont.variable} scroll-smooth`}
+      className={`${serifFont.variable} ${sansFont.variable} ${monoFont.variable} light scroll-smooth`}
+      style={{ colorScheme: "light" }}
       suppressHydrationWarning
     >
-      <body className="antialiased bg-[#F6F5F1] text-[#141413] dark:bg-[#161615] dark:text-[#F6F5F1] flex flex-col min-h-dvh overflow-x-hidden selection:bg-[#D94E28]/20 selection:text-[#141413] relative transition-colors duration-200">
+      <body className="antialiased bg-[#F7F6F2] text-[#18181B] dark:bg-[#161615] dark:text-[#F7F6F2] flex flex-col min-h-dvh overflow-x-hidden selection:bg-[#C2410C]/20 selection:text-[#18181B] relative transition-colors duration-200">
         {/* Subtle Architectural Dot Grid */}
         <div
           aria-hidden="true"
-          className="pointer-events-none fixed inset-0 z-0 architectural-grid opacity-60 dark:opacity-30"
+          className="pointer-events-none fixed inset-0 z-0 architectural-grid opacity-50 dark:opacity-20"
         />
 
         {/* App Content */}

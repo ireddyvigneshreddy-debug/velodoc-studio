@@ -39,7 +39,7 @@ export function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-[#F6F5F1]/90 dark:bg-[#161615]/90 border-b border-paper-300 dark:border-charcoal-border transition-colors">
+      <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-[#F7F6F2]/95 dark:bg-[#161615]/95 border-b border-paper-300 dark:border-charcoal-border transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-15 flex items-center justify-between gap-4">
           {/* Left: Brand Logo + Wordmark */}
           <div className="flex items-center gap-6">
@@ -50,7 +50,7 @@ export function Navbar() {
               <BrandLogo className="w-7 h-7" />
               <div className="flex items-center gap-2">
                 <span className="font-sans font-bold text-base sm:text-lg tracking-tight text-ink-primary dark:text-white">
-                  VeloDoc <span className="text-vermilion">Studio</span>
+                  VeloDoc <span className="text-[#C2410C]">Studio</span>
                 </span>
                 <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-paper-200 dark:bg-charcoal-700 text-ink-secondary dark:text-paper-400 border border-paper-300 dark:border-charcoal-border">
                   v2.4
@@ -99,9 +99,9 @@ export function Navbar() {
             </nav>
           </div>
 
-          {/* Center: Live Privacy Telemetry Pill */}
-          <div className="hidden xl:flex items-center gap-2 px-3 py-1 rounded-full bg-[#EDF5F2] dark:bg-[#143A2F]/30 border border-[#C4DFD5] dark:border-[#143A2F] text-[#1B4D3E] dark:text-[#6ee7b7] text-xs font-mono">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          {/* Center: Live Privacy Telemetry Pill (Muted Forest #2E5A44 - no pulsing neon) */}
+          <div className="hidden xl:flex items-center gap-2 px-3 py-1 rounded-full bg-[#EDF5F2] dark:bg-[#143A2F]/30 border border-[#C4DFD5] dark:border-[#143A2F] text-[#2E5A44] dark:text-[#6ee7b7] text-xs font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#2E5A44]" />
             <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
             <span className="tabular-nums text-[11px]">
               100% On-Device Wasm • 0 Bytes Uploaded
@@ -116,7 +116,7 @@ export function Navbar() {
               className="keycap-btn flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-ink-secondary dark:text-paper-400 hover:text-ink-primary dark:hover:text-white text-xs font-medium cursor-pointer"
               title="Open command palette"
             >
-              <Search className="w-3.5 h-3.5 text-vermilion" />
+              <Search className="w-3.5 h-3.5 text-[#C2410C]" />
               <span className="hidden sm:inline font-sans text-xs">Search Tools</span>
               <kbd className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono font-semibold bg-paper-200 dark:bg-charcoal-700 border border-paper-300 dark:border-charcoal-border rounded text-ink-secondary dark:text-paper-400">
                 {isMac ? "⌘K" : "Ctrl+K"}
@@ -131,7 +131,7 @@ export function Navbar() {
             >
               <History className="w-4 h-4" />
               {historyCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-vermilion text-[9px] font-mono font-bold text-white flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#C2410C] text-[9px] font-mono font-bold text-white flex items-center justify-center">
                   {historyCount}
                 </span>
               )}
@@ -154,8 +154,8 @@ export function Navbar() {
         </div>
 
         {/* Mobile Telemetry Strip */}
-        <div className="xl:hidden flex items-center justify-center gap-2 py-1 bg-[#EDF5F2] dark:bg-[#143A2F]/30 border-t border-[#C4DFD5] dark:border-[#143A2F] text-[#1B4D3E] dark:text-[#6ee7b7] text-[10px] font-mono tabular-nums px-3">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+        <div className="xl:hidden flex items-center justify-center gap-2 py-1 bg-[#EDF5F2] dark:bg-[#143A2F]/30 border-t border-[#C4DFD5] dark:border-[#143A2F] text-[#2E5A44] dark:text-[#6ee7b7] text-[10px] font-mono tabular-nums px-3">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#2E5A44] shrink-0" />
           <span className="truncate">100% On-Device WebAssembly • 0 Bytes Uploaded</span>
         </div>
       </header>

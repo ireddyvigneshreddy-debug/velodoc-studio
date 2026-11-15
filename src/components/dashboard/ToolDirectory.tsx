@@ -12,14 +12,14 @@ import {
   Funnel,
 } from "@/components/common/icons";
 
-// Clean Swiss Editorial accent palette
+// Muted Swiss Editorial Accent Palette
 function getToolFamilyTheme(tool: ToolDefinition) {
   if (tool.id === "compress-pdf" || tool.id === "image-studio" || tool.id === "flatten-pdf") {
     return {
-      iconBg: "bg-[#EDF5F2] text-[#1B4D3E] dark:bg-[#143A2F]/40 dark:text-[#6ee7b7] border border-[#C4DFD5] dark:border-[#143A2F]",
-      badgeColor: "bg-[#EDF5F2] text-[#1B4D3E] dark:bg-[#143A2F]/30 dark:text-[#6ee7b7] border-[#C4DFD5] dark:border-[#143A2F]",
-      spotlightColor: "rgba(27, 77, 62, 0.04)",
-      borderGlowColor: "rgba(27, 77, 62, 0.2)",
+      iconBg: "bg-[#EDF5F2] text-[#2E5A44] dark:bg-[#143A2F]/40 dark:text-[#6ee7b7] border border-[#C4DFD5] dark:border-[#143A2F]",
+      badgeColor: "bg-[#EDF5F2] text-[#2E5A44] dark:bg-[#143A2F]/30 dark:text-[#6ee7b7] border-[#C4DFD5] dark:border-[#143A2F]",
+      spotlightColor: "rgba(46, 90, 68, 0.04)",
+      borderGlowColor: "rgba(46, 90, 68, 0.2)",
     };
   }
 
@@ -31,10 +31,10 @@ function getToolFamilyTheme(tool: ToolDefinition) {
     tool.id === "crop-pdf"
   ) {
     return {
-      iconBg: "bg-vermilion-light text-vermilion dark:bg-vermilion/20 dark:text-vermilion-hover border border-vermilion/20",
-      badgeColor: "bg-vermilion-light text-vermilion dark:bg-vermilion/20 dark:text-vermilion-hover border-vermilion/20",
-      spotlightColor: "rgba(217, 78, 40, 0.04)",
-      borderGlowColor: "rgba(217, 78, 40, 0.25)",
+      iconBg: "bg-[#FFF5F0] text-[#C2410C] dark:bg-[#C2410C]/20 dark:text-[#ffedd5] border border-[#FBDCD0] dark:border-[#C2410C]/30",
+      badgeColor: "bg-[#FFF5F0] text-[#C2410C] dark:bg-[#C2410C]/20 dark:text-[#ffedd5] border-[#FBDCD0] dark:border-[#C2410C]/30",
+      spotlightColor: "rgba(194, 65, 12, 0.04)",
+      borderGlowColor: "rgba(194, 65, 12, 0.25)",
     };
   }
 
@@ -52,16 +52,16 @@ function getToolFamilyTheme(tool: ToolDefinition) {
     };
   }
 
-  // Default: Archival neutral
+  // Default: Archival neutral with Classic Navy accent
   return {
-    iconBg: "bg-paper-200 text-ink-primary dark:bg-charcoal-700 dark:text-white border border-paper-300 dark:border-charcoal-border",
+    iconBg: "bg-paper-200 text-[#1E3A5F] dark:bg-charcoal-700 dark:text-white border border-paper-300 dark:border-charcoal-border",
     badgeColor: "bg-paper-100 text-ink-secondary dark:bg-charcoal-700 dark:text-paper-400 border-paper-300 dark:border-charcoal-border",
-    spotlightColor: "rgba(20, 20, 19, 0.03)",
-    borderGlowColor: "rgba(20, 20, 19, 0.15)",
+    spotlightColor: "rgba(30, 58, 95, 0.03)",
+    borderGlowColor: "rgba(30, 58, 95, 0.15)",
   };
 }
 
-export function BentoGrid() {
+export function ToolDirectory() {
   const defaultCategory = TOOL_CATEGORIES[0];
   const [selectedCategory, setSelectedCategory] = useState<ToolCategory>(defaultCategory);
   const [searchQuery, setSearchQuery] = useState("");
@@ -126,7 +126,7 @@ export function BentoGrid() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={`Filter ${TOOLS.length} precision tools...`}
-            className="w-full pl-9 pr-3 py-2 rounded-lg bg-white dark:bg-charcoal-800 border border-paper-300 dark:border-charcoal-border focus:border-vermilion text-xs text-ink-primary dark:text-white placeholder-ink-muted outline-none transition-colors shadow-paper"
+            className="w-full pl-9 pr-3 py-2 rounded-lg bg-white dark:bg-charcoal-800 border border-paper-300 dark:border-charcoal-border focus:border-[#C2410C] text-xs text-ink-primary dark:text-white placeholder-ink-muted outline-none transition-colors shadow-paper"
           />
           {searchQuery && (
             <button
@@ -170,8 +170,8 @@ export function BentoGrid() {
         })}
       </div>
 
-      {/* 5-Column Responsive Tool Directory Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+      {/* Uniform 4-Column Responsive Tool Directory Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {filteredTools.map((tool) => {
           const theme = getToolFamilyTheme(tool);
 
@@ -207,10 +207,10 @@ export function BentoGrid() {
 
                 {/* MIDDLE ROW: Name + Caret */}
                 <div className="pt-2 flex items-center justify-between gap-1">
-                  <h3 className="text-xs sm:text-[13px] font-sans font-semibold text-ink-primary dark:text-white tracking-tight group-hover:text-vermilion transition-colors truncate">
+                  <h3 className="text-xs sm:text-[13px] font-sans font-semibold text-ink-primary dark:text-white tracking-tight group-hover:text-[#C2410C] transition-colors truncate">
                     {tool.name}
                   </h3>
-                  <CaretRight className="w-3.5 h-3.5 text-ink-muted group-hover:text-vermilion group-hover:translate-x-0.5 transition-all shrink-0" />
+                  <CaretRight className="w-3.5 h-3.5 text-ink-muted group-hover:text-[#C2410C] group-hover:translate-x-0.5 transition-all shrink-0" />
                 </div>
 
                 {/* BOTTOM ROW: Description */}
@@ -240,7 +240,7 @@ export function BentoGrid() {
               setSearchQuery("");
               setSelectedCategory(defaultCategory);
             }}
-            className="px-4 py-1.5 rounded text-xs font-mono font-medium bg-vermilion text-white hover:bg-vermilion-hover transition-colors shadow-paper cursor-pointer"
+            className="px-4 py-1.5 rounded text-xs font-mono font-medium bg-[#C2410C] text-white hover:bg-[#9A3412] transition-colors shadow-paper cursor-pointer"
           >
             Reset Filters
           </button>
