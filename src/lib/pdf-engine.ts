@@ -1455,74 +1455,149 @@ export async function convertPdfToImages(
 }
 
 /**
- * Tool 14: Images to PDF
+ * Tool 14: Images to PDF (Zero-Border Full-Bleed Engine)
  */
 export interface ImagesToPdfOptions {
-  pageSize: "fit" | "a4" | "letter";
-  orientation: "portrait" | "landscape";
-  margin: "none" | "small" | "large";
+  pageSize?: "fit" | "fit-image" | "a4" | "letter";
+  orientation?: "portrait" | "landscape";
+  margin?: "none" | "small" | "large" | number;
+  layoutMode?: "fit-image" | "paper-fill" | "paper-fit";
+  targetSizeKb?: number;
 }
 
 export async function convertImagesToPdf(
-  images: { file: File; buffer: ArrayBuffer; type: string; rotation?: number }[],
-  options: ImagesToPdfOptions
+  images: { file?: File; buffer: ArrayBuffer; type: string; rotation?: number }[],
+  options: ImagesToPdfOptions = { pageSize: "fit-image", margin: "none", layoutMode: "fit-image" }
 ): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.create();
 
-  const marginMap = {
-    none: 0,
-    small: 20,
-    large: 40,
-  };
-  const margin = marginMap[options.margin];
+  const isFitImage =
+    options.pageSize === "fit" ||
+    options.pageSize === "fit-image" ||
+    options.layoutMode === "fit-image" ||
+    !options.pageSize;
 
   for (const img of images) {
     let embeddedImage;
+    const rot = ((img.rotation || 0) % 360 + 360) % 360;
 
-    if (img.type === "image/jpeg" || img.file.name.match(/\.(jpe?g)$/i)) {
-      embeddedImage = await pdfDoc.embedJpg(img.buffer);
-    } else if (img.type === "image/png" || img.file.name.match(/\.png$/i)) {
-      embeddedImage = await pdfDoc.embedPng(img.buffer);
-    } else {
-      const blob = new Blob([img.buffer], { type: img.type });
+    // If rotation is requested, physically re-orient on canvas so image dimensions & orientation match 1:1
+    if (rot !== 0 && typeof window !== "undefined") {
+      const blob = new Blob([img.buffer], { type: img.type || "image/jpeg" });
       const imgUrl = URL.createObjectURL(blob);
-      const htmlImg = new Image();
-      await new Promise((resolve, reject) => {
-        htmlImg.onload = resolve;
-        htmlImg.onerror = reject;
-        htmlImg.src = imgUrl;
-      });
+      try {
+        const htmlImg = new Image();
+        await new Promise<void>((resolve, reject) => {
+          htmlImg.onload = () => resolve();
+          htmlImg.onerror = reject;
+          htmlImg.src = imgUrl;
+        });
 
-      const canvas = document.createElement("canvas");
-      canvas.width = htmlImg.naturalWidth;
-      canvas.height = htmlImg.naturalHeight;
-      const ctx = canvas.getContext("2d");
-      ctx?.drawImage(htmlImg, 0, 0);
-      URL.revokeObjectURL(imgUrl);
+        const is90or270 = rot === 90 || rot === 270;
+        const canvasW = is90or270 ? htmlImg.naturalHeight : htmlImg.naturalWidth;
+        const canvasH = is90or270 ? htmlImg.naturalWidth : htmlImg.naturalHeight;
+        const canvas = document.createElement("canvas");
+        canvas.width = canvasW;
+        canvas.height = canvasH;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.translate(canvasW / 2, canvasH / 2);
+          ctx.rotate((rot * Math.PI) / 180);
+          ctx.drawImage(htmlImg, -htmlImg.naturalWidth / 2, -htmlImg.naturalHeight / 2);
+        }
 
-      const pngBlob: Blob = await new Promise((resolve) =>
-        canvas.toBlob((b) => resolve(b!), "image/png")
-      );
-      canvas.width = 1;
-      canvas.height = 1;
-      const pngBuffer = await pngBlob.arrayBuffer();
-      embeddedImage = await pdfDoc.embedPng(pngBuffer);
+        const isPng = img.type === "image/png" || (img.file && img.file.name.match(/\.png$/i));
+        const mime = isPng ? "image/png" : "image/jpeg";
+        const rotatedBlob: Blob = await new Promise((resolve) =>
+          canvas.toBlob((b) => resolve(b!), mime, 0.95)
+        );
+        canvas.width = 1;
+        canvas.height = 1;
+        const rotatedBuffer = await rotatedBlob.arrayBuffer();
+        if (mime === "image/png") {
+          embeddedImage = await pdfDoc.embedPng(rotatedBuffer);
+        } else {
+          embeddedImage = await pdfDoc.embedJpg(rotatedBuffer);
+        }
+      } finally {
+        URL.revokeObjectURL(imgUrl);
+      }
+    } else {
+      // Rotation is 0 (or server-side environment)
+      const isJpg =
+        img.type === "image/jpeg" || (img.file && img.file.name.match(/\.(jpe?g)$/i));
+      const isPng =
+        img.type === "image/png" || (img.file && img.file.name.match(/\.png$/i));
+
+      if (isJpg) {
+        try {
+          embeddedImage = await pdfDoc.embedJpg(img.buffer);
+        } catch {
+          // fallback to png or canvas
+        }
+      } else if (isPng) {
+        try {
+          embeddedImage = await pdfDoc.embedPng(img.buffer);
+        } catch {
+          // fallback
+        }
+      }
+
+      if (!embeddedImage) {
+        // Fallback for WebP or other formats via canvas
+        if (typeof window !== "undefined") {
+          const blob = new Blob([img.buffer], { type: img.type || "image/jpeg" });
+          const imgUrl = URL.createObjectURL(blob);
+          try {
+            const htmlImg = new Image();
+            await new Promise<void>((resolve, reject) => {
+              htmlImg.onload = () => resolve();
+              htmlImg.onerror = reject;
+              htmlImg.src = imgUrl;
+            });
+
+            const canvas = document.createElement("canvas");
+            canvas.width = htmlImg.naturalWidth;
+            canvas.height = htmlImg.naturalHeight;
+            const ctx = canvas.getContext("2d");
+            ctx?.drawImage(htmlImg, 0, 0);
+
+            const pngBlob: Blob = await new Promise((resolve) =>
+              canvas.toBlob((b) => resolve(b!), "image/png")
+            );
+            canvas.width = 1;
+            canvas.height = 1;
+            const pngBuffer = await pngBlob.arrayBuffer();
+            embeddedImage = await pdfDoc.embedPng(pngBuffer);
+          } finally {
+            URL.revokeObjectURL(imgUrl);
+          }
+        } else {
+          // Server side fallback
+          embeddedImage = await pdfDoc.embedPng(img.buffer);
+        }
+      }
     }
 
     const { width: imgW, height: imgH } = embeddedImage;
 
-    let pageWidth = imgW;
-    let pageHeight = imgH;
+    if (isFitImage) {
+      // EXACT IMAGE SIZE (ZERO BORDERS — RECOMMENDED)
+      // Page size matches exact pixel/pt dimensions of the oriented image.
+      // Drawn from (0, 0) covering 100% of the page with 0.00 mm border.
+      const page = pdfDoc.addPage([imgW, imgH]);
+      page.drawImage(embeddedImage, {
+        x: 0,
+        y: 0,
+        width: imgW,
+        height: imgH,
+      });
+    } else {
+      let pageWidth =
+        options.pageSize === "letter" ? PageSizes.Letter[0] : PageSizes.A4[0];
+      let pageHeight =
+        options.pageSize === "letter" ? PageSizes.Letter[1] : PageSizes.A4[1];
 
-    if (options.pageSize === "a4") {
-      pageWidth = PageSizes.A4[0];
-      pageHeight = PageSizes.A4[1];
-    } else if (options.pageSize === "letter") {
-      pageWidth = PageSizes.Letter[0];
-      pageHeight = PageSizes.Letter[1];
-    }
-
-    if (options.pageSize !== "fit") {
       if (
         (options.orientation === "landscape" && pageWidth < pageHeight) ||
         (options.orientation === "portrait" && pageWidth > pageHeight)
@@ -1531,29 +1606,73 @@ export async function convertImagesToPdf(
         pageWidth = pageHeight;
         pageHeight = temp;
       }
+
+      if (options.layoutMode === "paper-fill") {
+        // A4 / Letter — Fill Edge-to-Edge (No White Bars)
+        // Scaled with Math.max to completely cover the sheet edge-to-edge
+        const scaleFactor = Math.max(pageWidth / imgW, pageHeight / imgH);
+        const drawW = imgW * scaleFactor;
+        const drawH = imgH * scaleFactor;
+        const x = (pageWidth - drawW) / 2;
+        const y = (pageHeight - drawH) / 2;
+
+        const page = pdfDoc.addPage([pageWidth, pageHeight]);
+        page.drawImage(embeddedImage, {
+          x,
+          y,
+          width: drawW,
+          height: drawH,
+        });
+      } else {
+        // A4 / Letter — Fit Inside With Margins
+        const marginVal =
+          typeof options.margin === "number"
+            ? options.margin
+            : options.margin === "none"
+            ? 0
+            : options.margin === "large"
+            ? 40
+            : 20;
+
+        const availW = Math.max(1, pageWidth - marginVal * 2);
+        const availH = Math.max(1, pageHeight - marginVal * 2);
+
+        const scaleFactor = Math.min(availW / imgW, availH / imgH);
+        const drawW = imgW * scaleFactor;
+        const drawH = imgH * scaleFactor;
+
+        const x = (pageWidth - drawW) / 2;
+        const y = (pageHeight - drawH) / 2;
+
+        const page = pdfDoc.addPage([pageWidth, pageHeight]);
+        page.drawImage(embeddedImage, {
+          x,
+          y,
+          width: drawW,
+          height: drawH,
+        });
+      }
     }
-
-    const availW = Math.max(1, pageWidth - margin * 2);
-    const availH = Math.max(1, pageHeight - margin * 2);
-
-    const scaleFactor = Math.min(availW / imgW, availH / imgH);
-    const drawW = imgW * scaleFactor;
-    const drawH = imgH * scaleFactor;
-
-    const x = (pageWidth - drawW) / 2;
-    const y = (pageHeight - drawH) / 2;
-
-    const page = pdfDoc.addPage([pageWidth, pageHeight]);
-    if (img.rotation) {
-      page.setRotation(degrees(img.rotation));
-    }
-    page.drawImage(embeddedImage, {
-      x,
-      y,
-      width: drawW,
-      height: drawH,
-    });
   }
 
-  return await pdfDoc.save({ useObjectStreams: true });
+  const rawBytes = await pdfDoc.save({ useObjectStreams: true });
+
+  // Optional Exact Target KB Compression
+  if (options.targetSizeKb && options.targetSizeKb > 0 && typeof window !== "undefined") {
+    try {
+      const { executeExactCompression } = await import("@/lib/compression-engine");
+      const safeBuf = toSafeArrayBuffer(rawBytes);
+      const res = await executeExactCompression(safeBuf, {
+        mode: "exact-size",
+        targetSizeKb: options.targetSizeKb,
+        exactBytePadding: true,
+      });
+      return res.pdfBytes;
+    } catch (compErr) {
+      console.warn("Target KB compression fallback to raw PDF:", compErr);
+      return rawBytes;
+    }
+  }
+
+  return rawBytes;
 }
