@@ -87,12 +87,20 @@ export function ImageToPdfTool() {
     setImages((prev) => [...prev, ...indexedItems]);
   }, []);
 
-  // Check for chained file or URL query param on mount
+  // Check for chained files or URL query param on mount
   useEffect(() => {
-    const chained = sessionHistory.consumeChainedFile();
-    if (chained) {
-      const file = createSafeFile(chained.data, chained.filename, chained.mimeType);
-      handleFilesAdded([file]);
+    const chainedList = sessionHistory.consumeChainedFiles();
+    if (chainedList && chainedList.length > 0) {
+      const files = chainedList.map((c) =>
+        createSafeFile(c.data, c.filename, c.mimeType)
+      );
+      handleFilesAdded(files);
+    } else {
+      const chained = sessionHistory.consumeChainedFile();
+      if (chained) {
+        const file = createSafeFile(chained.data, chained.filename, chained.mimeType);
+        handleFilesAdded([file]);
+      }
     }
 
     if (typeof window !== "undefined") {
@@ -226,7 +234,76 @@ export function ImageToPdfTool() {
 
   const handleInstantGeneratePdf = async (scannedFiles: File[]) => {
     if (scannedFiles.length === 0) return;
-    await handleFilesAdded(scannedFiles);
+    setIsProcessing(true);
+    setErrorMessage(null);
+    const startTime = performance.now();
+
+    try {
+      const imageInputs = [];
+      let totalOriginalSize = 0;
+
+      for (const file of scannedFiles) {
+        totalOriginalSize += file.size;
+        const buf = await file.arrayBuffer();
+        imageInputs.push({
+          file,
+          buffer: buf,
+          type: file.type || "image/jpeg",
+          rotation: 0,
+        });
+      }
+
+      const options: ImagesToPdfOptions = {
+        pageSize: "fit-image",
+        layoutMode: "fit-image",
+        margin: "none",
+        targetSizeKb: targetKbEnabled && targetKb > 0 ? targetKb : undefined,
+      };
+
+      const pdfBytes = await convertImagesToPdf(imageInputs, options);
+      const endTime = performance.now();
+      const durationMs = endTime - startTime;
+
+      const blob = createPdfBlob(pdfBytes);
+      const downloadUrl = URL.createObjectURL(blob);
+      const filename = `Camera_Scan_${new Date().toISOString().slice(0, 10)}.pdf`;
+
+      setOutputBytes(pdfBytes);
+      if (imageInputs.length > 0) {
+        setOriginalBytes(imageInputs[0].buffer);
+      }
+
+      setMetrics({
+        originalSize: totalOriginalSize,
+        processedSize: pdfBytes.byteLength,
+        savedBytes: 0,
+        savedPercentage: 0,
+        durationMs: Math.round(durationMs),
+        downloadUrl,
+        downloadFilename: filename,
+        pageCount: scannedFiles.length,
+        targetAccuracy: "Zero-Border Full Bleed",
+      });
+
+      sessionHistory.recordExecution({
+        toolId: "image-to-pdf",
+        toolName: "Images & Camera to PDF",
+        inputFiles: scannedFiles.map((f) => f.name),
+        outputFileName: filename,
+        outputSizeBytes: pdfBytes.byteLength,
+        durationMs: Math.round(durationMs),
+        outputData: pdfBytes,
+      });
+
+      await handleFilesAdded(scannedFiles);
+    } catch (err: unknown) {
+      console.error("Instant PDF generation error:", err);
+      setErrorMessage(
+        err instanceof Error ? err.message : "Failed to generate PDF from camera scans."
+      );
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (

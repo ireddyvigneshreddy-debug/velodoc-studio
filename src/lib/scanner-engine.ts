@@ -167,37 +167,37 @@ export function playCameraShutterSound(): void {
 // ============================================================================
 
 export interface StabilityDetectorOptions {
-  threshold?: number; // Mean absolute difference threshold (default 6.5)
-  requiredDurationMs?: number; // Time held steady to trigger (default 1200ms)
+  threshold?: number; // Mean absolute difference threshold (default 5.5)
+  requiredSteadyFrames?: number; // Number of steady 250ms frames to trigger (default 4 = 1.0s)
   onStabilityProgress: (progress: number) => void; // 0 to 1
   onTriggerShutter: () => void;
 }
 
 /**
- * Real-time frame stability detector. Analyzes video frames on a tiny 48x48
- * canvas to detect when the user holds a document completely motionless.
+ * Real-time frame stability detector. Analyzes video frames on a tiny 64x48
+ * canvas at 250ms intervals to detect when a document is held motionless.
  */
 export class MotionStabilityDetector {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D | null;
   private prevFrameData: Uint8ClampedArray | null = null;
-  private stableStartTimestamp: number | null = null;
+  private steadyFrameCount = 0;
   private lastTriggerTimestamp = 0;
   private isRunning = false;
-  private animFrameId: number | null = null;
+  private timerId: ReturnType<typeof setInterval> | null = null;
   private readonly threshold: number;
-  private readonly requiredDurationMs: number;
+  private readonly requiredSteadyFrames: number;
   private readonly onProgress: (progress: number) => void;
   private readonly onTrigger: () => void;
 
   constructor(options: StabilityDetectorOptions) {
-    this.threshold = options.threshold ?? 6.5;
-    this.requiredDurationMs = options.requiredDurationMs ?? 1200;
+    this.threshold = options.threshold ?? 5.5;
+    this.requiredSteadyFrames = options.requiredSteadyFrames ?? 4; // 4 * 250ms = 1.0s
     this.onProgress = options.onStabilityProgress;
     this.onTrigger = options.onTriggerShutter;
 
     this.canvas = document.createElement("canvas");
-    this.canvas.width = 48;
+    this.canvas.width = 64;
     this.canvas.height = 48;
     this.ctx = this.canvas.getContext("2d", { willReadFrequently: true });
   }
@@ -206,82 +206,80 @@ export class MotionStabilityDetector {
     if (this.isRunning) return;
     this.isRunning = true;
     this.prevFrameData = null;
-    this.stableStartTimestamp = null;
+    this.steadyFrameCount = 0;
+    this.onProgress(0);
 
-    const checkFrame = (timestamp: number) => {
+    const checkStability = () => {
       if (!this.isRunning) return;
+
+      const now = performance.now();
+      // Enforce a 1.5s cooldown after shutter triggers so the user can flip pages
+      if (now - this.lastTriggerTimestamp < 1500) {
+        this.onProgress(0);
+        return;
+      }
 
       if (
         video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
         video.videoWidth > 0 &&
         this.ctx
       ) {
-        // Enforce a 1.5s cooldown after shutter triggers so the user can flip pages
-        if (timestamp - this.lastTriggerTimestamp > 1500) {
-          this.ctx.drawImage(video, 0, 0, 48, 48);
-          const imageData = this.ctx.getImageData(0, 0, 48, 48);
-          const currentData = imageData.data;
+        this.ctx.drawImage(video, 0, 0, 64, 48);
+        const imageData = this.ctx.getImageData(0, 0, 64, 48);
+        const currentData = imageData.data;
 
-          if (this.prevFrameData) {
-            let totalDiff = 0;
-            const pixelCount = 48 * 48;
+        if (this.prevFrameData) {
+          let totalDiff = 0;
+          const pixelCount = 64 * 48;
 
-            for (let i = 0; i < currentData.length; i += 4) {
-              const curLum =
-                0.299 * currentData[i] +
-                0.587 * currentData[i + 1] +
-                0.114 * currentData[i + 2];
-              const prevLum =
-                0.299 * this.prevFrameData[i] +
-                0.587 * this.prevFrameData[i + 1] +
-                0.114 * this.prevFrameData[i + 2];
-              totalDiff += Math.abs(curLum - prevLum);
-            }
-
-            const meanDiff = totalDiff / pixelCount;
-
-            if (meanDiff < this.threshold) {
-              if (this.stableStartTimestamp === null) {
-                this.stableStartTimestamp = timestamp;
-              }
-              const elapsed = timestamp - this.stableStartTimestamp;
-              const progress = Math.min(1, elapsed / this.requiredDurationMs);
-              this.onProgress(progress);
-
-              if (progress >= 1) {
-                this.lastTriggerTimestamp = timestamp;
-                this.stableStartTimestamp = null;
-                this.onProgress(1);
-                this.onTrigger();
-              }
-            } else {
-              // Motion detected: reset stability timer
-              this.stableStartTimestamp = null;
-              this.onProgress(0);
-            }
+          for (let i = 0; i < currentData.length; i += 4) {
+            const curLum =
+              0.299 * currentData[i] +
+              0.587 * currentData[i + 1] +
+              0.114 * currentData[i + 2];
+            const prevLum =
+              0.299 * this.prevFrameData[i] +
+              0.587 * this.prevFrameData[i + 1] +
+              0.114 * this.prevFrameData[i + 2];
+            totalDiff += Math.abs(curLum - prevLum);
           }
 
-          // Cache current frame for next comparison
-          this.prevFrameData = new Uint8ClampedArray(currentData);
-        } else {
-          this.onProgress(0);
-        }
-      }
+          const meanDiff = totalDiff / pixelCount;
 
-      this.animFrameId = requestAnimationFrame(checkFrame);
+          if (meanDiff < this.threshold) {
+            this.steadyFrameCount++;
+            const progress = Math.min(1, this.steadyFrameCount / this.requiredSteadyFrames);
+            this.onProgress(progress);
+
+            if (this.steadyFrameCount >= this.requiredSteadyFrames) {
+              this.lastTriggerTimestamp = now;
+              this.steadyFrameCount = 0;
+              this.prevFrameData = null;
+              this.onProgress(1);
+              this.onTrigger();
+            }
+          } else {
+            // Motion detected: reset stability progress
+            this.steadyFrameCount = 0;
+            this.onProgress(0);
+          }
+        }
+
+        this.prevFrameData = new Uint8ClampedArray(currentData);
+      }
     };
 
-    this.animFrameId = requestAnimationFrame(checkFrame);
+    this.timerId = setInterval(checkStability, 250);
   }
 
   public stop(): void {
     this.isRunning = false;
-    if (this.animFrameId !== null) {
-      cancelAnimationFrame(this.animFrameId);
-      this.animFrameId = null;
+    if (this.timerId !== null) {
+      clearInterval(this.timerId);
+      this.timerId = null;
     }
     this.prevFrameData = null;
-    this.stableStartTimestamp = null;
+    this.steadyFrameCount = 0;
     this.onProgress(0);
   }
 }
@@ -300,19 +298,29 @@ export interface CameraInitializationResult {
 }
 
 /**
- * High-resolution camera stream initializer with cascading graceful fallback.
- * Prevents OverconstrainedError on Mac FaceTime cameras, iPhone Continuity, and USB webcams.
+ * High-resolution camera stream initializer with progressive graceful fallback.
+ * Never uses rigid "exact" constraints that throw OverconstrainedError on MacBooks, iPhones, or webcams.
  */
 export async function initializeCameraStream(options: {
   deviceId?: string;
   facingMode?: "user" | "environment";
   resolutionPreset?: "720p" | "1080p" | "4k";
 }): Promise<CameraInitializationResult> {
-  if (!navigator?.mediaDevices?.getUserMedia) {
+  if (typeof navigator === "undefined" || !navigator?.mediaDevices?.getUserMedia) {
     throw new Error("Camera API is not supported in this browser or environment.");
   }
 
-  const { deviceId, facingMode = "environment", resolutionPreset = "1080p" } = options;
+  const { deviceId, resolutionPreset = "1080p" } = options;
+
+  // Auto-detect default facing mode: "environment" for mobile, "user" for desktop
+  let facingMode = options.facingMode;
+  if (!facingMode && typeof window !== "undefined") {
+    const isMobile =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      ) || window.innerWidth < 768;
+    facingMode = isMobile ? "environment" : "user";
+  }
 
   let idealW = 1920;
   let idealH = 1080;
@@ -325,37 +333,46 @@ export async function initializeCameraStream(options: {
     idealH = 720;
   }
 
-  // Cascading constraint sets from highest desired resolution down to basic video
-  const constraintTiers: MediaStreamConstraints[] = [
-    {
+  // Exact 3-Tier Progressive Fallback Chain (Ideal constraints prevent OverconstrainedError)
+  const constraintTiers: MediaStreamConstraints[] = [];
+
+  // Attempt 1: Specific Device ID (if user picked one)
+  if (deviceId) {
+    constraintTiers.push({
       video: {
-        ...(deviceId ? { deviceId: { exact: deviceId } } : { facingMode: { ideal: facingMode } }),
+        deviceId: { ideal: deviceId },
         width: { ideal: idealW },
         height: { ideal: idealH },
       },
       audio: false,
+    });
+  }
+
+  // Attempt 2: Preferred Facing Mode (environment on phones, user on laptops)
+  constraintTiers.push({
+    video: {
+      facingMode: { ideal: facingMode || "environment" },
+      width: { ideal: idealW },
+      height: { ideal: idealH },
     },
-    {
-      video: {
-        ...(deviceId ? { deviceId: { exact: deviceId } } : { facingMode: { ideal: facingMode } }),
-        width: { ideal: 1920 },
-        height: { ideal: 1080 },
-      },
-      audio: false,
+    audio: false,
+  });
+
+  // Attempt 2b: Standard 720p with facingMode fallback
+  constraintTiers.push({
+    video: {
+      facingMode: { ideal: facingMode || "environment" },
+      width: { ideal: 1280 },
+      height: { ideal: 720 },
     },
-    {
-      video: {
-        ...(deviceId ? { deviceId: { exact: deviceId } } : {}),
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
-      },
-      audio: false,
-    },
-    {
-      video: deviceId ? { deviceId: { exact: deviceId } } : true,
-      audio: false,
-    },
-  ];
+    audio: false,
+  });
+
+  // Attempt 3: Safe Universal Fallback (Any video track available)
+  constraintTiers.push({
+    video: true,
+    audio: false,
+  });
 
   let stream: MediaStream | null = null;
   let lastError: unknown = null;
@@ -366,7 +383,7 @@ export async function initializeCameraStream(options: {
       if (stream) break;
     } catch (err) {
       lastError = err;
-      // If error is NotAllowedError (permission denied), don't keep looping
+      // If error is NotAllowedError (permission explicitly denied), do not keep looping
       if (err instanceof DOMException && err.name === "NotAllowedError") {
         throw err;
       }
@@ -880,7 +897,7 @@ export async function canvasToBlob(
  */
 export function createScanFile(blob: Blob, pageIndex: number): File {
   const padded = String(pageIndex + 1).padStart(2, "0");
-  const filename = `VeloDoc_Scan_Page_${padded}.jpg`;
+  const filename = `Scan_${padded}.jpg`;
   return new File([blob], filename, {
     type: "image/jpeg",
     lastModified: Date.now(),

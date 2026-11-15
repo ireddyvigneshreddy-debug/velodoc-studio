@@ -505,13 +505,11 @@ export function OcrPdfTool() {
       )}
 
       {/* Pro Camera Scanner Modal */}
-      {isCameraOpen && (
-        <CameraScannerModal
-          isOpen={isCameraOpen}
-          onClose={() => setIsCameraOpen(false)}
-          onAddScansToQueue={handleCameraScans}
-        />
-      )}
+      <CameraScannerModal
+        isOpen={isCameraOpen}
+        onClose={() => setIsCameraOpen(false)}
+        onAddScansToQueue={handleCameraScans}
+      />
     </div>
   );
 }

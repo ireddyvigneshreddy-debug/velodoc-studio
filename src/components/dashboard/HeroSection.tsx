@@ -62,8 +62,17 @@ export function HeroSection() {
   const handleCameraScanned = async (files: File[]) => {
     if (files.length > 0) {
       try {
-        const buffer = await files[0].arrayBuffer();
-        sessionHistory.setChainedFile(new Uint8Array(buffer), files[0].name, files[0].type);
+        const chainedList = await Promise.all(
+          files.map(async (file) => {
+            const buf = await file.arrayBuffer();
+            return {
+              data: new Uint8Array(buf),
+              filename: file.name,
+              mimeType: file.type || "image/jpeg",
+            };
+          })
+        );
+        sessionHistory.setChainedFiles(chainedList);
       } catch (err) {
         console.error("Camera scan chain error:", err);
       }

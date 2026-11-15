@@ -127,16 +127,20 @@ export function IdCardStudioTool() {
 
   const handleCameraScans = (files: File[]) => {
     if (files.length === 0) return;
-    const file = files[0];
     if (cameraTarget === "front") {
-      setFrontFile(file);
-      setFrontPreview(URL.createObjectURL(file));
+      setFrontFile(files[0]);
+      setFrontPreview(URL.createObjectURL(files[0]));
+      // If user snapped both sides in rapid batch mode, automatically populate Back
+      if (files[1]) {
+        setBackFile(files[1]);
+        setBackPreview(URL.createObjectURL(files[1]));
+      }
     } else if (cameraTarget === "back") {
-      setBackFile(file);
-      setBackPreview(URL.createObjectURL(file));
+      setBackFile(files[0]);
+      setBackPreview(URL.createObjectURL(files[0]));
     } else {
-      setPassportPhoto(file);
-      setPassportPreview(URL.createObjectURL(file));
+      setPassportPhoto(files[0]);
+      setPassportPreview(URL.createObjectURL(files[0]));
     }
     setIsCameraOpen(false);
   };

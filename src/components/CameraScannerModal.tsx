@@ -115,13 +115,24 @@ export function CameraScannerModal({
   const [isApplyingAdjustment, setIsApplyingAdjustment] = useState(false);
   const [activeCropPreset, setActiveCropPreset] = useState<CropPreset>("full");
 
-  // DOM Refs
+  // DOM Refs (Always keep stream and video references in refs to eliminate stale closure bugs)
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
+  const activeStreamRef = useRef<MediaStream | null>(null);
   const stabilityDetectorRef = useRef<MotionStabilityDetector | null>(null);
   const timerTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const editorCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const activePageRef = useRef<ScannedPageItem | null>(null);
+
+  // Default facing mode detection on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const isMobile =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent
+        ) || window.innerWidth < 768;
+      setFacingMode(isMobile ? "environment" : "user");
+    }
+  }, []);
 
   // Keep activePageRef up to date
   useEffect(() => {
@@ -159,9 +170,9 @@ export function CameraScannerModal({
 
   // Zero-leak camera stream cleanup
   const stopCurrentStream = useCallback(() => {
-    if (streamRef.current) {
-      stopMediaStream(streamRef.current);
-      streamRef.current = null;
+    if (activeStreamRef.current) {
+      stopMediaStream(activeStreamRef.current);
+      activeStreamRef.current = null;
     }
     if (videoRef.current) {
       videoRef.current.srcObject = null;
@@ -173,13 +184,19 @@ export function CameraScannerModal({
     setStabilityProgress(0);
   }, []);
 
-  // Initialize Camera Stream with graceful fallback tiers
+  // Initialize Camera Stream with progressive graceful fallback
   const startCamera = useCallback(async () => {
     if (!isOpen) return;
 
     setIsCameraLoading(true);
     setCameraError(null);
-    stopCurrentStream();
+
+    // Stop previous stream with 100ms hardware sensor release buffer to prevent NotReadableError
+    if (activeStreamRef.current) {
+      stopMediaStream(activeStreamRef.current);
+      activeStreamRef.current = null;
+      await new Promise((r) => setTimeout(r, 100));
+    }
 
     try {
       const res = await initializeCameraStream({
@@ -188,16 +205,25 @@ export function CameraScannerModal({
         resolutionPreset,
       });
 
-      streamRef.current = res.stream;
+      activeStreamRef.current = res.stream;
       setSupportsTorch(res.supportsTorch);
       setSupportsHardwareZoom(res.supportsZoom);
       if (res.zoomRange) {
         setHardwareZoomRange(res.zoomRange);
       }
 
+      // Automatically mirror front/user facing cameras, unmirror rear/environment cameras
+      const isUserFacing = facingMode === "user";
+      setIsMirrorActive(isUserFacing);
+
+      // Always assign stream to mounted video element and play
       if (videoRef.current) {
         videoRef.current.srcObject = res.stream;
-        await videoRef.current.play().catch(() => {});
+        try {
+          await videoRef.current.play();
+        } catch (playErr) {
+          console.warn("Video auto-play prevented or pending interaction:", playErr);
+        }
       }
 
       // Re-enumerate devices so system device labels populate after permission grant
@@ -209,11 +235,11 @@ export function CameraScannerModal({
         if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
           message = "Camera access denied. Please allow camera permissions in your browser.";
         } else if (err.name === "NotFoundError" || err.name === "DevicesNotFoundError") {
-          message = "No camera found on this device. You can still upload photos from disk.";
+          message = "No camera found on this device. You can upload photos or documents directly.";
         } else if (err.name === "NotReadableError") {
-          message = "Camera is already in use by another application.";
+          message = "Camera sensor is currently in use by another application or tab.";
         } else if (err.name === "OverconstrainedError") {
-          message = "Camera does not support the requested video constraints.";
+          message = "Requested camera resolution is not supported by your hardware.";
         }
       } else if (err instanceof Error) {
         message = err.message;
@@ -222,7 +248,7 @@ export function CameraScannerModal({
     } finally {
       setIsCameraLoading(false);
     }
-  }, [isOpen, selectedDeviceId, facingMode, resolutionPreset, stopCurrentStream, refreshDevices]);
+  }, [isOpen, selectedDeviceId, facingMode, resolutionPreset, refreshDevices]);
 
   // Restart camera whenever modal opens or camera hardware parameters change
   useEffect(() => {
@@ -244,8 +270,8 @@ export function CameraScannerModal({
 
   const handleZoomChange = async (newZoom: number) => {
     setZoomLevel(newZoom);
-    if (supportsHardwareZoom && streamRef.current) {
-      const track = streamRef.current.getVideoTracks()[0];
+    if (supportsHardwareZoom && activeStreamRef.current) {
+      const track = activeStreamRef.current.getVideoTracks()[0];
       if (track) {
         await applyTrackConstraint(track, { zoom: newZoom });
       }
@@ -253,8 +279,8 @@ export function CameraScannerModal({
   };
 
   const handleToggleTorch = async () => {
-    if (!supportsTorch || !streamRef.current) return;
-    const track = streamRef.current.getVideoTracks()[0];
+    if (!supportsTorch || !activeStreamRef.current) return;
+    const track = activeStreamRef.current.getVideoTracks()[0];
     if (!track) return;
 
     const nextTorch = !isTorchOn;
@@ -264,12 +290,26 @@ export function CameraScannerModal({
     }
   };
 
-  const handleFlipCamera = () => {
+  const handleFlipCamera = async () => {
+    // Release hardware sensor cleanly before re-requesting stream
+    if (activeStreamRef.current) {
+      stopMediaStream(activeStreamRef.current);
+      activeStreamRef.current = null;
+      await new Promise((r) => setTimeout(r, 100));
+    }
+
     if (devices.length > 1) {
       // Cycle to the next device ID
       const currentIndex = devices.findIndex((d) => d.deviceId === selectedDeviceId);
       const nextIndex = (currentIndex + 1) % devices.length;
-      setSelectedDeviceId(devices[nextIndex].deviceId);
+      const nextDev = devices[nextIndex];
+      setSelectedDeviceId(nextDev.deviceId);
+
+      const isFront =
+        nextDev.label.toLowerCase().includes("front") ||
+        nextDev.label.toLowerCase().includes("user") ||
+        nextDev.label.toLowerCase().includes("facetime");
+      setFacingMode(isFront ? "user" : "environment");
     } else {
       // Toggle facingMode if on mobile without named devices
       setFacingMode((prev) => (prev === "environment" ? "user" : "environment"));
@@ -284,7 +324,10 @@ export function CameraScannerModal({
     if (!videoRef.current || isCapturing) return;
 
     const video = videoRef.current;
-    if (video.videoWidth === 0 || video.videoHeight === 0) return;
+    if (video.readyState < 2 || video.videoWidth === 0 || video.videoHeight === 0) {
+      console.warn("Video frame not ready yet for capture.");
+      return;
+    }
 
     setIsCapturing(true);
 
@@ -301,12 +344,12 @@ export function CameraScannerModal({
       const snapCanvas = document.createElement("canvas");
       snapCanvas.width = vidW;
       snapCanvas.height = vidH;
-      const ctx = snapCanvas.getContext("2d");
+      const ctx = snapCanvas.getContext("2d", { willReadFrequently: true });
       if (!ctx) throw new Error("Could not acquire capture canvas context.");
 
       ctx.save();
 
-      // Mirror flip if enabled
+      // Mirror flip if enabled so saved scan matches what user saw on screen with forward-facing text
       if (isMirrorActive) {
         ctx.translate(vidW, 0);
         ctx.scale(-1, 1);
@@ -326,7 +369,7 @@ export function CameraScannerModal({
       ctx.restore();
 
       // 3. Export original snapshot
-      const originalBlob = await canvasToBlob(snapCanvas, "image/jpeg", 0.94);
+      const originalBlob = await canvasToBlob(snapCanvas, "image/jpeg", 0.95);
       const originalDataUrl = URL.createObjectURL(originalBlob);
 
       // 4. Create tiny thumbnail for filmstrip
@@ -356,11 +399,11 @@ export function CameraScannerModal({
         vidH,
         baseAdjustments
       );
-      const processedBlob = await canvasToBlob(enhancedCanvas, "image/jpeg", 0.94);
+      const processedBlob = await canvasToBlob(enhancedCanvas, "image/jpeg", 0.95);
       const processedDataUrl = URL.createObjectURL(processedBlob);
 
       const newPage: ScannedPageItem = {
-        id: Math.random().toString(36).substring(7),
+        id: `${Date.now()}-${Math.random().toString(36).substring(7)}`,
         originalBlob,
         originalDataUrl,
         processedBlob,
@@ -425,8 +468,8 @@ export function CameraScannerModal({
 
     if (!stabilityDetectorRef.current) {
       stabilityDetectorRef.current = new MotionStabilityDetector({
-        threshold: 6.0,
-        requiredDurationMs: 1200,
+        threshold: 5.5,
+        requiredSteadyFrames: 4, // 4 * 250ms = 1.0s
         onStabilityProgress: (prog) => {
           setStabilityProgress(prog);
         },
@@ -478,7 +521,6 @@ export function CameraScannerModal({
 
       setIsApplyingAdjustment(true);
       try {
-        // Load original capture into HTML Image
         const img = new window.Image();
         await new Promise<void>((resolve, reject) => {
           img.onload = () => resolve();
@@ -486,7 +528,6 @@ export function CameraScannerModal({
           img.src = activePage.originalDataUrl;
         });
 
-        // Run client-side filter and geometric calculations
         const enhancedCanvas = await processScannedImage(
           img,
           activePage.width,
@@ -494,7 +535,6 @@ export function CameraScannerModal({
           adjustmentsToApply
         );
 
-        // Update editor preview canvas
         if (editorCanvasRef.current) {
           const previewCanvas = editorCanvasRef.current;
           previewCanvas.width = enhancedCanvas.width;
@@ -503,10 +543,9 @@ export function CameraScannerModal({
           ctx?.drawImage(enhancedCanvas, 0, 0);
         }
 
-        const newProcessedBlob = await canvasToBlob(enhancedCanvas, "image/jpeg", 0.94);
+        const newProcessedBlob = await canvasToBlob(enhancedCanvas, "image/jpeg", 0.95);
         const newProcessedDataUrl = URL.createObjectURL(newProcessedBlob);
 
-        // Update in scannedPages array
         setScannedPages((prev) => {
           const next = [...prev];
           if (next[activePageIndex]) {
@@ -529,7 +568,6 @@ export function CameraScannerModal({
     [scannedPages, activePageIndex]
   );
 
-  // Set filter preset
   const handleSelectFilter = (filter: DocumentFilterType) => {
     const updated: ScanAdjustments = {
       ...editorAdjustments,
@@ -539,7 +577,6 @@ export function CameraScannerModal({
     applyAdjustmentsToActivePage(updated);
   };
 
-  // Set crop preset
   const handleSelectCropPreset = (preset: CropPreset) => {
     setActiveCropPreset(preset);
     const activePage = scannedPages[activePageIndex];
@@ -554,7 +591,6 @@ export function CameraScannerModal({
     applyAdjustmentsToActivePage(updated);
   };
 
-  // Rotate 90 degrees
   const handleRotate = (direction: "cw" | "ccw") => {
     const delta = direction === "cw" ? 90 : 270;
     const newRot = ((editorAdjustments.rotation + delta) % 360) as 0 | 90 | 180 | 270;
@@ -566,7 +602,6 @@ export function CameraScannerModal({
     applyAdjustmentsToActivePage(updated);
   };
 
-  // Slider adjustments (brightness, contrast, sharpness)
   const handleSliderChange = (
     key: "brightness" | "contrast" | "sharpness",
     value: number
@@ -579,7 +614,6 @@ export function CameraScannerModal({
     applyAdjustmentsToActivePage(updated);
   };
 
-  // "Apply Filter to All Scanned Pages" in 1 click
   const handleApplyFilterToAllPages = async () => {
     if (scannedPages.length === 0 || isProcessingBatch) return;
 
@@ -603,12 +637,11 @@ export function CameraScannerModal({
           page.height,
           {
             ...templateAdjustments,
-            // Keep each individual page's orientation/rotation if set
             rotation: page.adjustments.rotation,
           }
         );
 
-        const newProcessedBlob = await canvasToBlob(enhancedCanvas, "image/jpeg", 0.94);
+        const newProcessedBlob = await canvasToBlob(enhancedCanvas, "image/jpeg", 0.95);
         const newProcessedDataUrl = URL.createObjectURL(newProcessedBlob);
 
         updatedPages.push({
@@ -729,7 +762,7 @@ export function CameraScannerModal({
       {/* TOP STUDIO TOOLBAR */}
       <header className="relative z-20 flex items-center justify-between px-4 sm:px-6 py-3 bg-[#0D0F17]/90 border-b border-white/10 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-gradient-to-br from-indigo-500 to-cyan-500 text-white shadow-lg shadow-indigo-500/20">
+          <div className="w-8 h-8 rounded-lg bg-[#C2410C] text-white flex items-center justify-center shrink-0 shadow-sm">
             <Camera className="w-4 h-4" />
           </div>
           <div>
@@ -737,12 +770,12 @@ export function CameraScannerModal({
               <h2 className="text-sm font-bold text-white tracking-tight">
                 Pro Camera &amp; Document Scanner
               </h2>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                100% In-Browser Engine
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 uppercase">
+                Zero-Loss
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 hidden sm:block">
-              Crystal-clear 4K document capture with auto-shutter and real-time xerox filters
+            <p className="text-[11px] text-zinc-400 hidden sm:block">
+              Full-sensor 4K document capture with auto-shutter and real-time contrast filters
             </p>
           </div>
         </div>
@@ -750,14 +783,14 @@ export function CameraScannerModal({
         {/* View Switcher Tabs (Viewfinder vs. Editor) */}
         <div className="flex items-center gap-2">
           {scannedPages.length > 0 && (
-            <div className="flex items-center p-1 rounded-xl bg-black/50 border border-white/10 text-xs">
+            <div className="flex items-center p-1 rounded-xl bg-black/60 border border-white/10 text-xs">
               <button
                 type="button"
                 onClick={() => setCurrentView("viewfinder")}
-                className={`px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
                   currentView === "viewfinder"
-                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
-                    : "text-slate-400 hover:text-white"
+                    ? "bg-[#C2410C] text-white shadow-sm font-semibold"
+                    : "text-zinc-400 hover:text-white"
                 }`}
               >
                 <Video className="w-3.5 h-3.5" />
@@ -766,10 +799,10 @@ export function CameraScannerModal({
               <button
                 type="button"
                 onClick={() => setCurrentView("editor")}
-                className={`px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
                   currentView === "editor"
-                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
-                    : "text-slate-400 hover:text-white"
+                    ? "bg-[#C2410C] text-white shadow-sm font-semibold"
+                    : "text-zinc-400 hover:text-white"
                 }`}
               >
                 <Sliders className="w-3.5 h-3.5" />
@@ -781,7 +814,7 @@ export function CameraScannerModal({
           <button
             type="button"
             onClick={handleCloseModal}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
             aria-label="Close scanner modal"
           >
             <X className="w-5 h-5" />
@@ -792,406 +825,439 @@ export function CameraScannerModal({
       {/* MAIN STUDIO VIEWPORT */}
       <div className="relative flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
         {/* ================================================================= */}
-        {/* VIEW 1: LIVE VIEWFINDER */}
+        {/* VIEW 1: LIVE VIEWFINDER (ALWAYS MOUNTED to eliminate iOS metadata deadlocks) */}
         {/* ================================================================= */}
-        {currentView === "viewfinder" && (
-          <div className="relative flex-1 flex flex-col items-center justify-center bg-black overflow-hidden">
-            {/* Live Video Element */}
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className={`w-full h-full object-contain transition-transform duration-200 ${
-                isMirrorActive ? "-scale-x-100" : ""
-              }`}
-            />
+        <div
+          className={`relative flex-1 flex flex-col items-center justify-center bg-black overflow-hidden ${
+            currentView === "viewfinder" ? "flex" : "hidden"
+          }`}
+        >
+          {/* Always-Mounted Live Video Element */}
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className={`w-full h-full object-contain transition-transform duration-200 ${
+              isMirrorActive ? "-scale-x-100" : ""
+            }`}
+          />
 
-            {/* Camera Loading Overlay */}
-            {isCameraLoading && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm z-30 space-y-3">
-                <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
-                <p className="text-xs font-medium text-slate-300">
-                  Initializing camera hardware with crystal-clear optics...
+          {/* Camera Loading Overlay */}
+          {isCameraLoading && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/85 backdrop-blur-sm z-30 space-y-3">
+              <Loader2 className="w-8 h-8 text-[#C2410C] animate-spin" />
+              <p className="text-xs font-mono text-zinc-300">
+                Connecting camera optics &amp; auto-focus...
+              </p>
+            </div>
+          )}
+
+          {/* Camera Error / Permission Recovery Card */}
+          {cameraError && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/95 p-6 text-center z-30 space-y-5">
+              <div className="w-14 h-14 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center">
+                <AlertCircle className="w-8 h-8" />
+              </div>
+              <div className="max-w-md space-y-2">
+                <h3 className="text-base font-bold text-white">Camera Access Restricted</h3>
+                <p className="text-xs text-zinc-300 leading-relaxed">{cameraError}</p>
+                <p className="text-[11px] text-zinc-400 pt-1">
+                  Tip: Allow camera access in browser address bar or iOS Settings &rarr; Safari &rarr; Camera &rarr; Allow.
                 </p>
               </div>
-            )}
-
-            {/* Camera Error Overlay */}
-            {cameraError && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 p-6 text-center z-30 space-y-4">
-                <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400">
-                  <AlertCircle className="w-8 h-8" />
-                </div>
-                <div className="max-w-md space-y-1">
-                  <h3 className="text-sm font-bold text-white">Camera Unavailable</h3>
-                  <p className="text-xs text-slate-400">{cameraError}</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={startCamera}
-                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-2 shadow-lg"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" />
-                    <span>Retry Camera</span>
-                  </button>
-                  <label className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold cursor-pointer">
-                    <span>Upload Photos Instead</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      className="hidden"
-                      onChange={(e) => {
-                        const files = Array.from(e.target.files || []);
-                        if (files.length > 0) {
-                          onAddScansToQueue(files);
-                          handleCloseModal();
-                        }
-                      }}
-                    />
-                  </label>
-                </div>
-              </div>
-            )}
-
-            {/* VIEWFINDER OVERLAY GUIDES */}
-            {!isCameraLoading && !cameraError && (
-              <div className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center p-6">
-                {/* A4 / Letter Alignment Box */}
-                {(alignmentGuide === "a4" || alignmentGuide === "letter") && (
-                  <div
-                    className={`relative border-2 border-dashed border-white/40 rounded-lg transition-all ${
-                      alignmentGuide === "a4"
-                        ? "aspect-[1/1.414] max-h-[85%] max-w-[85%]"
-                        : "aspect-[8.5/11] max-h-[85%] max-w-[85%]"
-                    }`}
-                  >
-                    {/* Tactile hardware corner brackets */}
-                    <div className="absolute -top-1.5 -left-1.5 w-6 h-6 border-t-3 border-l-3 border-white rounded-tl" />
-                    <div className="absolute -top-1.5 -right-1.5 w-6 h-6 border-t-3 border-r-3 border-white rounded-tr" />
-                    <div className="absolute -bottom-1.5 -left-1.5 w-6 h-6 border-b-3 border-l-3 border-white rounded-bl" />
-                    <div className="absolute -bottom-1.5 -right-1.5 w-6 h-6 border-b-3 border-r-3 border-white rounded-br" />
-
-                    <div className="absolute top-3 left-3 px-2 py-0.5 rounded bg-black/70 backdrop-blur-sm text-[10px] font-mono font-bold text-white border border-white/20">
-                      {alignmentGuide.toUpperCase()} DOCUMENT ALIGNMENT
-                    </div>
-                  </div>
-                )}
-
-                {/* 3x3 Rule-of-Thirds Grid */}
-                {alignmentGuide === "grid" && (
-                  <div className="absolute inset-8 grid grid-cols-3 grid-rows-3 border border-white/20">
-                    <div className="border-r border-b border-white/20" />
-                    <div className="border-r border-b border-white/20" />
-                    <div className="border-b border-white/20" />
-                    <div className="border-r border-b border-white/20" />
-                    <div className="border-r border-b border-white/20" />
-                    <div className="border-b border-white/20" />
-                    <div className="border-r border-white/20" />
-                    <div className="border-r border-white/20" />
-                    <div />
-                  </div>
-                )}
-
-                {/* Center Crosshair for Flat-Lay Precision */}
-                {showCrosshair && (
-                  <div className="absolute flex items-center justify-center opacity-60">
-                    <Crosshair className="w-8 h-8 text-cyan-400 animate-pulse" />
-                  </div>
-                )}
-
-                {/* Hands-Free Auto-Shutter Stability Gauge */}
-                {isAutoShutterActive && (
-                  <div className="absolute top-5 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/75 backdrop-blur-md border border-cyan-500/40 text-xs text-white shadow-xl">
-                    <div className="w-4 h-4 rounded-full border-2 border-white/20 relative flex items-center justify-center">
-                      <div
-                        className="w-full h-full rounded-full bg-cyan-400 transition-all duration-100"
-                        style={{
-                          transform: `scale(${stabilityProgress})`,
-                          opacity: stabilityProgress > 0 ? 1 : 0,
-                        }}
-                      />
-                    </div>
-                    <span className="text-[11px] font-medium text-cyan-300 font-mono">
-                      {stabilityProgress >= 1
-                        ? "Snapping!"
-                        : stabilityProgress > 0
-                        ? `Hold Still (${Math.round(stabilityProgress * 100)}%)`
-                        : "Hold document steady..."}
-                    </span>
-                  </div>
-                )}
-
-                {/* Self-Timer Countdown Overlay */}
-                {countdownRemaining !== null && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-40">
-                    <div className="text-8xl font-black text-vermilion animate-ping">
-                      {countdownRemaining}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* TOP VIEWFINDER HARDWARE CONTROLS BAR */}
-            <div className="absolute top-4 inset-x-4 z-20 flex flex-wrap items-center justify-between gap-2 pointer-events-auto">
-              {/* Left group: Camera lens & resolution switchers */}
-              <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-black/60 backdrop-blur-md border border-white/10 shadow-xl">
-                {/* Camera device picker */}
-                {devices.length > 1 ? (
-                  <select
-                    value={selectedDeviceId}
-                    onChange={(e) => setSelectedDeviceId(e.target.value)}
-                    className="px-2.5 py-1 rounded-xl bg-transparent text-[11px] font-medium text-slate-200 focus:outline-none cursor-pointer max-w-[140px] truncate"
-                  >
-                    {devices.map((d, idx) => (
-                      <option key={d.deviceId || idx} value={d.deviceId} className="bg-[#12141D] text-white">
-                        {d.label || `Camera ${idx + 1}`}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <span className="px-2 py-1 text-[11px] font-medium text-slate-300">
-                    Facetime / Default Lens
-                  </span>
-                )}
-
-                {/* Flip camera front/back */}
+              <div className="flex flex-col sm:flex-row items-center gap-3 w-full max-w-sm">
+                <label className="w-full sm:flex-1 px-4 py-3 rounded-xl bg-[#C2410C] hover:bg-[#A8370A] text-white text-xs font-mono font-semibold flex items-center justify-center gap-2 shadow-sm cursor-pointer transition-colors">
+                  <Camera className="w-4 h-4" />
+                  <span>Use System Camera / Pick Photos</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || []);
+                      if (files.length > 0) {
+                        onAddScansToQueue(files);
+                        handleCloseModal();
+                      }
+                    }}
+                  />
+                </label>
                 <button
                   type="button"
-                  onClick={handleFlipCamera}
-                  title="Switch to next camera lens"
-                  className="p-1.5 rounded-xl hover:bg-white/10 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                  onClick={startCamera}
+                  className="w-full sm:w-auto px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-mono font-semibold flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
-                </button>
-
-                {/* Resolution selector */}
-                <select
-                  value={resolutionPreset}
-                  onChange={(e) => setResolutionPreset(e.target.value as ResolutionPreset)}
-                  className="px-2 py-1 rounded-xl bg-transparent text-[10px] font-mono font-bold text-cyan-400 focus:outline-none cursor-pointer border-l border-white/10"
-                >
-                  <option value="720p" className="bg-[#12141D] text-white">
-                    720p HD
-                  </option>
-                  <option value="1080p" className="bg-[#12141D] text-white">
-                    1080p FHD
-                  </option>
-                  <option value="4k" className="bg-[#12141D] text-white">
-                    2K/4K Ultra
-                  </option>
-                </select>
-              </div>
-
-              {/* Right group: Viewfinder Tools (Torch, Mirror, Guides, Timer, Auto-shutter) */}
-              <div className="flex items-center gap-1 p-1 rounded-2xl bg-black/60 backdrop-blur-md border border-white/10 shadow-xl">
-                {/* Torch / Flash */}
-                {supportsTorch && (
-                  <button
-                    type="button"
-                    onClick={handleToggleTorch}
-                    title={isTorchOn ? "Turn Torch Off" : "Turn Torch On"}
-                    className={`p-1.5 rounded-xl transition-colors cursor-pointer ${
-                      isTorchOn ? "bg-amber-400 text-black shadow-lg" : "text-slate-300 hover:text-white"
-                    }`}
-                  >
-                    {isTorchOn ? <Zap className="w-4 h-4 fill-current" /> : <ZapOff className="w-4 h-4" />}
-                  </button>
-                )}
-
-                {/* Mirror toggle */}
-                <button
-                  type="button"
-                  onClick={() => setIsMirrorActive((prev) => !prev)}
-                  title="Mirror / Flip Horizontally (fix reversed text on webcams)"
-                  className={`p-1.5 rounded-xl transition-colors cursor-pointer ${
-                    isMirrorActive ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30" : "text-slate-300 hover:text-white"
-                  }`}
-                >
-                  <FlipHorizontal className="w-4 h-4" />
-                </button>
-
-                {/* Alignment Guides toggle */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    const modes: AlignmentGuide[] = ["none", "a4", "letter", "grid"];
-                    const next = modes[(modes.indexOf(alignmentGuide) + 1) % modes.length];
-                    setAlignmentGuide(next);
-                  }}
-                  title={`Alignment Guide: ${alignmentGuide}`}
-                  className={`px-2 py-1 rounded-xl text-[10px] font-mono font-bold transition-colors cursor-pointer ${
-                    alignmentGuide !== "none"
-                      ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
-                      : "text-slate-400 hover:text-white"
-                  }`}
-                >
-                  {alignmentGuide === "none" ? "Guide: Off" : alignmentGuide.toUpperCase()}
-                </button>
-
-                {/* Crosshair toggle */}
-                <button
-                  type="button"
-                  onClick={() => setShowCrosshair((prev) => !prev)}
-                  title="Toggle Center Crosshair"
-                  className={`p-1.5 rounded-xl transition-colors cursor-pointer ${
-                    showCrosshair ? "text-cyan-400" : "text-slate-500 hover:text-white"
-                  }`}
-                >
-                  <Crosshair className="w-4 h-4" />
-                </button>
-
-                {/* Self-Timer toggle */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    const modes: TimerMode[] = [0, 3, 5];
-                    const next = modes[(modes.indexOf(timerSeconds) + 1) % modes.length];
-                    setTimerSeconds(next);
-                  }}
-                  title={`Self-Timer: ${timerSeconds === 0 ? "Off" : `${timerSeconds}s`}`}
-                  className={`px-2 py-1 rounded-xl text-[10px] font-mono font-bold transition-colors cursor-pointer ${
-                    timerSeconds > 0
-                      ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
-                      : "text-slate-400 hover:text-white"
-                  }`}
-                >
-                  {timerSeconds === 0 ? "Timer: Off" : `${timerSeconds}s`}
-                </button>
-
-                {/* Hands-free Auto-Shutter toggle */}
-                <button
-                  type="button"
-                  onClick={() => setIsAutoShutterActive((prev) => !prev)}
-                  title="Hands-Free Auto-Shutter (snaps automatically when document is held steady)"
-                  className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
-                    isAutoShutterActive
-                      ? "bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-md shadow-emerald-500/20"
-                      : "text-slate-300 hover:text-white bg-white/5"
-                  }`}
-                >
-                  <Sparkles className="w-3 h-3" />
-                  <span>Auto-Snap</span>
+                  <span>Retry</span>
                 </button>
               </div>
             </div>
+          )}
 
-            {/* BOTTOM VIEWFINDER SHUTTER & ZOOM DOCK (Leica / iOS Pro Camera HUD) */}
-            <div className="absolute bottom-4 inset-x-0 z-20 flex flex-col items-center justify-center space-y-2.5 pointer-events-auto">
-              {/* Live Filter Preset Switcher Pills */}
-              <div className="flex items-center gap-1.5 p-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 shadow-xl">
-                {[
-                  { id: "magic-color", label: "Magic Color", icon: Sparkles },
-                  { id: "bw-threshold", label: "Crisp B&W", icon: FileText },
-                  { id: "grayscale", label: "Clean Grayscale", icon: Layers },
-                ].map((f) => {
-                  const Icon = f.icon;
-                  const isSelected = viewfinderFilter === f.id;
-                  return (
-                    <button
-                      key={f.id}
-                      type="button"
-                      onClick={() => setViewfinderFilter(f.id as DocumentFilterType)}
-                      className={`flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-semibold transition-all cursor-pointer ${
-                        isSelected
-                          ? "bg-gradient-to-r from-cyan-500 to-indigo-600 text-white shadow-md shadow-cyan-500/25 border border-cyan-400/40"
-                          : "text-zinc-400 hover:text-white hover:bg-white/[0.08]"
-                      }`}
-                    >
-                      <Icon className="w-3 h-3" />
-                      <span>{f.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Zoom Slider Bar */}
-              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-xs text-zinc-300 shadow-xl">
-                <button
-                  type="button"
-                  onClick={() => handleZoomChange(1.0)}
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold transition-colors cursor-pointer ${
-                    zoomLevel === 1.0 ? "bg-white/20 text-white" : "text-zinc-400 hover:text-white"
+          {/* VIEWFINDER OVERLAY GUIDES */}
+          {!isCameraLoading && !cameraError && (
+            <div className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center p-6">
+              {/* A4 / Letter Alignment Box */}
+              {(alignmentGuide === "a4" || alignmentGuide === "letter") && (
+                <div
+                  className={`relative border-2 border-dashed border-white/40 rounded-lg transition-all ${
+                    alignmentGuide === "a4"
+                      ? "aspect-[1/1.414] max-h-[85%] max-w-[85%]"
+                      : "aspect-[8.5/11] max-h-[85%] max-w-[85%]"
                   }`}
                 >
-                  1.0x
-                </button>
-                <input
-                  type="range"
-                  min={supportsHardwareZoom ? hardwareZoomRange.min : 1.0}
-                  max={supportsHardwareZoom ? hardwareZoomRange.max : 4.0}
-                  step={0.1}
-                  value={zoomLevel}
-                  onChange={(e) => handleZoomChange(parseFloat(e.target.value))}
-                  className="w-24 sm:w-32 accent-cyan-400 cursor-pointer h-1 rounded-lg"
-                />
-                <button
-                  type="button"
-                  onClick={() => handleZoomChange(2.0)}
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold transition-colors cursor-pointer ${
-                    zoomLevel === 2.0 ? "bg-white/20 text-white" : "text-zinc-400 hover:text-white"
-                  }`}
-                >
-                  2.0x
-                </button>
-                <span className="text-[10px] font-mono text-cyan-400 min-w-[28px] text-right font-bold">
-                  {zoomLevel.toFixed(1)}x
-                </span>
-              </div>
+                  {/* Tactile hardware corner brackets */}
+                  <div className="absolute -top-1.5 -left-1.5 w-6 h-6 border-t-2 border-l-2 border-white rounded-tl" />
+                  <div className="absolute -top-1.5 -right-1.5 w-6 h-6 border-t-2 border-r-2 border-white rounded-tr" />
+                  <div className="absolute -bottom-1.5 -left-1.5 w-6 h-6 border-b-2 border-l-2 border-white rounded-bl" />
+                  <div className="absolute -bottom-1.5 -right-1.5 w-6 h-6 border-b-2 border-r-2 border-white rounded-br" />
 
-              {/* Shutter Button & Capture Mode Switcher */}
-              <div className="flex items-center gap-5 sm:gap-7">
-                {/* Capture Mode Toggle */}
-                <div className="p-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center text-xs shadow-lg">
-                  <button
-                    type="button"
-                    onClick={() => setCaptureMode("single")}
-                    className={`px-3 py-1 rounded-full text-[11px] font-semibold transition-all cursor-pointer ${
-                      captureMode === "single"
-                        ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
-                        : "text-zinc-400 hover:text-white"
-                    }`}
-                  >
-                    Single
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCaptureMode("batch")}
-                    className={`px-3 py-1 rounded-full text-[11px] font-semibold transition-all cursor-pointer ${
-                      captureMode === "batch"
-                        ? "bg-cyan-600 text-white shadow-md shadow-cyan-600/30"
-                        : "text-zinc-400 hover:text-white"
-                    }`}
-                  >
-                    Rapid Batch
-                  </button>
+                  <div className="absolute top-3 left-3 px-2 py-0.5 rounded bg-black/70 backdrop-blur-sm text-[10px] font-mono font-bold text-white border border-white/20">
+                    {alignmentGuide.toUpperCase()} DOCUMENT ALIGNMENT
+                  </div>
                 </div>
+              )}
 
-                {/* Tactile Leica / iOS Pro Shutter Snap Button */}
+              {/* Rule-of-Thirds Grid (SVG overlay avoiding grid-cols-3) */}
+              {alignmentGuide === "grid" && (
+                <svg
+                  className="absolute inset-4 sm:inset-8 w-[calc(100%-32px)] sm:w-[calc(100%-64px)] h-[calc(100%-32px)] sm:h-[calc(100%-64px)] pointer-events-none"
+                  viewBox="0 0 300 300"
+                  preserveAspectRatio="none"
+                >
+                  <line x1="100" y1="0" x2="100" y2="300" stroke="rgba(255,255,255,0.25)" strokeWidth="1" strokeDasharray="4 4" />
+                  <line x1="200" y1="0" x2="200" y2="300" stroke="rgba(255,255,255,0.25)" strokeWidth="1" strokeDasharray="4 4" />
+                  <line x1="0" y1="100" x2="300" y2="100" stroke="rgba(255,255,255,0.25)" strokeWidth="1" strokeDasharray="4 4" />
+                  <line x1="0" y1="200" x2="300" y2="200" stroke="rgba(255,255,255,0.25)" strokeWidth="1" strokeDasharray="4 4" />
+                </svg>
+              )}
+
+              {/* Center Crosshair for Flat-Lay Precision */}
+              {showCrosshair && (
+                <div className="absolute flex items-center justify-center opacity-60">
+                  <Crosshair className="w-8 h-8 text-[#C2410C] animate-pulse" />
+                </div>
+              )}
+
+              {/* Hands-Free Auto-Shutter Stability Gauge */}
+              {isAutoShutterActive && (
+                <div className="absolute top-5 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/80 backdrop-blur-md border border-emerald-500/40 text-xs text-white shadow-xl">
+                  <div className="w-4 h-4 rounded-full border-2 border-white/20 relative flex items-center justify-center">
+                    <div
+                      className="w-full h-full rounded-full bg-emerald-400 transition-all duration-150"
+                      style={{
+                        transform: `scale(${stabilityProgress})`,
+                        opacity: stabilityProgress > 0 ? 1 : 0,
+                      }}
+                    />
+                  </div>
+                  <span className="text-[11px] font-mono font-medium text-emerald-300">
+                    {stabilityProgress >= 1
+                      ? "Snapping!"
+                      : stabilityProgress > 0
+                      ? `Hold Steady (${Math.round(stabilityProgress * 100)}%)`
+                      : "Hold document steady..."}
+                  </span>
+                </div>
+              )}
+
+              {/* Self-Timer Countdown Overlay */}
+              {countdownRemaining !== null && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-40">
+                  <div className="text-8xl font-black text-[#C2410C] animate-ping">
+                    {countdownRemaining}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TOP VIEWFINDER HARDWARE CONTROLS BAR */}
+          <div className="absolute top-4 inset-x-4 z-20 flex flex-wrap items-center justify-between gap-2 pointer-events-auto">
+            {/* Left group: Camera lens & resolution switchers */}
+            <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-black/60 backdrop-blur-md border border-white/10 shadow-xl">
+              {/* Camera device picker */}
+              {devices.length > 1 ? (
+                <select
+                  value={selectedDeviceId}
+                  onChange={(e) => setSelectedDeviceId(e.target.value)}
+                  className="px-2.5 py-1 rounded-xl bg-transparent text-[11px] font-medium text-zinc-200 focus:outline-none cursor-pointer max-w-[140px] truncate"
+                >
+                  {devices.map((d, idx) => (
+                    <option key={d.deviceId || idx} value={d.deviceId} className="bg-[#12141D] text-white">
+                      {d.label || `Camera ${idx + 1}`}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <span className="px-2 py-1 text-[11px] font-medium text-zinc-300">
+                  {facingMode === "environment" ? "Rear Lens" : "Front Camera"}
+                </span>
+              )}
+
+              {/* Flip camera front/back */}
+              <button
+                type="button"
+                onClick={handleFlipCamera}
+                title="Switch camera lens"
+                className="p-1.5 rounded-xl hover:bg-white/10 text-zinc-300 hover:text-white transition-colors cursor-pointer"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+              </button>
+
+              {/* Resolution selector */}
+              <select
+                value={resolutionPreset}
+                onChange={(e) => setResolutionPreset(e.target.value as ResolutionPreset)}
+                className="px-2 py-1 rounded-xl bg-transparent text-[10px] font-mono font-bold text-amber-400 focus:outline-none cursor-pointer border-l border-white/10"
+              >
+                <option value="720p" className="bg-[#12141D] text-white">
+                  720p HD
+                </option>
+                <option value="1080p" className="bg-[#12141D] text-white">
+                  1080p FHD
+                </option>
+                <option value="4k" className="bg-[#12141D] text-white">
+                  2K/4K Ultra
+                </option>
+              </select>
+            </div>
+
+            {/* Right group: Viewfinder Tools (Torch, Mirror, Guides, Timer, Auto-shutter) */}
+            <div className="flex items-center gap-1 p-1 rounded-2xl bg-black/60 backdrop-blur-md border border-white/10 shadow-xl">
+              {/* Torch / Flash */}
+              {supportsTorch && (
+                <button
+                  type="button"
+                  onClick={handleToggleTorch}
+                  title={isTorchOn ? "Turn Torch Off" : "Turn Torch On"}
+                  className={`p-1.5 rounded-xl transition-colors cursor-pointer ${
+                    isTorchOn ? "bg-amber-400 text-black shadow-lg" : "text-zinc-300 hover:text-white"
+                  }`}
+                >
+                  {isTorchOn ? <Zap className="w-4 h-4 fill-current" /> : <ZapOff className="w-4 h-4" />}
+                </button>
+              )}
+
+              {/* Mirror toggle */}
+              <button
+                type="button"
+                onClick={() => setIsMirrorActive((prev) => !prev)}
+                title="Mirror / Flip Horizontally (fix reversed text on webcams)"
+                className={`p-1.5 rounded-xl transition-colors cursor-pointer ${
+                  isMirrorActive ? "bg-amber-500/20 text-amber-300 border border-amber-500/30" : "text-zinc-300 hover:text-white"
+                }`}
+              >
+                <FlipHorizontal className="w-4 h-4" />
+              </button>
+
+              {/* Alignment Guides toggle */}
+              <button
+                type="button"
+                onClick={() => {
+                  const modes: AlignmentGuide[] = ["none", "a4", "letter", "grid"];
+                  const next = modes[(modes.indexOf(alignmentGuide) + 1) % modes.length];
+                  setAlignmentGuide(next);
+                }}
+                title={`Alignment Guide: ${alignmentGuide}`}
+                className={`px-2 py-1 rounded-xl text-[10px] font-mono font-bold transition-colors cursor-pointer ${
+                  alignmentGuide !== "none"
+                    ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                    : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                {alignmentGuide === "none" ? "Guide: Off" : alignmentGuide.toUpperCase()}
+              </button>
+
+              {/* Crosshair toggle */}
+              <button
+                type="button"
+                onClick={() => setShowCrosshair((prev) => !prev)}
+                title="Toggle Center Crosshair"
+                className={`p-1.5 rounded-xl transition-colors cursor-pointer ${
+                  showCrosshair ? "text-[#C2410C]" : "text-zinc-500 hover:text-white"
+                }`}
+              >
+                <Crosshair className="w-4 h-4" />
+              </button>
+
+              {/* Self-Timer toggle */}
+              <button
+                type="button"
+                onClick={() => {
+                  const modes: TimerMode[] = [0, 3, 5];
+                  const next = modes[(modes.indexOf(timerSeconds) + 1) % modes.length];
+                  setTimerSeconds(next);
+                }}
+                title={`Self-Timer: ${timerSeconds === 0 ? "Off" : `${timerSeconds}s`}`}
+                className={`px-2 py-1 rounded-xl text-[10px] font-mono font-bold transition-colors cursor-pointer ${
+                  timerSeconds > 0
+                    ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                    : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                {timerSeconds === 0 ? "Timer: Off" : `${timerSeconds}s`}
+              </button>
+
+              {/* Hands-free Auto-Shutter toggle */}
+              <button
+                type="button"
+                onClick={() => setIsAutoShutterActive((prev) => !prev)}
+                title="Hands-Free Auto-Shutter (snaps automatically when document is held steady)"
+                className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                  isAutoShutterActive
+                    ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/30"
+                    : "text-zinc-300 hover:text-white bg-white/5"
+                }`}
+              >
+                <Sparkles className="w-3 h-3" />
+                <span>Auto-Snap</span>
+              </button>
+            </div>
+          </div>
+
+          {/* BOTTOM VIEWFINDER SHUTTER & ZOOM DOCK */}
+          <div className="absolute bottom-4 inset-x-0 z-20 flex flex-col items-center justify-center space-y-2.5 pointer-events-auto pb-safe">
+            {/* Live Filter Preset Switcher Pills */}
+            <div className="flex items-center gap-1.5 p-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 shadow-xl">
+              {[
+                { id: "magic-color", label: "Magic Color", icon: Sparkles },
+                { id: "bw-threshold", label: "Crisp B&W", icon: FileText },
+                { id: "grayscale", label: "Clean Grayscale", icon: Layers },
+              ].map((f) => {
+                const Icon = f.icon;
+                const isSelected = viewfinderFilter === f.id;
+                return (
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => setViewfinderFilter(f.id as DocumentFilterType)}
+                    className={`flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-semibold transition-all cursor-pointer ${
+                      isSelected
+                        ? "bg-[#C2410C] text-white shadow-sm border border-[#C2410C]"
+                        : "text-zinc-400 hover:text-white hover:bg-white/[0.08]"
+                    }`}
+                  >
+                    <Icon className="w-3 h-3" />
+                    <span>{f.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Zoom Slider Bar */}
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-xs text-zinc-300 shadow-xl">
+              <button
+                type="button"
+                onClick={() => handleZoomChange(1.0)}
+                className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold transition-colors cursor-pointer ${
+                  zoomLevel === 1.0 ? "bg-white/20 text-white" : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                1.0x
+              </button>
+              <input
+                type="range"
+                min={supportsHardwareZoom ? hardwareZoomRange.min : 1.0}
+                max={supportsHardwareZoom ? hardwareZoomRange.max : 4.0}
+                step={0.1}
+                value={zoomLevel}
+                onChange={(e) => handleZoomChange(parseFloat(e.target.value))}
+                className="w-24 sm:w-32 accent-[#C2410C] cursor-pointer h-1 rounded-lg"
+              />
+              <button
+                type="button"
+                onClick={() => handleZoomChange(2.0)}
+                className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold transition-colors cursor-pointer ${
+                  zoomLevel === 2.0 ? "bg-white/20 text-white" : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                2.0x
+              </button>
+              <span className="text-[10px] font-mono text-[#F97316] min-w-[28px] text-right font-bold">
+                {zoomLevel.toFixed(1)}x
+              </span>
+            </div>
+
+            {/* Shutter Button & Capture Mode Switcher */}
+            <div className="flex items-center gap-5 sm:gap-7">
+              {/* Capture Mode Toggle */}
+              <div className="p-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center text-xs shadow-lg">
+                <button
+                  type="button"
+                  onClick={() => setCaptureMode("single")}
+                  className={`px-3 py-1 rounded-full text-[11px] font-semibold transition-all cursor-pointer ${
+                    captureMode === "single"
+                      ? "bg-zinc-800 text-white shadow-sm"
+                      : "text-zinc-400 hover:text-white"
+                  }`}
+                >
+                  Single
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCaptureMode("batch")}
+                  className={`px-3 py-1 rounded-full text-[11px] font-semibold transition-all cursor-pointer ${
+                    captureMode === "batch"
+                      ? "bg-[#C2410C] text-white shadow-sm"
+                      : "text-zinc-400 hover:text-white"
+                  }`}
+                >
+                  Rapid Batch
+                </button>
+              </div>
+
+              {/* Tactile Shutter Snap Button with Auto-Shutter Progress Ring */}
+              <div className="relative flex items-center justify-center">
+                {isAutoShutterActive && (
+                  <svg
+                    className="absolute -inset-2 w-[calc(100%+16px)] h-[calc(100%+16px)] -rotate-90 pointer-events-none z-10"
+                    viewBox="0 0 100 100"
+                  >
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="44"
+                      className="stroke-white/20 fill-none"
+                      strokeWidth="4"
+                    />
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="44"
+                      className="stroke-emerald-400 fill-none transition-all duration-150"
+                      strokeWidth="4"
+                      strokeDasharray={2 * Math.PI * 44}
+                      strokeDashoffset={(1 - stabilityProgress) * (2 * Math.PI * 44)}
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                )}
+
                 <button
                   type="button"
                   onClick={handleShutterClick}
                   disabled={isCapturing || Boolean(cameraError)}
                   aria-label="Capture Document"
-                  className="relative group p-1.5 rounded-full border-4 border-white/90 hover:border-white transition-all transform active:scale-90 shadow-paper cursor-pointer disabled:opacity-50"
+                  className="relative group p-1.5 rounded-full border-4 border-white/90 hover:border-white transition-all transform active:scale-90 shadow-2xl cursor-pointer disabled:opacity-50"
                 >
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-vermilion hover:bg-vermilion-hover group-hover:scale-105 active:scale-95 transition-transform flex items-center justify-center">
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#C2410C] hover:bg-[#A8370A] group-hover:scale-105 active:scale-95 transition-transform flex items-center justify-center">
                     <Camera className="w-6 h-6 text-white group-hover:scale-110 transition-transform" />
                   </div>
                 </button>
+              </div>
 
-                {/* Captured Pages Counter Badge */}
-                <div className="px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-xs font-mono text-zinc-300 shadow-lg">
-                  <span className="text-cyan-400 font-bold tabular-nums">{scannedPages.length}</span>{" "}
-                  {scannedPages.length === 1 ? "page" : "pages"}
-                </div>
+              {/* Captured Pages Counter Badge */}
+              <div className="px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-xs font-mono text-zinc-300 shadow-lg">
+                <span className="text-amber-400 font-bold tabular-nums">{scannedPages.length}</span>{" "}
+                {scannedPages.length === 1 ? "page" : "pages"}
               </div>
             </div>
           </div>
-        )}
+        </div>
 
         {/* ================================================================= */}
         {/* VIEW 2: SCAN POST-PROCESSOR & FINE-TUNING STUDIO */}
@@ -1211,7 +1277,7 @@ export function CameraScannerModal({
                   {isApplyingAdjustment && (
                     <div className="absolute inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-10">
                       <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/80 text-white text-xs font-medium border border-white/10">
-                        <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-400" />
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-[#C2410C]" />
                         <span>Applying Filter...</span>
                       </div>
                     </div>
@@ -1223,8 +1289,8 @@ export function CameraScannerModal({
                   </div>
                 </div>
               ) : (
-                <div className="text-center text-slate-400 space-y-2">
-                  <FileText className="w-10 h-10 mx-auto text-slate-600" />
+                <div className="text-center text-zinc-400 space-y-2">
+                  <FileText className="w-10 h-10 mx-auto text-zinc-600" />
                   <p className="text-sm">No page selected to enhance.</p>
                 </div>
               )}
@@ -1235,21 +1301,21 @@ export function CameraScannerModal({
               {/* Preset Filters Section */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                  <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-[#C2410C]" />
                     <span>Document Filter Presets</span>
                   </h3>
                   <button
                     type="button"
                     onClick={handleApplyFilterToAllPages}
                     disabled={isProcessingBatch || scannedPages.length <= 1}
-                    className="text-[10px] font-semibold text-cyan-400 hover:text-cyan-300 disabled:opacity-40 transition-colors"
+                    className="text-[10px] font-semibold text-amber-400 hover:text-amber-300 disabled:opacity-40 transition-colors cursor-pointer"
                   >
                     Apply to All {scannedPages.length} Pages
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2">
+                <div className="space-y-2">
                   {FILTER_METADATA.map((f) => {
                     const isSelected = editorAdjustments.filter === f.id;
                     return (
@@ -1257,17 +1323,17 @@ export function CameraScannerModal({
                         key={f.id}
                         type="button"
                         onClick={() => handleSelectFilter(f.id)}
-                        className={`flex items-start gap-2.5 p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                        className={`w-full flex items-start gap-2.5 p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                           isSelected
-                            ? "bg-cyan-500/10 border-cyan-500 text-white shadow-md shadow-cyan-500/10"
-                            : "bg-white/[0.02] border-white/5 hover:border-white/20 text-slate-300 hover:text-white"
+                            ? "bg-[#C2410C]/15 border-[#C2410C] text-white shadow-sm"
+                            : "bg-white/[0.02] border-white/5 hover:border-white/20 text-zinc-300 hover:text-white"
                         }`}
                       >
                         <div
                           className={`p-1.5 rounded-lg shrink-0 ${
                             isSelected
-                              ? "bg-cyan-500 text-white"
-                              : "bg-white/5 text-slate-400"
+                              ? "bg-[#C2410C] text-white"
+                              : "bg-white/5 text-zinc-400"
                           }`}
                         >
                           {f.id === "original" && <Camera className="w-3.5 h-3.5" />}
@@ -1278,7 +1344,7 @@ export function CameraScannerModal({
                         </div>
                         <div className="min-w-0">
                           <p className="text-xs font-bold truncate">{f.label}</p>
-                          <p className="text-[10px] text-slate-400 line-clamp-1">{f.shortDesc}</p>
+                          <p className="text-[10px] text-zinc-400 line-clamp-1">{f.shortDesc}</p>
                         </div>
                       </button>
                     );
@@ -1286,14 +1352,14 @@ export function CameraScannerModal({
                 </div>
               </div>
 
-              {/* Crop & Perspective Presets */}
+              {/* Crop & Perspective Presets (flex-wrap avoids grid-cols-3) */}
               <div className="space-y-3 pt-2 border-t border-white/5">
-                <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                  <Crop className="w-3.5 h-3.5 text-indigo-400" />
+                <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <Crop className="w-3.5 h-3.5 text-[#C2410C]" />
                   <span>Crop &amp; Perspective Presets</span>
                 </h3>
 
-                <div className="grid grid-cols-3 gap-1.5 text-xs">
+                <div className="flex flex-wrap gap-1.5 text-xs">
                   {(
                     [
                       { id: "full", label: "Full Frame" },
@@ -1307,10 +1373,10 @@ export function CameraScannerModal({
                       key={preset.id}
                       type="button"
                       onClick={() => handleSelectCropPreset(preset.id)}
-                      className={`px-2 py-1.5 rounded-lg font-medium text-[11px] transition-all cursor-pointer ${
+                      className={`px-2.5 py-1.5 rounded-lg font-medium text-[11px] transition-all cursor-pointer ${
                         activeCropPreset === preset.id
-                          ? "bg-indigo-600 text-white font-bold"
-                          : "bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white"
+                          ? "bg-[#C2410C] text-white font-bold"
+                          : "bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white"
                       }`}
                     >
                       {preset.label}
@@ -1323,7 +1389,7 @@ export function CameraScannerModal({
                   <button
                     type="button"
                     onClick={() => handleRotate("ccw")}
-                    className="flex-1 py-1.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    className="flex-1 py-1.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                     <span>Rotate 90° CCW</span>
@@ -1331,7 +1397,7 @@ export function CameraScannerModal({
                   <button
                     type="button"
                     onClick={() => handleRotate("cw")}
-                    className="flex-1 py-1.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    className="flex-1 py-1.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                   >
                     <RotateCw className="w-3.5 h-3.5" />
                     <span>Rotate 90° CW</span>
@@ -1341,14 +1407,14 @@ export function CameraScannerModal({
 
               {/* Fine-Tuning Sliders */}
               <div className="space-y-4 pt-2 border-t border-white/5">
-                <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                  <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-400" />
+                <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <SlidersHorizontal className="w-3.5 h-3.5 text-[#C2410C]" />
                   <span>Fine-Tune Contrast &amp; Edge Sharpness</span>
                 </h3>
 
                 {/* Brightness */}
                 <div className="space-y-1">
-                  <div className="flex items-center justify-between text-xs text-slate-400">
+                  <div className="flex items-center justify-between text-xs text-zinc-400">
                     <span>Brightness</span>
                     <span className="font-mono text-white text-[11px]">
                       {editorAdjustments.brightness > 0 ? `+${editorAdjustments.brightness}` : editorAdjustments.brightness}
@@ -1360,13 +1426,13 @@ export function CameraScannerModal({
                     max={60}
                     value={editorAdjustments.brightness}
                     onChange={(e) => handleSliderChange("brightness", parseInt(e.target.value, 10))}
-                    className="w-full accent-cyan-400 cursor-pointer h-1.5 bg-white/10 rounded-lg"
+                    className="w-full accent-[#C2410C] cursor-pointer h-1.5 bg-white/10 rounded-lg"
                   />
                 </div>
 
                 {/* Contrast */}
                 <div className="space-y-1">
-                  <div className="flex items-center justify-between text-xs text-slate-400">
+                  <div className="flex items-center justify-between text-xs text-zinc-400">
                     <span>Contrast</span>
                     <span className="font-mono text-white text-[11px]">
                       {editorAdjustments.contrast > 0 ? `+${editorAdjustments.contrast}` : editorAdjustments.contrast}
@@ -1378,13 +1444,13 @@ export function CameraScannerModal({
                     max={60}
                     value={editorAdjustments.contrast}
                     onChange={(e) => handleSliderChange("contrast", parseInt(e.target.value, 10))}
-                    className="w-full accent-cyan-400 cursor-pointer h-1.5 bg-white/10 rounded-lg"
+                    className="w-full accent-[#C2410C] cursor-pointer h-1.5 bg-white/10 rounded-lg"
                   />
                 </div>
 
                 {/* Sharpness */}
                 <div className="space-y-1">
-                  <div className="flex items-center justify-between text-xs text-slate-400">
+                  <div className="flex items-center justify-between text-xs text-zinc-400">
                     <span>Edge Sharpness (Unsharp Mask)</span>
                     <span className="font-mono text-white text-[11px]">
                       {editorAdjustments.sharpness}%
@@ -1396,7 +1462,7 @@ export function CameraScannerModal({
                     max={100}
                     value={editorAdjustments.sharpness}
                     onChange={(e) => handleSliderChange("sharpness", parseInt(e.target.value, 10))}
-                    className="w-full accent-cyan-400 cursor-pointer h-1.5 bg-white/10 rounded-lg"
+                    className="w-full accent-[#C2410C] cursor-pointer h-1.5 bg-white/10 rounded-lg"
                   />
                 </div>
               </div>
@@ -1406,7 +1472,7 @@ export function CameraScannerModal({
                 <button
                   type="button"
                   onClick={handleRetakePage}
-                  className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+                  className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
                   <span>Retake This Page</span>
@@ -1431,9 +1497,9 @@ export function CameraScannerModal({
       {scannedPages.length > 0 && (
         <div className="relative z-20 px-4 sm:px-6 py-2.5 backdrop-blur-2xl bg-black/85 border-t border-white/[0.12] shadow-[0_-12px_40px_rgba(0,0,0,0.85)] shrink-0">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+            <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
               <span>Scanned Pages Tray ({scannedPages.length})</span>
-              <span className="text-[10px] font-mono text-cyan-400">
+              <span className="text-[10px] font-mono text-amber-400">
                 Click any thumbnail to preview &amp; enhance
               </span>
             </span>
@@ -1441,7 +1507,7 @@ export function CameraScannerModal({
             <button
               type="button"
               onClick={() => setCurrentView("viewfinder")}
-              className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-1 cursor-pointer"
+              className="text-xs font-semibold text-amber-400 hover:text-amber-300 flex items-center gap-1 cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Snap Next Page</span>
@@ -1460,7 +1526,7 @@ export function CameraScannerModal({
                   }}
                   className={`relative group shrink-0 w-20 sm:w-24 rounded-lg border p-1 transition-all cursor-pointer ${
                     isActive
-                      ? "border-vermilion bg-vermilion-light/20 shadow-paper"
+                      ? "border-[#C2410C] bg-[#C2410C]/20 shadow-md"
                       : "border-white/10 hover:border-white/30 bg-[#12141D]"
                   }`}
                 >
@@ -1478,8 +1544,8 @@ export function CameraScannerModal({
                     </div>
                   </div>
 
-                  {/* Reorder Left / Right controls on hover */}
-                  <div className="flex items-center justify-between pt-1 text-slate-400 text-[10px]">
+                  {/* Reorder Left / Right controls */}
+                  <div className="flex items-center justify-between pt-1 text-zinc-400 text-[10px]">
                     <button
                       type="button"
                       disabled={index === 0}
@@ -1487,7 +1553,7 @@ export function CameraScannerModal({
                         e.stopPropagation();
                         handleMovePage(index, "left");
                       }}
-                      className="p-0.5 hover:text-white disabled:opacity-20"
+                      className="p-0.5 hover:text-white disabled:opacity-20 cursor-pointer"
                     >
                       <ChevronLeft className="w-3 h-3" />
                     </button>
@@ -1499,7 +1565,7 @@ export function CameraScannerModal({
                         e.stopPropagation();
                         handleMovePage(index, "right");
                       }}
-                      className="p-0.5 hover:text-white disabled:opacity-20"
+                      className="p-0.5 hover:text-white disabled:opacity-20 cursor-pointer"
                     >
                       <ChevronRight className="w-3 h-3" />
                     </button>
@@ -1512,7 +1578,7 @@ export function CameraScannerModal({
             <button
               type="button"
               onClick={() => setCurrentView("viewfinder")}
-              className="shrink-0 w-20 sm:w-24 aspect-[3/4] rounded-xl border-2 border-dashed border-white/20 hover:border-cyan-400/60 bg-white/[0.02] hover:bg-cyan-500/10 flex flex-col items-center justify-center text-slate-400 hover:text-cyan-300 transition-all cursor-pointer group"
+              className="shrink-0 w-20 sm:w-24 aspect-[3/4] rounded-xl border-2 border-dashed border-white/20 hover:border-[#C2410C]/60 bg-white/[0.02] hover:bg-[#C2410C]/10 flex flex-col items-center justify-center text-zinc-400 hover:text-amber-300 transition-all cursor-pointer group"
             >
               <Plus className="w-6 h-6 mb-1 group-hover:scale-110 transition-transform" />
               <span className="text-[10px] font-bold">Add Page</span>
@@ -1525,7 +1591,7 @@ export function CameraScannerModal({
       {/* COMPLETION FOOTER ACTIONS */}
       {/* ================================================================= */}
       <footer className="relative z-20 flex flex-col sm:flex-row items-center justify-between gap-3 px-4 sm:px-6 py-3 pb-safe bg-[#0D0F17] border-t border-white/10 shrink-0">
-        <div className="flex items-center gap-3 text-xs text-slate-400">
+        <div className="flex items-center gap-3 text-xs text-zinc-400">
           <span className="font-semibold text-white">
             {scannedPages.length} {scannedPages.length === 1 ? "page" : "pages"} captured
           </span>
@@ -1541,15 +1607,15 @@ export function CameraScannerModal({
         </div>
 
         <div className="flex items-center gap-2.5 w-full sm:w-auto">
-          {/* Action 1: Add Scans to PDF Builder Queue */}
+          {/* Action 1: Add Scans to Tool Queue */}
           <button
             type="button"
             onClick={handleAddScansToQueue}
             disabled={scannedPages.length === 0}
-            className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 disabled:opacity-30 text-white font-semibold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 disabled:opacity-30 text-white font-mono font-semibold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer border border-white/10"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>Add {scannedPages.length} to PDF Builder</span>
+            <span>Use {scannedPages.length} {scannedPages.length === 1 ? "Scan" : "Scans"} in Tool</span>
           </button>
 
           {/* Action 2: Instant 1-Click Generate PDF */}
@@ -1557,7 +1623,7 @@ export function CameraScannerModal({
             type="button"
             onClick={handleInstantGeneratePdf}
             disabled={scannedPages.length === 0 || isGeneratingPdf}
-            className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 via-cyan-500 to-emerald-500 hover:from-indigo-500 hover:to-emerald-400 disabled:opacity-40 text-white font-bold text-xs shadow-lg shadow-cyan-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer"
+            className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-[#C2410C] hover:bg-[#A8370A] disabled:opacity-40 text-white font-mono font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             {isGeneratingPdf ? (
               <>
@@ -1567,7 +1633,7 @@ export function CameraScannerModal({
             ) : (
               <>
                 <FileDown className="w-3.5 h-3.5" />
-                <span>Instant 1-Click Generate PDF</span>
+                <span>Instant PDF (Zero Borders)</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </>
             )}
