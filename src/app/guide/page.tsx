@@ -117,7 +117,7 @@ export default function GuidePage() {
             </p>
             <ol className="list-decimal pl-5 space-y-2 mt-2">
               <li>
-                Click the <strong>“Camera Scanner”</strong> button in the Workbench Quick-Action Dock.
+                Click the <strong>“Camera to PDF”</strong> button in the Workbench Quick-Action Dock.
               </li>
               <li>
                 Grant browser video permission. The viewfinder displays real-time alignment grids to assist with positioning.
@@ -180,7 +180,7 @@ export default function GuidePage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="p-4 rounded-lg bg-paper-100 dark:bg-charcoal-900 border border-paper-300 dark:border-charcoal-border">
                 <h3 className="font-semibold text-zinc-950 dark:text-white mb-1">
-                  2-in-1 ID &amp; Passport Sheet Maker
+                  ID Card &amp; Passport Photo
                 </h3>
                 <p className="text-xs text-zinc-600 dark:text-zinc-400">
                   Align front and back cards onto single A4 sheets or generate 35x45mm / 2x2&quot; passport photo grids with cut lines and target KB compression.
@@ -189,7 +189,7 @@ export default function GuidePage() {
 
               <div className="p-4 rounded-lg bg-paper-100 dark:bg-charcoal-900 border border-paper-300 dark:border-charcoal-border">
                 <h3 className="font-semibold text-zinc-950 dark:text-white mb-1">
-                  Code &amp; Lab Record to PDF
+                  Code to PDF
                 </h3>
                 <p className="text-xs text-zinc-600 dark:text-zinc-400">
                   Compile .java, .py, .c, .cpp, .sql source code with Prism syntax highlighting, student metadata headers, and evaluation observation boxes.
@@ -198,7 +198,7 @@ export default function GuidePage() {
 
               <div className="p-4 rounded-lg bg-paper-100 dark:bg-charcoal-900 border border-paper-300 dark:border-charcoal-border">
                 <h3 className="font-semibold text-zinc-950 dark:text-white mb-1">
-                  Offline WebAssembly OCR
+                  Read Text from Scans
                 </h3>
                 <p className="text-xs text-zinc-600 dark:text-zinc-400">
                   Extract text from scanned PDFs or photos in-memory, edit text side-by-side, and synthesize searchable hybrid PDFs.
@@ -207,7 +207,7 @@ export default function GuidePage() {
 
               <div className="p-4 rounded-lg bg-paper-100 dark:bg-charcoal-900 border border-paper-300 dark:border-charcoal-border">
                 <h3 className="font-semibold text-zinc-950 dark:text-white mb-1">
-                  Clickable Index / Table of Contents
+                  Add Clickable Index
                 </h3>
                 <p className="text-xs text-zinc-600 dark:text-zinc-400">
                   Combine up to 30 chapters with true GoTo internal PDF links that jump directly to designated pages in any PDF viewer.

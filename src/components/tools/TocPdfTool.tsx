@@ -189,7 +189,7 @@ export function TocPdfTool() {
 
       sessionHistory.recordExecution({
         toolId: "toc-pdf",
-        toolName: "Clickable Table of Contents & Index",
+        toolName: "Add Clickable Index",
         inputFiles: chapters.map((c) => c.name),
         outputFileName: downloadFilename,
         outputSizeBytes: pdfBytes.byteLength,

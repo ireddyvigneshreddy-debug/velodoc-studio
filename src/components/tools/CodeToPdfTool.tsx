@@ -177,7 +177,7 @@ export function CodeToPdfTool() {
 
       sessionHistory.recordExecution({
         toolId: "code-to-pdf",
-        toolName: "Code & Academic Lab Record to PDF",
+        toolName: "Code to PDF",
         inputFiles: files.map((f) => f.filename),
         outputFileName: downloadFilename,
         outputSizeBytes: pdfBytes.byteLength,

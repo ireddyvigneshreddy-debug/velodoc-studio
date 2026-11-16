@@ -9,7 +9,7 @@ export interface QuickIntentPreset {
 }
 
 export const TOOL_CATEGORIES: ToolCategory[] = [
-  "All Studio Tools (27)",
+  "All Studio Tools (28)",
   "Shrink & Exact KB",
   "Merge & Split",
   "Edit & Organize Pages",
@@ -21,14 +21,14 @@ export const TOOL_CATEGORIES: ToolCategory[] = [
 export const QUICK_INTENT_PRESETS: QuickIntentPreset[] = [
   {
     id: "camera-scan",
-    label: "Camera to PDF Scanner",
+    label: "Camera to PDF",
     toolId: "camera-to-pdf",
     path: "/tools/camera-to-pdf",
     description: "Scan documents live with auto-shutter and adaptive B&W xerox filters",
   },
   {
     id: "images-to-pdf",
-    label: "Photos to PDF Compiler",
+    label: "Images to PDF",
     toolId: "image-to-pdf",
     path: "/tools/image-to-pdf",
     description: "Combine up to 30+ gallery photos into a zero-border PDF",
@@ -42,42 +42,42 @@ export const QUICK_INTENT_PRESETS: QuickIntentPreset[] = [
   },
   {
     id: "under-200kb",
-    label: "Need PDF under 200 KB?",
+    label: "Compress PDF",
     toolId: "compress-pdf",
     path: "/tools/compress-pdf?target=200kb",
     description: "Hit exact portal size limits with binary search",
   },
   {
     id: "combine-pdfs",
-    label: "Combine multiple PDFs?",
+    label: "Merge PDFs",
     toolId: "merge-pdf",
     path: "/tools/merge-pdf",
     description: "Reorder and merge up to 30 files instantly",
   },
   {
     id: "code-to-pdf-preset",
-    label: "Code & Lab Record to PDF?",
+    label: "Code to PDF",
     toolId: "code-to-pdf",
     path: "/tools/code-to-pdf",
     description: "Prism syntax highlighted lab records with student headers",
   },
   {
     id: "ocr-pdf-preset",
-    label: "Scanned PDF to Text OCR?",
+    label: "Read Text from Scans",
     toolId: "ocr-pdf",
     path: "/tools/ocr-pdf",
     description: "Client-side WebAssembly OCR & Searchable Hybrid PDF",
   },
   {
     id: "sign-fast",
-    label: "Sign document legally?",
+    label: "Sign PDF",
     toolId: "sign-pdf",
     path: "/tools/sign-pdf",
     description: "Draw or type cursive signature and stamp",
   },
   {
     id: "compare-versions",
-    label: "Compare two versions?",
+    label: "Compare PDFs",
     toolId: "compare-pdf",
     path: "/tools/compare-pdf",
     description: "Side-by-side visual red pixel diff overlay",
@@ -90,7 +90,7 @@ export const TOOLS: ToolDefinition[] = [
   // ==========================================
   {
     id: "compress-pdf",
-    name: "Exact-Target Compress PDF",
+    name: "Compress PDF",
     category: "Shrink & Exact KB",
     toolType: "pdf",
     description: "Hit exact target KB/MB sizes (passport & portal safe) or percentage reductions using binary-search canvas compression.",
@@ -105,7 +105,7 @@ export const TOOLS: ToolDefinition[] = [
   },
   {
     id: "image-studio",
-    name: "Exact-Target Image Studio",
+    name: "Compress & Convert Images",
     category: "Shrink & Exact KB",
     toolType: "image",
     description: "Batch compress photos to exact target KB sizes (20 KB/50 KB passport forms), resize dimensions, and convert to WebP/JPEG/PNG.",
@@ -124,7 +124,7 @@ export const TOOLS: ToolDefinition[] = [
   },
   {
     id: "grayscale-pdf",
-    name: "Grayscale & Clean Scan",
+    name: "Black & White Clean PDF",
     category: "Shrink & Exact KB",
     toolType: "pdf",
     description: "Convert color PDFs to pure grayscale or high-contrast black-and-white scan mode with brightness & contrast controls.",
@@ -139,7 +139,7 @@ export const TOOLS: ToolDefinition[] = [
   },
   {
     id: "id-card-studio",
-    name: "2-in-1 ID & Passport Photo Sheet",
+    name: "ID Card & Passport Photo",
     category: "Shrink & Exact KB",
     toolType: "image",
     description: "Generate 2-in-1 Front & Back ID Card prints on single A4 sheets or tiled passport/visa photo sheets (35x45mm, 2x2in) with cut guides.",
@@ -162,7 +162,7 @@ export const TOOLS: ToolDefinition[] = [
   // ==========================================
   {
     id: "merge-pdf",
-    name: "Merge PDFs Pro",
+    name: "Merge PDFs",
     category: "Merge & Split",
     toolType: "pdf",
     description: "Combine documents with drag-and-drop ordering, page range selections, and duplex front/back scan interleaving.",
@@ -177,7 +177,7 @@ export const TOOLS: ToolDefinition[] = [
   },
   {
     id: "split-pdf",
-    name: "Split & Burst PDF",
+    name: "Split PDF",
     category: "Merge & Split",
     toolType: "pdf",
     description: "Split by custom page ranges, split every N pages, extract visual selections, or burst all pages into ZIP.",
@@ -192,7 +192,7 @@ export const TOOLS: ToolDefinition[] = [
   },
   {
     id: "nup-pdf",
-    name: "2-Up / 4-Up Handout & Booklet Imposition",
+    name: "Multiple Pages per Sheet",
     category: "Merge & Split",
     toolType: "pdf",
     description: "Impose 2, 4, or 6 slides per sheet with cutting lines, borders, and custom margins for student lecture notes (Save up to 75% paper).",
@@ -211,7 +211,7 @@ export const TOOLS: ToolDefinition[] = [
   // ==========================================
   {
     id: "organize-pdf",
-    name: "Organize, Reorder & Rotate",
+    name: "Reorder & Rotate Pages",
     category: "Edit & Organize Pages",
     toolType: "pdf",
     description: "Rearrange pages, rotate 90° CW/CCW/180°, duplicate, reverse entire document sequence, or sort.",
@@ -226,7 +226,7 @@ export const TOOLS: ToolDefinition[] = [
   },
   {
     id: "add-pages",
-    name: "Add & Insert Pages",
+    name: "Insert Pages",
     category: "Edit & Organize Pages",
     toolType: "pdf",
     description: "Visual timeline with '+ Insert Here' buttons to add blank, lined, or grid pages, or pages from another file.",
@@ -241,7 +241,7 @@ export const TOOLS: ToolDefinition[] = [
   },
   {
     id: "remove-pages",
-    name: "Remove / Delete Pages",
+    name: "Delete PDF Pages",
     category: "Edit & Organize Pages",
     toolType: "pdf",
     description: "Interactive thumbnail grid with instant odd/even page selection, range filters, and live remaining counts.",
@@ -256,7 +256,7 @@ export const TOOLS: ToolDefinition[] = [
   },
   {
     id: "crop-pdf",
-    name: "Crop & Resize Margins",
+    name: "Crop & Resize PDF",
     category: "Edit & Organize Pages",
     toolType: "pdf",
     description: "Visually trim top, bottom, left, and right margins or standardize documents into A4, Letter, or Legal sizes.",
@@ -271,7 +271,7 @@ export const TOOLS: ToolDefinition[] = [
   },
   {
     id: "page-numbers",
-    name: "Page Numbers & Bates",
+    name: "Add Page Numbers",
     category: "Edit & Organize Pages",
     toolType: "pdf",
     description: "Add custom page numbers, Bates legal stamping (DOC-0001), alternating book margins, and cover page skips.",
@@ -286,7 +286,7 @@ export const TOOLS: ToolDefinition[] = [
   },
   {
     id: "toc-pdf",
-    name: "Clickable Table of Contents & Index",
+    name: "Add Clickable Index",
     category: "Edit & Organize Pages",
     toolType: "pdf",
     description: "Prepend formatted Index page with real internal PDF GoTo link annotations so clicking any chapter jumps directly to that page.",
@@ -345,7 +345,7 @@ export const TOOLS: ToolDefinition[] = [
   },
   {
     id: "pdf-to-image",
-    name: "PDF to Images Studio",
+    name: "PDF to Images",
     category: "Convert & Camera Scan",
     toolType: "image",
     description: "Render pages to high-res PNG, JPG, or WebP images up to 600 DPI with ZIP export and live gallery preview.",
@@ -360,7 +360,7 @@ export const TOOLS: ToolDefinition[] = [
   },
   {
     id: "pdf-to-text",
-    name: "Extract Text & Markdown",
+    name: "PDF to Text",
     category: "Convert & Camera Scan",
     toolType: "pdf",
     description: "Extract structured text page-by-page preserving layout flow, with live text editor, word count, and JSON/MD export.",
@@ -375,7 +375,7 @@ export const TOOLS: ToolDefinition[] = [
   },
   {
     id: "markdown-to-pdf",
-    name: "Markdown to PDF",
+    name: "Text & Notes to PDF",
     category: "Convert & Camera Scan",
     toolType: "pdf",
     description: "Split-screen Markdown editor with live preview, custom typography, headings, tables, and instant PDF rendering.",
@@ -390,7 +390,7 @@ export const TOOLS: ToolDefinition[] = [
   },
   {
     id: "code-to-pdf",
-    name: "Code & Academic Lab Record to PDF",
+    name: "Code to PDF",
     category: "Convert & Camera Scan",
     toolType: "pdf",
     description: "Convert up to 30 source code files (.java, .py, .cpp, .sql) with Prism syntax highlighting, line numbers, student headers, and observation boxes.",
@@ -405,7 +405,7 @@ export const TOOLS: ToolDefinition[] = [
   },
   {
     id: "ocr-pdf",
-    name: "Offline OCR — Scanned PDF to Text",
+    name: "Read Text from Scans",
     category: "Convert & Camera Scan",
     toolType: "pdf",
     description: "Extract text from image PDFs or photos locally via WebAssembly OCR, edit text side-by-side, and export Searchable Hybrid PDFs.",
@@ -429,7 +429,7 @@ export const TOOLS: ToolDefinition[] = [
   // ==========================================
   {
     id: "sign-pdf",
-    name: "Sign & Annotate PDF",
+    name: "Sign PDF",
     category: "Sign, Redact & Compare",
     toolType: "pdf",
     description: "Draw signatures, generate cursive typed signatures, stamp images, add date stamps, text boxes, and checkmarks.",
@@ -444,7 +444,7 @@ export const TOOLS: ToolDefinition[] = [
   },
   {
     id: "redact-pdf",
-    name: "Redact & Sanitize PDF",
+    name: "Hide Sensitive Info",
     category: "Sign, Redact & Compare",
     toolType: "pdf",
     description: "Draw blackout boxes over sensitive areas and permanently rasterize pages to destroy underlying text streams.",
@@ -459,7 +459,7 @@ export const TOOLS: ToolDefinition[] = [
   },
   {
     id: "compare-pdf",
-    name: "Multi-Doc Compare (Up to 30)",
+    name: "Compare PDFs",
     category: "Sign, Redact & Compare",
     toolType: "pdf",
     description: "Upload original and revised PDFs to visually diff page changes with synchronized scrolling and neon pixel-diff highlights.",
@@ -474,7 +474,7 @@ export const TOOLS: ToolDefinition[] = [
   },
   {
     id: "watermark-pdf",
-    name: "Stamp & Watermark Pro",
+    name: "Add Watermark",
     category: "Sign, Redact & Compare",
     toolType: "pdf",
     description: "Add text or image logo watermarks across a 9-point grid or full diagonal tile grid with custom rotation and opacity.",
@@ -489,7 +489,7 @@ export const TOOLS: ToolDefinition[] = [
   },
   {
     id: "metadata-pdf",
-    name: "PDF Metadata Inspector",
+    name: "Edit or Clear File Info",
     category: "Sign, Redact & Compare",
     toolType: "pdf",
     description: "Inspect, edit, or sanitize all internal PDF dictionary fields (Title, Author, Producer, Creation Date) in 1 click.",
@@ -504,7 +504,7 @@ export const TOOLS: ToolDefinition[] = [
   },
   {
     id: "fill-form-pdf",
-    name: "Interactive Form Filler & Flattener",
+    name: "Fill PDF Forms",
     category: "Sign, Redact & Compare",
     toolType: "pdf",
     description: "Parse AcroForm fields dynamically, fill out applications, and lock fields into permanent tamper-proof vector paths.",
@@ -519,7 +519,7 @@ export const TOOLS: ToolDefinition[] = [
   },
   {
     id: "links-pdf",
-    name: "Link Auditor & Hyperlink Stripper",
+    name: "View or Remove Links",
     category: "Sign, Redact & Compare",
     toolType: "pdf",
     description: "Audit all embedded URL and mailto links, export CSV tables, or strip external hyperlinks to eliminate outbound tracking.",
@@ -538,7 +538,7 @@ export const TOOLS: ToolDefinition[] = [
   // ==========================================
   {
     id: "qr-stamp-pdf",
-    name: "QR Code Document Stamper",
+    name: "Add QR Code to PDF",
     category: "Extreme & Smart Pro",
     toolType: "pdf",
     description: "Stamp high-resolution vector QR codes (URLs, verification strings, portfolios) with captions onto any document page corner.",

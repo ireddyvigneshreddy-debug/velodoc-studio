@@ -188,7 +188,7 @@ export function IdCardStudioTool() {
 
       sessionHistory.recordExecution({
         toolId: "id-card-studio",
-        toolName: "2-in-1 ID & Passport Photo Sheet",
+        toolName: "ID Card & Passport Photo",
         inputFiles: [frontFile?.name || "card_front.jpg"],
         outputFileName: downloadFilename,
         outputSizeBytes: pdfBytes.byteLength,

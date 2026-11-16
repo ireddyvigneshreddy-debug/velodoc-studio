@@ -114,7 +114,7 @@ export function QrStampPdfTool() {
 
       sessionHistory.recordExecution({
         toolId: "qr-stamp-pdf",
-        toolName: "QR Code Document Stamper",
+        toolName: "Add QR Code to PDF",
         inputFiles: [fileItem.name],
         outputFileName: downloadFilename,
         outputSizeBytes: processedSize,

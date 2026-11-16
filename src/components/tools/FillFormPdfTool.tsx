@@ -113,7 +113,7 @@ export function FillFormPdfTool() {
 
       sessionHistory.recordExecution({
         toolId: "fill-form-pdf",
-        toolName: "Interactive Form Filler & Flattener",
+        toolName: "Fill PDF Forms",
         inputFiles: [fileItem.name],
         outputFileName: downloadFilename,
         outputSizeBytes: processedSize,
@@ -215,14 +215,14 @@ export function FillFormPdfTool() {
             <span>No Interactive AcroForm Fields Detected</span>
           </div>
           <p className="text-xs text-amber-950/80 leading-relaxed font-sans">
-            This PDF is a flat or scanned document without embedded interactive AcroForm text inputs or checkboxes. You can open it in our Sign & Annotate Studio to click and type anywhere!
+            This PDF is a flat or scanned document without embedded interactive AcroForm text inputs or checkboxes. You can open it in our Sign PDF tool to click and type anywhere!
           </p>
           <div>
             <Link
               href="/tools/sign-pdf"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-950 text-white text-xs font-mono hover:bg-zinc-800 transition-colors"
             >
-              <span>Open in Sign & Annotate Studio</span>
+              <span>Open in Sign PDF</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>

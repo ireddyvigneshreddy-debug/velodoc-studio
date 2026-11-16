@@ -195,7 +195,7 @@ export function NUpPdfTool() {
 
       sessionHistory.recordExecution({
         toolId: "nup-pdf",
-        toolName: "2-Up / 4-Up Handout & Booklet Imposition",
+        toolName: "Multiple Pages per Sheet",
         inputFiles: [fileItem.name],
         outputFileName: downloadFilename,
         outputSizeBytes: processedSize,

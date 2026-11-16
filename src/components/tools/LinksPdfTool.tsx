@@ -115,7 +115,7 @@ export function LinksPdfTool() {
 
       sessionHistory.recordExecution({
         toolId: "links-pdf",
-        toolName: "Link Auditor & Hyperlink Stripper",
+        toolName: "View or Remove Links",
         inputFiles: [fileItem.name],
         outputFileName: downloadFilename,
         outputSizeBytes: processedSize,

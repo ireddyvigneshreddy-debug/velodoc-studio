@@ -215,7 +215,7 @@ export function OcrPdfTool() {
 
       sessionHistory.recordExecution({
         toolId: "ocr-pdf",
-        toolName: "OCR Scanned PDF & Image to Searchable PDF",
+        toolName: "Read Text from Scans",
         inputFiles: scanItems.map((s) => s.name),
         outputFileName: downloadFilename,
         outputSizeBytes: processedSize,

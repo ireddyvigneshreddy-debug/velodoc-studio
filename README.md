@@ -22,27 +22,27 @@
 
 | Tool | Route | Module Family | Description |
 |---|---|---|---|
-| **Exact-Target Compress PDF** | `/tools/compress-pdf` | Optimization | Hit exact target KB/MB limits or percentage reduction with binary-search canvas compression. |
-| **Exact-Target Image Studio** | `/tools/image-studio` | Optimization | Batch compress photos to exact target KB (20 KB / 50 KB portal forms) and convert formats. |
+| **Compress PDF** | `/tools/compress-pdf` | Optimization | Hit exact target KB/MB limits or percentage reduction with binary-search canvas compression. |
+| **Compress & Convert Images** | `/tools/image-studio` | Optimization | Batch compress photos to exact target KB (20 KB / 50 KB portal forms) and convert formats. |
 | **Flatten PDF Forms** | `/tools/flatten-pdf` | Optimization | Flatten interactive form fields, annotations, and vector layers into fixed printable pages. |
-| **Merge PDFs Pro** | `/tools/merge-pdf` | Sequence | Combine up to 30 documents with drag-and-drop ordering and duplex scan interleaving. |
-| **Split & Burst PDF** | `/tools/split-pdf` | Sequence | Split by page ranges, partition every N pages, or burst all pages to an organized ZIP archive. |
-| **Organize, Reorder & Rotate** | `/tools/organize-pdf` | Sequence | Rearrange pages, rotate 90° CW/CCW/180°, duplicate sheets, reverse sequence, or sort. |
-| **Add & Insert Pages** | `/tools/add-pages` | Sequence | Visual timeline with insertion slots to add blank, lined, grid, or external PDF pages. |
-| **Remove / Delete Pages** | `/tools/remove-pages` | Security | Visual thumbnail grid with instant odd/even page selection, inverted selection, and range filters. |
-| **Crop & Resize Margins** | `/tools/crop-pdf` | Security | Visually trim margins or standardize documents into A4, US Letter, or Legal bounds. |
+| **Merge PDFs** | `/tools/merge-pdf` | Sequence | Combine up to 30 documents with drag-and-drop ordering and duplex scan interleaving. |
+| **Split PDF** | `/tools/split-pdf` | Sequence | Split by page ranges, partition every N pages, or burst all pages to an organized ZIP archive. |
+| **Reorder & Rotate Pages** | `/tools/organize-pdf` | Sequence | Rearrange pages, rotate 90° CW/CCW/180°, duplicate sheets, reverse sequence, or sort. |
+| **Insert Pages** | `/tools/add-pages` | Sequence | Visual timeline with insertion slots to add blank, lined, grid, or external PDF pages. |
+| **Delete PDF Pages** | `/tools/remove-pages` | Security | Visual thumbnail grid with instant odd/even page selection, inverted selection, and range filters. |
+| **Crop & Resize PDF** | `/tools/crop-pdf` | Security | Visually trim margins or standardize documents into A4, US Letter, or Legal bounds. |
 | **Images to PDF** | `/tools/image-to-pdf` | Conversion | Compile multi-image collections into formatted PDFs with smart sorting and zero-border full-bleed layout. |
 | **Camera to PDF** | `/tools/camera-to-pdf` | Conversion | Hardware webcam and phone camera scanner with auto-shutter, scan filters, alignment guides, and PDF export. |
-| **PDF to Images Studio** | `/tools/pdf-to-image` | Conversion | Render pages to high-resolution PNG, JPG, or WebP images up to 600 DPI with ZIP export. |
-| **Extract Text & Markdown** | `/tools/pdf-to-text` | Conversion | Extract structured text preserving layout flow with live editor and JSON/MD export. |
-| **Markdown to PDF** | `/tools/markdown-to-pdf` | Conversion | Split-screen Markdown editor with live preview, headings, tables, and instant PDF rendering. |
-| **Sign & Annotate PDF** | `/tools/sign-pdf` | Security | Draw signatures, generate typographic cursive signatures, stamp images, and add date stamps. |
-| **Redact & Sanitize PDF** | `/tools/redact-pdf` | Security | Draw blackout redactions over sensitive text and permanently rasterize pages securely. |
-| **Multi-Doc Compare Studio** | `/tools/compare-pdf` | Security | Upload 2–30 PDFs to visually diff page changes with synchronized scrolling and visual diffing. |
-| **Stamp & Watermark Pro** | `/tools/watermark-pdf` | Annotation | Add text or image logo watermarks across a 9-point grid or full diagonal tile grid. |
-| **Page Numbers & Bates** | `/tools/page-numbers` | Annotation | Add custom page numbers, Bates legal stamping (`DOC-0001`), and alternating book margins. |
-| **Grayscale & Clean Scan** | `/tools/grayscale-pdf` | Optimization | Convert color PDFs to pure grayscale or high-contrast black-and-white scan mode. |
-| **PDF Metadata Inspector** | `/tools/metadata-pdf` | Security | Inspect, edit, or sanitize all internal PDF dictionary metadata (Title, Author, Producer). |
+| **PDF to Images** | `/tools/pdf-to-image` | Conversion | Render pages to high-resolution PNG, JPG, or WebP images up to 600 DPI with ZIP export. |
+| **PDF to Text** | `/tools/pdf-to-text` | Conversion | Extract structured text preserving layout flow with live editor and JSON/MD export. |
+| **Text & Notes to PDF** | `/tools/markdown-to-pdf` | Conversion | Split-screen Markdown editor with live preview, headings, tables, and instant PDF rendering. |
+| **Sign PDF** | `/tools/sign-pdf` | Security | Draw signatures, generate typographic cursive signatures, stamp images, and add date stamps. |
+| **Hide Sensitive Info** | `/tools/redact-pdf` | Security | Draw blackout redactions over sensitive text and permanently rasterize pages securely. |
+| **Compare PDFs** | `/tools/compare-pdf` | Security | Upload 2–30 PDFs to visually diff page changes with synchronized scrolling and visual diffing. |
+| **Add Watermark** | `/tools/watermark-pdf` | Annotation | Add text or image logo watermarks across a 9-point grid or full diagonal tile grid. |
+| **Add Page Numbers** | `/tools/page-numbers` | Annotation | Add custom page numbers, Bates legal stamping (`DOC-0001`), and alternating book margins. |
+| **Black & White Clean PDF** | `/tools/grayscale-pdf` | Optimization | Convert color PDFs to pure grayscale or high-contrast black-and-white scan mode. |
+| **Edit or Clear File Info** | `/tools/metadata-pdf` | Security | Inspect, edit, or sanitize all internal PDF dictionary metadata (Title, Author, Producer). |
 
 ---
 

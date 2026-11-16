@@ -19,7 +19,7 @@ import {
 const INTENT_CHIPS = [
   {
     id: "shrink-200kb",
-    label: "Shrink to exact 200 KB",
+    label: "Compress PDF",
     icon: Minimize2,
     href: "/tools/compress-pdf?target=200kb",
     badge: "Binary Search",
@@ -33,21 +33,21 @@ const INTENT_CHIPS = [
   },
   {
     id: "combine-30",
-    label: "Combine up to 30 PDFs",
+    label: "Merge PDFs",
     icon: Layers,
     href: "/tools/merge-pdf",
     badge: "Batch",
   },
   {
     id: "delete-pages",
-    label: "Remove unwanted pages",
+    label: "Delete PDF Pages",
     icon: Trash2,
     href: "/tools/remove-pages",
     badge: "Visual",
   },
   {
     id: "compare-docs",
-    label: "Compare 2–30 PDFs",
+    label: "Compare PDFs",
     icon: GitCompare,
     href: "/tools/compare-pdf",
     badge: "Diff",
