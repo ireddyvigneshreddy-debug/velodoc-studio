@@ -119,6 +119,8 @@ export interface TechTalkSlide {
   speakerNotes: string; // 3-4 sentence conversational verbal script for stage delivery
 }
 
+export type ContentDepth = "detailed" | "extra-deep";
+
 export interface TechTalkPresentation {
   topic: string;
   details: string;
@@ -130,6 +132,7 @@ export interface TechTalkPresentation {
   slides: TechTalkSlide[];
   createdAt: number;
   iareMetadata?: IareMetadata;
+  contentDepth?: ContentDepth;
 }
 
 export type AiProviderId =

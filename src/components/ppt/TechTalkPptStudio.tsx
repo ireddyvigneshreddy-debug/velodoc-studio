@@ -7,6 +7,7 @@ import {
   ApiVaultConfig,
   IareAssessmentType,
   IareMetadata,
+  ContentDepth,
 } from "@/types/ppt";
 import { generateTechTalkPresentation } from "@/lib/ppt-ai-engine";
 import {
@@ -57,6 +58,7 @@ export function TechTalkPptStudio() {
   const [assessmentType, setAssessmentType] =
     useState<IareAssessmentType>("AAT - TECH TALK");
   const [slideCount, setSlideCount] = useState<number>(13);
+  const [contentDepth, setContentDepth] = useState<ContentDepth>("detailed");
   const selectedTheme: PptThemeId = "iare";
   const [customLogoBase64, setCustomLogoBase64] = useState<string>("");
   const [defaultLogoBase64, setDefaultLogoBase64] = useState<string>("");
@@ -190,6 +192,7 @@ export function TechTalkPptStudio() {
         eventName: assessmentType,
         config: vaultConfig,
         iareMetadata: iareMeta,
+        contentDepth,
       });
 
       const newDeck: TechTalkPresentation = {
@@ -203,6 +206,7 @@ export function TechTalkPptStudio() {
         slides,
         createdAt: Date.now(),
         iareMetadata: iareMeta,
+        contentDepth,
       };
 
       setPresentation(newDeck);
@@ -333,26 +337,26 @@ export function TechTalkPptStudio() {
   return (
     <section
       id="ai-presentation-studio"
-      className="relative rounded-xl border border-paper-300 dark:border-charcoal-border bg-white dark:bg-charcoal-800 p-5 sm:p-8 shadow-paper overflow-hidden space-y-8"
+      className="relative rounded-2xl border border-paper-300 dark:border-charcoal-border bg-[#F6F5F1] dark:bg-[#161615] p-5 sm:p-8 shadow-paper overflow-hidden space-y-8"
     >
       {/* Top Banner & Heading Strip */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-paper-300 dark:border-charcoal-border pb-6 relative z-10">
         <div className="space-y-1.5">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-paper-100 dark:bg-charcoal-700 border border-paper-300 dark:border-charcoal-border text-ink-primary dark:text-white text-xs font-mono font-semibold">
-            <Sparkles className="w-3.5 h-3.5 text-vermilion" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white dark:bg-charcoal-800 border border-paper-300 dark:border-charcoal-border text-zinc-950 dark:text-white text-xs font-mono font-semibold">
+            <Sparkles className="w-3.5 h-3.5 text-[#C2410C]" />
             <span>IARE Official Tech-Talk &amp; Concept Video Studio</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-serif text-ink-primary dark:text-white tracking-tight flex items-center gap-2 flex-wrap">
+          <h2 className="text-2xl sm:text-3xl font-serif text-zinc-950 dark:text-white tracking-tight flex items-center gap-2 flex-wrap">
             <span>IARE Official 13-Slide AAT Tech Talk Generator</span>
             <span className="text-xs px-2.5 py-0.5 rounded text-[11px] font-mono bg-[#EDF5F2] text-[#1B4D3E] dark:bg-[#143A2F]/40 dark:text-[#6ee7b7] border border-[#C4DFD5] dark:border-[#143A2F]">
               OBE Rubric Aligned
             </span>
           </h2>
-          <p className="text-xs sm:text-sm text-ink-secondary dark:text-paper-400 max-w-2xl leading-relaxed font-sans">
+          <p className="text-xs sm:text-sm text-zinc-700 dark:text-paper-400 max-w-2xl leading-relaxed font-sans">
             Generate authentic Institute of Aeronautical Engineering (Autonomous)
             AAT presentations matching the exact 13-slide institutional layout
             (Cover, INDEX, INTRODUCTION, 8 ALL CAPS Core Slides, CONCLUSION, and
-            THANK YOU) with embedded teleprompter speech notes.
+            THANK YOU) with embedded teleprompter speech notes and deep engineering content.
           </p>
         </div>
 
@@ -361,12 +365,12 @@ export function TechTalkPptStudio() {
           <button
             type="button"
             onClick={() => setIsVaultOpen(true)}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-paper-100 dark:bg-charcoal-700 hover:bg-paper-200 dark:hover:bg-charcoal-600 border border-paper-300 dark:border-charcoal-border text-xs text-ink-secondary dark:text-paper-400 hover:text-ink-primary dark:hover:text-white transition-colors cursor-pointer shadow-paper"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white dark:bg-charcoal-800 hover:bg-paper-100 dark:hover:bg-charcoal-700 border border-paper-300 dark:border-charcoal-border text-xs text-zinc-700 dark:text-paper-400 hover:text-zinc-950 dark:hover:text-white transition-colors cursor-pointer shadow-paper"
           >
-            <Key className="w-3.5 h-3.5 text-vermilion" />
+            <Key className="w-3.5 h-3.5 text-[#C2410C]" />
             <span className="font-mono text-xs">
               Engine:{" "}
-              <strong className="text-ink-primary dark:text-white capitalize">
+              <strong className="text-zinc-950 dark:text-white capitalize">
                 {vaultConfig.provider === "zero-key"
                   ? "Zero-Key (Free)"
                   : vaultConfig.provider}
@@ -380,13 +384,13 @@ export function TechTalkPptStudio() {
       <div className="space-y-8 relative z-10">
         {/* Validation Warning Alert (if user tried to submit with empty required fields) */}
         {hasAttemptedSubmit && hasValidationErrors && (
-          <div className="flex items-start gap-3 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs sm:text-sm animate-in fade-in duration-200">
-            <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
+          <div className="flex items-start gap-3 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-800 dark:text-rose-300 text-xs sm:text-sm animate-in fade-in duration-200">
+            <AlertCircle className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
             <div>
-              <p className="font-bold text-rose-200">
+              <p className="font-bold text-rose-900 dark:text-rose-200">
                 Please complete all required fields before generating:
               </p>
-              <ul className="list-disc list-inside mt-1 space-y-0.5 text-rose-300/90 font-medium">
+              <ul className="list-disc list-inside mt-1 space-y-0.5 text-rose-800/90 dark:text-rose-300/90 font-medium">
                 {isTopicMissing && <li>Topic Title</li>}
                 {isNameMissing && <li>Student Full Name</li>}
                 {isRollMissing && <li>Student Roll Number (e.g. 26951A67XX)</li>}
@@ -397,23 +401,23 @@ export function TechTalkPptStudio() {
           </div>
         )}
 
-        {/* Input Form — Strictly Blank On Initial Load */}
-        <div className="rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-950/20 via-zinc-950 to-slate-950 p-5 sm:p-7 space-y-6 shadow-xl">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-4">
+        {/* Input Form Card — Warm Archival Paper Card with Blank Inputs on Initial Load */}
+        <div className="rounded-3xl border border-paper-300 dark:border-charcoal-border bg-[#FFFFFF] dark:bg-charcoal-800 p-5 sm:p-7 space-y-6 shadow-paper">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-paper-300 dark:border-charcoal-border pb-4">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-400">
+              <div className="p-2.5 rounded-2xl bg-[#C2410C]/10 border border-[#C2410C]/25 text-[#C2410C]">
                 <GraduationCap className="w-6 h-6" />
               </div>
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
+                  <h3 className="text-base sm:text-lg font-bold text-zinc-950 dark:text-white tracking-tight">
                     IARE Assessment &amp; Student Credentials
                   </h3>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#C2410C]/10 text-[#C2410C] border border-[#C2410C]/25">
                     Mandatory Authentic Data
                   </span>
                 </div>
-                <p className="text-xs text-zinc-400">
+                <p className="text-xs text-zinc-600 dark:text-zinc-400">
                   All fields must be filled with your authentic college credentials.
                 </p>
               </div>
@@ -429,7 +433,7 @@ export function TechTalkPptStudio() {
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border cursor-pointer ${
                     assessmentType === type
                       ? "bg-[#C2410C] text-white border-orange-600 shadow-sm font-bold"
-                      : "bg-zinc-100 hover:bg-zinc-200 dark:bg-white/[0.03] border-zinc-200 dark:border-white/[0.08] text-zinc-800 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white"
+                      : "bg-[#FAF9F5] hover:bg-paper-200 dark:bg-charcoal-700 border-paper-300 dark:border-charcoal-border text-zinc-800 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white"
                   }`}
                 >
                   {type}
@@ -444,7 +448,7 @@ export function TechTalkPptStudio() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Student Name */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-zinc-800 dark:text-zinc-300 uppercase tracking-wider block">
+                <label className="text-xs font-semibold text-zinc-950 dark:text-zinc-200 uppercase tracking-wider block font-sans">
                   Student Full Name <span className="text-rose-600 dark:text-rose-400">*</span>
                 </label>
                 <input
@@ -452,10 +456,10 @@ export function TechTalkPptStudio() {
                   value={studentName}
                   onChange={(e) => setStudentName(e.target.value)}
                   placeholder="Enter your full name"
-                  className={`w-full bg-white dark:bg-zinc-900 border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-zinc-950 dark:text-white placeholder-zinc-500 focus:outline-none transition-colors ${
+                  className={`w-full bg-[#FAF9F5] dark:bg-charcoal-900 border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-zinc-950 dark:text-white placeholder-zinc-500 focus:outline-none transition-colors ${
                     isNameMissing
                       ? "border-rose-500 ring-1 ring-rose-500"
-                      : "border-zinc-300 dark:border-white/[0.1] focus:border-orange-500"
+                      : "border-paper-300 dark:border-charcoal-border focus:border-[#C2410C]"
                   }`}
                 />
                 {isNameMissing && (
@@ -467,7 +471,7 @@ export function TechTalkPptStudio() {
 
               {/* Roll Number */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-zinc-800 dark:text-zinc-300 uppercase tracking-wider block">
+                <label className="text-xs font-semibold text-zinc-950 dark:text-zinc-200 uppercase tracking-wider block font-sans">
                   Student Roll Number <span className="text-rose-600 dark:text-rose-400">*</span>
                 </label>
                 <input
@@ -475,10 +479,10 @@ export function TechTalkPptStudio() {
                   value={rollNumber}
                   onChange={(e) => setRollNumber(e.target.value.toUpperCase())}
                   placeholder="e.g., 26951A67XX"
-                  className={`w-full bg-white dark:bg-zinc-900 border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-mono font-semibold uppercase text-zinc-950 dark:text-amber-300 placeholder-zinc-500 focus:outline-none transition-colors ${
+                  className={`w-full bg-[#FAF9F5] dark:bg-charcoal-900 border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-mono font-semibold uppercase text-zinc-950 dark:text-amber-300 placeholder-zinc-500 focus:outline-none transition-colors ${
                     isRollMissing
                       ? "border-rose-500 ring-1 ring-rose-500"
-                      : "border-zinc-300 dark:border-white/[0.1] focus:border-orange-500"
+                      : "border-paper-300 dark:border-charcoal-border focus:border-[#C2410C]"
                   }`}
                 />
                 {isRollMissing && (
@@ -490,7 +494,7 @@ export function TechTalkPptStudio() {
 
               {/* Branch */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-zinc-800 dark:text-zinc-300 uppercase tracking-wider block">
+                <label className="text-xs font-semibold text-zinc-950 dark:text-zinc-200 uppercase tracking-wider block font-sans">
                   Branch / Dept <span className="text-rose-600 dark:text-rose-400">*</span>
                 </label>
                 <input
@@ -498,10 +502,10 @@ export function TechTalkPptStudio() {
                   value={branch}
                   onChange={(e) => setBranch(e.target.value)}
                   placeholder="e.g., CSE or CSD"
-                  className={`w-full bg-white dark:bg-zinc-900 border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-zinc-950 dark:text-white placeholder-zinc-500 focus:outline-none transition-colors ${
+                  className={`w-full bg-[#FAF9F5] dark:bg-charcoal-900 border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-zinc-950 dark:text-white placeholder-zinc-500 focus:outline-none transition-colors ${
                     isBranchMissing
                       ? "border-rose-500 ring-1 ring-rose-500"
-                      : "border-zinc-300 dark:border-white/[0.1] focus:border-orange-500"
+                      : "border-paper-300 dark:border-charcoal-border focus:border-[#C2410C]"
                   }`}
                 />
                 {isBranchMissing && (
@@ -513,7 +517,7 @@ export function TechTalkPptStudio() {
 
               {/* Subject */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-zinc-800 dark:text-zinc-300 uppercase tracking-wider block">
+                <label className="text-xs font-semibold text-zinc-950 dark:text-zinc-200 uppercase tracking-wider block font-sans">
                   Subject / Course Name <span className="text-rose-600 dark:text-rose-400">*</span>
                 </label>
                 <input
@@ -521,10 +525,10 @@ export function TechTalkPptStudio() {
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                   placeholder="e.g., Essentials of Problem Solving"
-                  className={`w-full bg-white dark:bg-zinc-900 border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-zinc-950 dark:text-white placeholder-zinc-500 focus:outline-none transition-colors ${
+                  className={`w-full bg-[#FAF9F5] dark:bg-charcoal-900 border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-zinc-950 dark:text-white placeholder-zinc-500 focus:outline-none transition-colors ${
                     isSubjectMissing
                       ? "border-rose-500 ring-1 ring-rose-500"
-                      : "border-zinc-300 dark:border-white/[0.1] focus:border-orange-500"
+                      : "border-paper-300 dark:border-charcoal-border focus:border-[#C2410C]"
                   }`}
                 />
                 {isSubjectMissing && (
@@ -550,7 +554,7 @@ export function TechTalkPptStudio() {
                     className={`px-2.5 py-1 rounded-lg text-xs font-mono font-semibold transition-all border cursor-pointer ${
                       isSelected
                         ? "bg-[#C2410C] text-white border-orange-600 font-bold shadow-sm"
-                        : "bg-white hover:bg-zinc-100 dark:bg-white/[0.04] text-zinc-800 dark:text-zinc-300 border-zinc-200 dark:border-white/[0.08] hover:border-orange-500/40 hover:text-zinc-950 dark:hover:text-white"
+                        : "bg-[#FAF9F5] hover:bg-paper-200 dark:bg-charcoal-700 text-zinc-800 dark:text-zinc-300 border-paper-300 dark:border-charcoal-border hover:border-[#C2410C]/40 hover:text-zinc-950 dark:hover:text-white"
                     }`}
                   >
                     {chip}
@@ -561,7 +565,7 @@ export function TechTalkPptStudio() {
 
             {/* Row 3: Topic Title */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-zinc-800 dark:text-zinc-300 uppercase tracking-wider block">
+              <label className="text-xs font-semibold text-zinc-950 dark:text-zinc-200 uppercase tracking-wider block font-sans">
                 Presentation Topic Title <span className="text-rose-600 dark:text-rose-400">*</span>
               </label>
               <input
@@ -569,10 +573,10 @@ export function TechTalkPptStudio() {
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
                 placeholder="e.g., Bagging and Boosting Fine-Tuning for Ensemble Learning"
-                className={`w-full bg-white dark:bg-zinc-950 border rounded-2xl px-4 py-3 text-base sm:text-sm text-zinc-950 dark:text-white placeholder-zinc-500 focus:outline-none font-medium shadow-sm transition-colors ${
+                className={`w-full bg-[#FAF9F5] dark:bg-charcoal-900 border rounded-2xl px-4 py-3 text-base sm:text-sm text-zinc-950 dark:text-white placeholder-zinc-500 focus:outline-none font-medium shadow-sm transition-colors ${
                   isTopicMissing
                     ? "border-rose-500 ring-1 ring-rose-500"
-                    : "border-zinc-300 dark:border-white/[0.1] focus:border-orange-500"
+                    : "border-paper-300 dark:border-charcoal-border focus:border-[#C2410C]"
                 }`}
               />
               {isTopicMissing && (
@@ -584,7 +588,7 @@ export function TechTalkPptStudio() {
 
             {/* Row 4: Topic Details / Syllabus / Abstract */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-zinc-800 dark:text-zinc-300 uppercase tracking-wider block">
+              <label className="text-xs font-semibold text-zinc-950 dark:text-zinc-200 uppercase tracking-wider block font-sans">
                 Topic Syllabus, Subtopics or Abstract (Optional)
               </label>
               <textarea
@@ -592,12 +596,12 @@ export function TechTalkPptStudio() {
                 onChange={(e) => setDetails(e.target.value)}
                 rows={3}
                 placeholder="Paste your topic syllabus, subtopics, or abstract here..."
-                className="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-white/[0.1] rounded-2xl p-4 text-xs sm:text-sm text-zinc-950 dark:text-zinc-300 placeholder-zinc-500 focus:outline-none focus:border-orange-500 leading-relaxed resize-y shadow-sm"
+                className="w-full bg-[#FAF9F5] dark:bg-charcoal-900 border border-paper-300 dark:border-charcoal-border rounded-2xl p-4 text-xs sm:text-sm text-zinc-950 dark:text-zinc-300 placeholder-zinc-500 focus:outline-none focus:border-[#C2410C] leading-relaxed resize-y shadow-sm"
               />
             </div>
 
             {/* Row 5: Institutional Crest & Custom Logo Uploader */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-zinc-50 dark:bg-white/[0.02] border border-zinc-200 dark:border-white/[0.06]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-[#FAF9F5] dark:bg-charcoal-900 border border-paper-300 dark:border-charcoal-border">
               <div className="flex items-center gap-3.5">
                 {activeLogo ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
@@ -610,12 +614,12 @@ export function TechTalkPptStudio() {
                   <IareEmblem className="w-14 h-14 shrink-0" size={56} />
                 )}
                 <div>
-                  <span className="text-xs font-semibold text-zinc-950 dark:text-white block">
+                  <span className="text-xs font-semibold text-zinc-950 dark:text-white block font-sans">
                     {customLogoBase64
                       ? "Custom College Logo Active"
                       : "Official High-DPI IARE Circular Emblem Active"}
                   </span>
-                  <span className="text-[11px] text-zinc-600 dark:text-zinc-400 block">
+                  <span className="text-[11px] text-zinc-600 dark:text-zinc-400 block font-sans">
                     Rendered in pure high resolution onto Title Cover and exported
                     .pptx &amp; .pdf files.
                   </span>
@@ -633,9 +637,9 @@ export function TechTalkPptStudio() {
                 <button
                   type="button"
                   onClick={() => logoInputRef.current?.click()}
-                  className="px-3 py-1.5 rounded-xl bg-white hover:bg-zinc-100 dark:bg-white/[0.05] dark:hover:bg-white/[0.1] border border-zinc-200 dark:border-white/[0.1] text-xs text-zinc-800 dark:text-zinc-200 hover:text-zinc-950 dark:hover:text-white transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="px-3.5 py-2 rounded-xl bg-white hover:bg-paper-100 dark:bg-charcoal-800 dark:hover:bg-charcoal-700 border border-paper-300 dark:border-charcoal-border text-xs text-zinc-800 dark:text-zinc-200 hover:text-zinc-950 dark:hover:text-white transition-all flex items-center gap-1.5 cursor-pointer shadow-paper font-sans"
                 >
-                  <Upload className="w-3.5 h-3.5 text-orange-600 dark:text-amber-400" />
+                  <Upload className="w-3.5 h-3.5 text-[#C2410C]" />
                   <span>Upload Custom Logo</span>
                 </button>
 
@@ -643,7 +647,7 @@ export function TechTalkPptStudio() {
                   <button
                     type="button"
                     onClick={handleResetLogo}
-                    className="p-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 transition-all cursor-pointer"
+                    className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 transition-all cursor-pointer"
                     title="Reset to default IARE circular crest"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
@@ -652,28 +656,63 @@ export function TechTalkPptStudio() {
               </div>
             </div>
 
-            {/* Row 6: Slide Count & Submit Action */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
-                  <Layers className="w-3.5 h-3.5 text-orange-600 dark:text-amber-400" />
-                  Slide Count:
-                </span>
-                <div className="flex items-center gap-1.5">
-                  {[10, 12, 13, 14, 15].map((cnt) => (
+            {/* Row 6: Content Depth Selector & Slide Count & Submit Action */}
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pt-2 border-t border-paper-300 dark:border-charcoal-border">
+              <div className="flex flex-wrap items-center gap-4">
+                {/* Content Depth Selector */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-zinc-950 dark:text-zinc-300 uppercase tracking-wider flex items-center gap-1.5 font-sans">
+                    <Sparkles className="w-3.5 h-3.5 text-[#C2410C]" />
+                    Depth:
+                  </span>
+                  <div className="inline-flex p-1 rounded-xl bg-[#FAF9F5] dark:bg-charcoal-900 border border-paper-300 dark:border-charcoal-border">
                     <button
-                      key={cnt}
                       type="button"
-                      onClick={() => setSlideCount(cnt)}
-                      className={`px-3 py-1 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
-                        slideCount === cnt
-                          ? "bg-[#C2410C] text-white border-orange-600 font-bold shadow-sm"
-                          : "bg-zinc-100 hover:bg-zinc-200 dark:bg-white/[0.03] text-zinc-800 dark:text-zinc-400 border border-zinc-200 dark:border-white/[0.08] hover:text-zinc-950 dark:hover:text-white"
+                      onClick={() => setContentDepth("detailed")}
+                      className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer font-sans ${
+                        contentDepth === "detailed"
+                          ? "bg-[#C2410C] text-white font-bold shadow-sm"
+                          : "text-zinc-700 hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white"
                       }`}
                     >
-                      {cnt} {cnt === 13 && "(IARE Default)"}
+                      Detailed Tech Talk (Default)
                     </button>
-                  ))}
+                    <button
+                      type="button"
+                      onClick={() => setContentDepth("extra-deep")}
+                      className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer font-sans ${
+                        contentDepth === "extra-deep"
+                          ? "bg-[#C2410C] text-white font-bold shadow-sm"
+                          : "text-zinc-700 hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white"
+                      }`}
+                    >
+                      Extra Deep Technical
+                    </button>
+                  </div>
+                </div>
+
+                {/* Slide Count Selector */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-zinc-950 dark:text-zinc-300 uppercase tracking-wider flex items-center gap-1.5 font-sans">
+                    <Layers className="w-3.5 h-3.5 text-[#C2410C]" />
+                    Slides:
+                  </span>
+                  <div className="flex items-center gap-1">
+                    {[10, 12, 13, 14, 15].map((cnt) => (
+                      <button
+                        key={cnt}
+                        type="button"
+                        onClick={() => setSlideCount(cnt)}
+                        className={`px-2.5 py-1 rounded-xl text-xs font-semibold border transition-all cursor-pointer font-sans ${
+                          slideCount === cnt
+                            ? "bg-[#C2410C] text-white border-orange-600 font-bold shadow-sm"
+                            : "bg-[#FAF9F5] hover:bg-paper-200 dark:bg-charcoal-700 text-zinc-800 dark:text-zinc-400 border border-paper-300 dark:border-charcoal-border hover:text-zinc-950 dark:hover:text-white"
+                        }`}
+                      >
+                        {cnt} {cnt === 13 && "(IARE)"}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -682,7 +721,7 @@ export function TechTalkPptStudio() {
                 type="button"
                 onClick={handleGenerateDeck}
                 disabled={isGenerating}
-                className="w-full sm:w-auto px-8 py-3.5 rounded-lg bg-[#C2410C] hover:bg-[#9A3412] text-white font-mono uppercase tracking-wider font-semibold text-xs sm:text-sm flex items-center justify-center gap-2.5 transition-colors shadow-paper cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#C2410C] hover:bg-[#9A3412] text-white font-mono uppercase tracking-wider font-semibold text-xs sm:text-sm flex items-center justify-center gap-2.5 transition-colors shadow-paper cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isGenerating ? (
                   <>
@@ -702,24 +741,24 @@ export function TechTalkPptStudio() {
 
         {/* EMPTY STATE (Visible until user generates presentation) */}
         {!presentation && (
-          <div className="rounded-lg border border-paper-300 dark:border-charcoal-border bg-paper-100/50 dark:bg-charcoal-900/50 p-8 sm:p-12 text-center space-y-4">
-            <div className="w-16 h-16 rounded-lg bg-[#FEF3C7] dark:bg-[#B45309]/20 border border-[#FDE68A] dark:border-[#B45309]/30 text-[#B45309] dark:text-[#fde68a] mx-auto flex items-center justify-center">
+          <div className="rounded-2xl border border-paper-300 dark:border-charcoal-border bg-white dark:bg-charcoal-800 p-8 sm:p-12 text-center space-y-4 shadow-paper">
+            <div className="w-16 h-16 rounded-2xl bg-[#FEF3C7] dark:bg-[#B45309]/20 border border-[#FDE68A] dark:border-[#B45309]/30 text-[#B45309] dark:text-[#fde68a] mx-auto flex items-center justify-center">
               <IareEmblem size={40} className="w-10 h-10" />
             </div>
             <div className="space-y-1.5 max-w-lg mx-auto">
-              <h3 className="text-lg font-serif text-ink-primary dark:text-white tracking-tight">
+              <h3 className="text-lg font-serif text-zinc-950 dark:text-white tracking-tight">
                 No Presentation Generated Yet
               </h3>
-              <p className="text-xs sm:text-sm text-ink-secondary dark:text-paper-400 leading-relaxed font-sans">
+              <p className="text-xs sm:text-sm text-zinc-700 dark:text-paper-400 leading-relaxed font-sans">
                 Enter your authentic topic, full name, roll number, engineering
                 branch, and subject above, then click{" "}
                 <strong className="text-[#C2410C]">
                   &ldquo;Generate Presentation&rdquo;
                 </strong>{" "}
-                to build your OBE-compliant 13-slide IARE deck with speaker notes.
+                to build your OBE-compliant 13-slide IARE deck with speaker notes and deep technical content.
               </p>
             </div>
-            <div className="pt-2 flex items-center justify-center gap-6 text-xs text-ink-muted flex-wrap font-mono">
+            <div className="pt-2 flex items-center justify-center gap-6 text-xs text-zinc-600 dark:text-paper-400 flex-wrap font-mono">
               <span className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-[#C2410C]" />
                 13 Official Master Slides
@@ -751,12 +790,19 @@ export function TechTalkPptStudio() {
                     SLIDE {activeSlideIndex + 1} OF {presentation.slides.length}
                   </span>
                   <span className="text-zinc-400 dark:text-zinc-600">•</span>
-                  <span className="text-xs text-zinc-600 dark:text-zinc-400 uppercase tracking-wider font-semibold">
+                  <span className="text-xs text-zinc-600 dark:text-zinc-400 uppercase tracking-wider font-semibold font-sans">
                     Layout: {currentSlide.layout}
                   </span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-950 border border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30 font-bold">
-                    IARE Master Active
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-950 border border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30 font-bold font-mono">
+                    IARE Master (13.333&quot; x 7.5&quot;)
                   </span>
+                  {presentation.contentDepth && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#EDF5F2] text-[#1B4D3E] dark:bg-[#143A2F]/40 dark:text-[#6ee7b7] border border-[#C4DFD5] dark:border-[#143A2F] font-bold font-mono">
+                      {presentation.contentDepth === "extra-deep"
+                        ? "Extra Deep Technical"
+                        : "Detailed Tech Talk"}
+                    </span>
+                  )}
                 </div>
                 <h3 className="text-base sm:text-lg font-bold text-zinc-950 dark:text-white truncate max-w-xl font-sans">
                   {presentation.topic}
@@ -769,7 +815,7 @@ export function TechTalkPptStudio() {
                   type="button"
                   onClick={handleExportPptx}
                   disabled={isExportingPptx}
-                  className="px-4 py-2 rounded-lg bg-[#C2410C] hover:bg-[#9A3412] text-white font-mono uppercase tracking-wider font-semibold text-xs flex items-center gap-2 transition-colors cursor-pointer shadow-paper disabled:opacity-50"
+                  className="px-4 py-2 rounded-xl bg-[#C2410C] hover:bg-[#9A3412] text-white font-mono uppercase tracking-wider font-semibold text-xs flex items-center gap-2 transition-colors cursor-pointer shadow-paper disabled:opacity-50"
                   title="Export PowerPoint (.pptx) with speaker notes"
                 >
                   {isExportingPptx ? (
@@ -784,7 +830,7 @@ export function TechTalkPptStudio() {
                   type="button"
                   onClick={handleExportPdf}
                   disabled={isExportingPdf}
-                  className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-black text-white dark:bg-charcoal-700 dark:hover:bg-charcoal-600 font-mono uppercase tracking-wider font-semibold text-xs flex items-center gap-2 transition-colors cursor-pointer shadow-paper disabled:opacity-50"
+                  className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-black text-white dark:bg-charcoal-700 dark:hover:bg-charcoal-600 font-mono uppercase tracking-wider font-semibold text-xs flex items-center gap-2 transition-colors cursor-pointer shadow-paper disabled:opacity-50"
                   title="Export 16:9 PDF Presentation Deck"
                 >
                   {isExportingPdf ? (
@@ -798,8 +844,8 @@ export function TechTalkPptStudio() {
                 <button
                   type="button"
                   onClick={handleDownloadCheatSheet}
-                  className="px-3.5 py-2 rounded-lg bg-paper-100 hover:bg-paper-200 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 border border-paper-300 dark:border-charcoal-border text-ink-primary dark:text-white font-mono text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-paper"
-                  title="Download Speaker Script for your phone"
+                  className="px-3.5 py-2 rounded-xl bg-white hover:bg-paper-100 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 border border-paper-300 dark:border-charcoal-border text-zinc-950 dark:text-white font-mono text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-paper"
+                  title="Download Speaker Script for your presentation"
                 >
                   <Copy className="w-3.5 h-3.5 text-[#C2410C]" />
                   <span>Speech Notes (.md)</span>
@@ -811,7 +857,7 @@ export function TechTalkPptStudio() {
                     setPresentation(null);
                     setHasAttemptedSubmit(false);
                   }}
-                  className="text-xs text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white px-3 py-2 rounded-lg hover:bg-paper-200 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
+                  className="text-xs text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white px-3 py-2 rounded-xl hover:bg-paper-200 dark:hover:bg-white/[0.06] transition-colors cursor-pointer font-sans"
                 >
                   New Deck
                 </button>
@@ -823,7 +869,7 @@ export function TechTalkPptStudio() {
               className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden shadow-2xl border border-slate-300 flex flex-col justify-between transition-colors select-none"
               style={{
                 backgroundColor: `#${IARE_EXACT_COLORS.slideBg}`,
-                color: `#${IARE_EXACT_COLORS.bodyText}`,
+                color: "#111827",
                 fontFamily: 'Calibri, Candara, "Segoe UI", Arial, sans-serif',
               }}
             >
@@ -840,7 +886,7 @@ export function TechTalkPptStudio() {
 
                   {/* Main Content Area */}
                   <div className="flex-1 flex flex-col justify-between px-6 sm:px-12 py-3 sm:py-5">
-                    {/* Shape 'Text 0': Assessment Title (Centered, 28pt Arial Bold, #004170) */}
+                    {/* Assessment Title (Centered, 28pt Arial Bold, #004170) */}
                     <div className="text-center">
                       <h2
                         className="text-base sm:text-xl md:text-2xl font-bold tracking-tight uppercase"
@@ -853,7 +899,7 @@ export function TechTalkPptStudio() {
                       </h2>
                     </div>
 
-                    {/* Shape 'Text 1': Topic - [Topic] (Left-aligned, Arial 28pt Bold + Calibri 24pt, #004170) */}
+                    {/* Topic Title (Left-aligned, Arial 28pt Bold + Calibri 24pt, #004170) */}
                     <div className="text-left pt-1 sm:pt-2">
                       <h3
                         className="text-base sm:text-xl md:text-2xl font-bold tracking-tight leading-snug"
@@ -869,7 +915,7 @@ export function TechTalkPptStudio() {
                       </h3>
                     </div>
 
-                    {/* Shapes 'Text 2-5': Stacked Student Metadata (Name, Roll No, Branch, Subject) */}
+                    {/* Stacked Student Metadata (Name, Roll No, Branch, Subject) */}
                     <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm md:text-base text-left pt-1 sm:pt-2 pb-2">
                       <p className="flex items-center">
                         <strong
@@ -878,7 +924,7 @@ export function TechTalkPptStudio() {
                         >
                           Name:{" "}
                         </strong>
-                        <span style={{ color: `#${IARE_EXACT_COLORS.bodyText}` }}>
+                        <span style={{ color: "#111827" }}>
                           {presentation.iareMetadata?.studentName}
                         </span>
                       </p>
@@ -889,7 +935,7 @@ export function TechTalkPptStudio() {
                         >
                           Roll No:{" "}
                         </strong>
-                        <span style={{ color: `#${IARE_EXACT_COLORS.bodyText}` }}>
+                        <span style={{ color: "#111827" }}>
                           {presentation.iareMetadata?.rollNumber}
                         </span>
                       </p>
@@ -900,7 +946,7 @@ export function TechTalkPptStudio() {
                         >
                           Branch:{" "}
                         </strong>
-                        <span style={{ color: `#${IARE_EXACT_COLORS.bodyText}` }}>
+                        <span style={{ color: "#111827" }}>
                           {presentation.iareMetadata?.department}
                         </span>
                       </p>
@@ -911,7 +957,7 @@ export function TechTalkPptStudio() {
                         >
                           Subject:{" "}
                         </strong>
-                        <span style={{ color: `#${IARE_EXACT_COLORS.bodyText}` }}>
+                        <span style={{ color: "#111827" }}>
                           {presentation.iareMetadata?.subject}
                         </span>
                       </p>
@@ -929,7 +975,7 @@ export function TechTalkPptStudio() {
                     className="w-full h-auto max-h-[26%] object-cover object-top select-none pointer-events-none"
                   />
 
-                  {/* Centered THANK YOU: 48pt Arial Bold in #51237F */}
+                  {/* Centered THANK YOU: 52pt Arial Bold in #51237F */}
                   <div className="flex-1 flex flex-col justify-center items-center text-center my-auto pb-6">
                     <h2
                       className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight"
@@ -946,10 +992,10 @@ export function TechTalkPptStudio() {
                 /* SLIDES 2 TO 12: EXACT CONTENT SLIDES (slideLayout3.xml CONTENT_MASTER) */
                 <div className="flex-1 flex flex-col justify-between relative z-10">
                   {/* Top Row: Left Side-Heading + Right Corner Logo */}
-                  <div className="flex items-start justify-between px-6 sm:px-10 pt-4 sm:pt-6">
-                    {/* Shape 'Text 0': Side-Heading in ALL CAPS (#003366, 22pt Calibri Bold) */}
+                  <div className="flex items-start justify-between px-6 sm:px-10 pt-3 sm:pt-5">
+                    {/* Side-Heading in ALL CAPS (#003366, 23pt Calibri Bold) */}
                     <h3
-                      className="text-base sm:text-xl md:text-2xl font-bold tracking-tight text-left uppercase max-w-[80%]"
+                      className="text-base sm:text-xl md:text-2xl font-bold tracking-tight text-left uppercase max-w-[82%]"
                       style={{
                         color: `#${IARE_EXACT_COLORS.sideHeading}`,
                         fontFamily: "Calibri, sans-serif",
@@ -968,10 +1014,10 @@ export function TechTalkPptStudio() {
                   </div>
 
                   {/* Body Content Area (Shape 'Text 1') */}
-                  <div className="flex-1 flex flex-col justify-start px-6 sm:px-10 py-3 sm:py-5">
+                  <div className="flex-1 flex flex-col justify-start px-6 sm:px-10 py-2 sm:py-3 overflow-hidden">
                     {/* INDEX LAYOUT */}
                     {currentSlide.layout === "index" && (
-                      <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm md:text-base text-left text-black font-normal leading-relaxed">
+                      <div className="space-y-1 sm:space-y-1.5 text-xs sm:text-sm md:text-[15px] text-left text-zinc-950 font-normal leading-relaxed">
                         {(currentSlide.bulletPoints || []).map((item, idx) => (
                           <div key={idx} className="text-left">
                             {item}
@@ -981,39 +1027,63 @@ export function TechTalkPptStudio() {
                     )}
 
                     {/* PARAGRAPH LAYOUT (INTRODUCTION / CONCLUSION) */}
-                    {currentSlide.layout === "paragraph" && (
-                      <div className="py-1">
-                        <p className="text-xs sm:text-sm md:text-base text-black leading-relaxed sm:leading-[1.7] text-left font-normal">
-                          {currentSlide.paragraph || currentSlide.bulletPoints?.join(" ")}
-                        </p>
-                      </div>
-                    )}
+                    {currentSlide.layout === "paragraph" && (() => {
+                      const pText = currentSlide.paragraph || currentSlide.bulletPoints?.join(" ") || "";
+                      const isLongParagraph = pText.length > 750;
+                      return (
+                        <div className="py-1">
+                          <p
+                            className={`text-zinc-950 text-left font-normal ${
+                              isLongParagraph
+                                ? "text-[11px] sm:text-[13px] md:text-[14px] leading-[1.4]"
+                                : "text-xs sm:text-sm md:text-[15.5px] leading-[1.45]"
+                            }`}
+                          >
+                            {pText}
+                          </p>
+                        </div>
+                      );
+                    })()}
 
                     {/* BULLETS LAYOUT (8 CORE TECHNICAL SLIDES) */}
                     {(currentSlide.layout === "bullets" ||
                       (!["index", "paragraph"].includes(currentSlide.layout) &&
-                        currentSlide.bulletPoints)) && (
-                      <div className="space-y-2 sm:space-y-3 py-1">
-                        {(currentSlide.bulletPoints || [])
-                          .slice(0, 5)
-                          .map((bullet, idx) => (
+                        currentSlide.bulletPoints)) && (() => {
+                      const bullets = currentSlide.bulletPoints || [];
+                      const totalChars = bullets.join("").length;
+                      const isDense = totalChars > 950 || bullets.length > 5;
+
+                      return (
+                        <div
+                          className={`py-0.5 ${
+                            isDense
+                              ? "space-y-1.5 sm:space-y-2"
+                              : "space-y-2 sm:space-y-2.5"
+                          }`}
+                        >
+                          {bullets.map((bullet, idx) => (
                             <div
                               key={idx}
-                              className="flex items-start gap-2.5 text-xs sm:text-sm md:text-base text-black leading-relaxed text-left font-normal"
+                              className={`flex items-start gap-2 text-zinc-950 text-left font-normal ${
+                                isDense
+                                  ? "text-[10px] sm:text-[12px] md:text-[13.5px] leading-[1.26]"
+                                  : "text-xs sm:text-sm md:text-[14.5px] leading-[1.28]"
+                              }`}
                             >
-                              <span className="text-black font-bold text-sm sm:text-base select-none shrink-0 mt-[-1px]">
+                              <span className="text-zinc-950 font-bold select-none shrink-0 mt-[-1px]">
                                 •
                               </span>
                               <span>{bullet}</span>
                             </div>
                           ))}
-                      </div>
-                    )}
+                        </div>
+                      );
+                    })()}
                   </div>
 
-                  {/* Bottom Footer Bar: Shape 0 (x=0, y=5.3438", w=10.0", h=0.4", fill=#003366) */}
+                  {/* Bottom Footer Bar: Shape 0 (x=0, y=7.12", w=13.333", h=0.38", fill=#003366) */}
                   <div
-                    className="w-full h-4 sm:h-5 shrink-0"
+                    className="w-full h-3.5 sm:h-4 shrink-0"
                     style={{ backgroundColor: `#${IARE_EXACT_COLORS.footerBar}` }}
                   />
                 </div>
@@ -1026,7 +1096,7 @@ export function TechTalkPptStudio() {
                 type="button"
                 disabled={activeSlideIndex <= 0}
                 onClick={() => setActiveSlideIndex((i) => Math.max(0, i - 1))}
-                className="p-2 rounded-xl bg-paper-100 hover:bg-paper-200 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] text-zinc-700 dark:text-zinc-300 border border-paper-300 dark:border-transparent disabled:opacity-30 shrink-0 cursor-pointer"
+                className="p-2 rounded-xl bg-white hover:bg-paper-100 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-zinc-700 dark:text-zinc-300 border border-paper-300 dark:border-charcoal-border disabled:opacity-30 shrink-0 cursor-pointer shadow-paper"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
@@ -1037,10 +1107,10 @@ export function TechTalkPptStudio() {
                     key={s.id}
                     type="button"
                     onClick={() => setActiveSlideIndex(idx)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all border cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all border cursor-pointer font-sans ${
                       activeSlideIndex === idx
                         ? "bg-[#C2410C] border-orange-600 text-white font-bold shadow-sm"
-                        : "bg-paper-100 dark:bg-white/[0.02] border-paper-300 dark:border-white/[0.06] text-zinc-700 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white hover:border-paper-400 dark:hover:border-white/[0.12]"
+                        : "bg-white dark:bg-charcoal-800 border-paper-300 dark:border-charcoal-border text-zinc-700 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white hover:border-paper-400 shadow-paper"
                     }`}
                   >
                     <span>{idx + 1}. </span>
@@ -1059,7 +1129,7 @@ export function TechTalkPptStudio() {
                     Math.min(presentation.slides.length - 1, i + 1)
                   )
                 }
-                className="p-2 rounded-xl bg-paper-100 hover:bg-paper-200 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] text-zinc-700 dark:text-zinc-300 border border-paper-300 dark:border-transparent disabled:opacity-30 shrink-0 cursor-pointer"
+                className="p-2 rounded-xl bg-white hover:bg-paper-100 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-zinc-700 dark:text-zinc-300 border border-paper-300 dark:border-charcoal-border disabled:opacity-30 shrink-0 cursor-pointer shadow-paper"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -1068,22 +1138,22 @@ export function TechTalkPptStudio() {
             {/* Slide Editor & Verbal Stage Speaker Script Notes Drawer */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Quick Slide Content Editor */}
-              <div className="p-4 rounded-2xl bg-paper-100/60 dark:bg-white/[0.02] border border-paper-300 dark:border-white/[0.08] space-y-3">
+              <div className="p-4 rounded-2xl bg-white dark:bg-charcoal-800 border border-paper-300 dark:border-charcoal-border space-y-3 shadow-paper">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-zinc-800 dark:text-zinc-300 uppercase tracking-wider block font-sans">
+                  <label className="text-xs font-semibold text-zinc-950 dark:text-zinc-300 uppercase tracking-wider block font-sans">
                     Edit Slide Title
                   </label>
                   <input
                     type="text"
                     value={currentSlide.title}
                     onChange={(e) => handleUpdateSlideTitle(e.target.value)}
-                    className="w-full bg-white dark:bg-zinc-950 border border-paper-300 dark:border-white/[0.1] rounded-xl px-3 py-2 text-xs sm:text-sm text-zinc-950 dark:text-white font-medium focus:outline-none focus:border-[#C2410C] dark:focus:border-amber-500 shadow-paper"
+                    className="w-full bg-[#FAF9F5] dark:bg-charcoal-900 border border-paper-300 dark:border-charcoal-border rounded-xl px-3 py-2 text-xs sm:text-sm text-zinc-950 dark:text-white font-medium focus:outline-none focus:border-[#C2410C]"
                   />
                 </div>
 
                 {currentSlide.layout === "paragraph" && (
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-zinc-800 dark:text-zinc-300 uppercase tracking-wider block font-sans">
+                    <label className="text-xs font-semibold text-zinc-950 dark:text-zinc-300 uppercase tracking-wider block font-sans">
                       Edit Paragraph Text
                     </label>
                     <textarea
@@ -1095,8 +1165,8 @@ export function TechTalkPptStudio() {
                       onChange={(e) =>
                         handleUpdateSlideParagraph(e.target.value)
                       }
-                      rows={4}
-                      className="w-full bg-white dark:bg-zinc-950 border border-paper-300 dark:border-white/[0.1] rounded-xl p-3 text-xs sm:text-sm text-zinc-900 dark:text-zinc-200 focus:outline-none focus:border-[#C2410C] dark:focus:border-amber-500 leading-relaxed resize-y shadow-paper"
+                      rows={5}
+                      className="w-full bg-[#FAF9F5] dark:bg-charcoal-900 border border-paper-300 dark:border-charcoal-border rounded-xl p-3 text-xs sm:text-sm text-zinc-950 dark:text-zinc-200 focus:outline-none focus:border-[#C2410C] leading-relaxed resize-y"
                     />
                   </div>
                 )}
@@ -1104,24 +1174,24 @@ export function TechTalkPptStudio() {
                 {(currentSlide.layout === "bullets" ||
                   currentSlide.layout === "index") && (
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-zinc-800 dark:text-zinc-300 uppercase tracking-wider block font-sans">
+                    <label className="text-xs font-semibold text-zinc-950 dark:text-zinc-300 uppercase tracking-wider block font-sans">
                       Edit Slide Points (One per line)
                     </label>
                     <textarea
                       value={(currentSlide.bulletPoints || []).join("\n")}
                       onChange={(e) => handleUpdateSlideBullets(e.target.value)}
-                      rows={5}
-                      className="w-full bg-white dark:bg-zinc-950 border border-paper-300 dark:border-white/[0.1] rounded-xl p-3 text-xs sm:text-sm text-zinc-900 dark:text-zinc-200 focus:outline-none focus:border-[#C2410C] dark:focus:border-amber-500 leading-relaxed resize-y font-mono shadow-paper"
+                      rows={6}
+                      className="w-full bg-[#FAF9F5] dark:bg-charcoal-900 border border-paper-300 dark:border-charcoal-border rounded-xl p-3 text-xs sm:text-sm text-zinc-950 dark:text-zinc-200 focus:outline-none focus:border-[#C2410C] leading-relaxed resize-y font-mono"
                     />
                   </div>
                 )}
               </div>
 
               {/* Speaker Notes Script Panel (Stage Teleprompter) */}
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-950/20 to-zinc-900 border border-amber-500/25 space-y-2">
+              <div className="p-4 rounded-2xl bg-white dark:bg-charcoal-800 border border-paper-300 dark:border-charcoal-border space-y-2 shadow-paper">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="text-xs font-bold text-[#C2410C] uppercase tracking-wider flex items-center gap-1.5 font-sans">
+                    <Sparkles className="w-3.5 h-3.5" />
                     What to Say on Stage (Verbal Speaker Script)
                   </span>
                   <button
@@ -1131,7 +1201,7 @@ export function TechTalkPptStudio() {
                       setCopiedNotes(true);
                       setTimeout(() => setCopiedNotes(false), 2000);
                     }}
-                    className="text-[11px] text-amber-300 hover:text-white flex items-center gap-1 cursor-pointer font-medium"
+                    className="text-[11px] text-[#C2410C] hover:text-[#9A3412] dark:text-amber-400 dark:hover:text-amber-300 flex items-center gap-1 cursor-pointer font-medium font-sans"
                   >
                     <Copy className="w-3 h-3" />
                     {copiedNotes ? "Copied!" : "Copy Notes"}
@@ -1140,8 +1210,8 @@ export function TechTalkPptStudio() {
                 <textarea
                   value={currentSlide.speakerNotes}
                   onChange={(e) => handleUpdateSlideNotes(e.target.value)}
-                  rows={5}
-                  className="w-full bg-black/40 border border-white/[0.08] rounded-xl p-3 text-xs sm:text-sm text-amber-100 placeholder-zinc-500 focus:outline-none focus:border-amber-400 leading-relaxed resize-y font-normal"
+                  rows={6}
+                  className="w-full bg-[#FAF9F5] dark:bg-charcoal-900 border border-paper-300 dark:border-charcoal-border rounded-xl p-3 text-xs sm:text-sm text-zinc-900 dark:text-amber-100 placeholder-zinc-500 focus:outline-none focus:border-[#C2410C] leading-relaxed resize-y font-normal"
                 />
               </div>
             </div>

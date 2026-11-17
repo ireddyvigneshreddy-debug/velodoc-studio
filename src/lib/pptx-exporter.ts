@@ -60,15 +60,15 @@ export function getPresentationExportFilename(
 }
 
 /**
- * 1. Export 16:9 PowerPoint (.pptx) with embedded Speaker Notes
- * Exact 1:1 XML geometry from reference Vigneshreddy_EPS_AAT-1.pptx (10.0" x 5.625")
+ * 1. Export 16:9 Widescreen PowerPoint (.pptx) with embedded Speaker Notes
+ * Exact 13.333" x 7.5" Widescreen Geometry with Auto-Fit Typography
  */
 export async function exportToPptx(
   presentation: TechTalkPresentation
 ): Promise<void> {
   const pptx = new pptxgen();
-  // Exact 16:9 widescreen layout matching PowerPoint template (10.0" x 5.625")
-  pptx.defineLayout({ name: "IARE_EXACT_16x9", width: 10.0, height: 5.625 });
+  // Exact 16:9 widescreen layout (13.333" x 7.5")
+  pptx.defineLayout({ name: "IARE_EXACT_16x9", width: 13.333, height: 7.5 });
   pptx.layout = "IARE_EXACT_16x9";
 
   pptx.title = presentation.topic;
@@ -105,35 +105,33 @@ export async function exportToPptx(
       // ======================================================================
       // SLIDE 1: EXACT COVER SLIDE (slideLayout2.xml TITLE_MASTER)
       // ======================================================================
-      // Header Banner Image across top: x=0, y=0, w=10.0", h=1.5"
+      // Header Banner Image across top: x=0, y=0, w=13.333", h=2.0"
       try {
         slide.addImage({
           data: IARE_HEADER_BANNER_BASE64,
           x: 0,
           y: 0,
-          w: 10.0,
-          h: 1.5,
+          w: 13.333,
+          h: 2.0,
         });
       } catch {
         // Fallback
       }
 
-      // Shape 'Text 0': AAT - TECH TALK
-      // pos=(0.5000", 1.8000") size=(9.0000" x 0.5") font=Arial, sz=28.0pt, bold=True, clr=#004170, align=ctr
+      // Assessment Title: AAT - TECH TALK
       slide.addText(assessmentTitle, {
-        x: 0.5,
-        y: 1.8,
-        w: 9.0,
-        h: 0.55,
-        fontSize: 28,
+        x: 0.75,
+        y: 2.3,
+        w: 11.83,
+        h: 0.65,
+        fontSize: 30,
         fontFace: "Arial",
         bold: true,
         color: IARE_EXACT_COLORS.headerBannerBg,
         align: "center",
       });
 
-      // Shape 'Text 1': Topic - [Topic]
-      // pos=(1.0000", 2.5000") size=(8.0000" x 0.8") font=Arial 28pt bold + Calibri 24pt regular, clr=#004170
+      // Topic Title: Topic - [Topic]
       const topicText = s.title.replace(/^Topic\s*-\s*/i, "").trim();
       const topicProps: pptxgen.TextProps[] = [
         {
@@ -158,14 +156,13 @@ export async function exportToPptx(
 
       slide.addText(topicProps, {
         x: 1.0,
-        y: 2.5,
-        w: 8.0,
-        h: 0.85,
+        y: 3.25,
+        w: 11.33,
+        h: 0.95,
         align: "left",
       });
 
-      // Shape 'Text 2': Name: [Name]
-      // pos=(1.0000", 3.5000") size=(8.0000" x 0.4")
+      // Student Credentials: Name
       slide.addText(
         [
           {
@@ -183,15 +180,14 @@ export async function exportToPptx(
               fontSize: 18,
               fontFace: "Calibri",
               bold: false,
-              color: IARE_EXACT_COLORS.bodyText,
+              color: "111827",
             },
           },
         ],
-        { x: 1.0, y: 3.5, w: 8.0, h: 0.4, align: "left" }
+        { x: 1.0, y: 4.45, w: 11.33, h: 0.45, align: "left" }
       );
 
-      // Shape 'Text 3': Roll No: [Roll No]
-      // pos=(1.0000", 4.0000") size=(8.0000" x 0.4")
+      // Roll No
       slide.addText(
         [
           {
@@ -209,15 +205,14 @@ export async function exportToPptx(
               fontSize: 18,
               fontFace: "Calibri",
               bold: false,
-              color: IARE_EXACT_COLORS.bodyText,
+              color: "111827",
             },
           },
         ],
-        { x: 1.0, y: 4.0, w: 8.0, h: 0.4, align: "left" }
+        { x: 1.0, y: 5.05, w: 11.33, h: 0.45, align: "left" }
       );
 
-      // Shape 'Text 4': Branch: [Branch]
-      // pos=(1.0000", 4.5000") size=(8.0000" x 0.4")
+      // Branch
       slide.addText(
         [
           {
@@ -235,15 +230,14 @@ export async function exportToPptx(
               fontSize: 18,
               fontFace: "Calibri",
               bold: false,
-              color: IARE_EXACT_COLORS.bodyText,
+              color: "111827",
             },
           },
         ],
-        { x: 1.0, y: 4.5, w: 8.0, h: 0.4, align: "left" }
+        { x: 1.0, y: 5.65, w: 11.33, h: 0.45, align: "left" }
       );
 
-      // Shape 'Text 5': Subject: [Subject]
-      // pos=(1.0000", 5.0000") size=(8.0000" x 0.4")
+      // Subject
       slide.addText(
         [
           {
@@ -261,37 +255,35 @@ export async function exportToPptx(
               fontSize: 18,
               fontFace: "Calibri",
               bold: false,
-              color: IARE_EXACT_COLORS.bodyText,
+              color: "111827",
             },
           },
         ],
-        { x: 1.0, y: 5.0, w: 8.0, h: 0.4, align: "left" }
+        { x: 1.0, y: 6.25, w: 11.33, h: 0.45, align: "left" }
       );
     } else if (s.layout === "thank-you") {
       // ======================================================================
       // SLIDE 13: EXACT THANK YOU SLIDE (slideLayout2.xml TITLE_MASTER)
       // ======================================================================
-      // Header Banner Image across top: x=0, y=0, w=10.0", h=1.5"
       try {
         slide.addImage({
           data: IARE_HEADER_BANNER_BASE64,
           x: 0,
           y: 0,
-          w: 10.0,
-          h: 1.5,
+          w: 13.333,
+          h: 2.0,
         });
       } catch {
         // Fallback
       }
 
-      // Shape 'Text 0': THANK YOU
-      // pos=(0.5000", 1.5000") size=(9.0000" x 2.8125") font=Arial, sz=48.0pt, bold=True, clr=#51237F, align=ctr
+      // Shape: THANK YOU (52pt Arial Bold in #51237F)
       slide.addText("THANK YOU", {
-        x: 0.5,
-        y: 2.2,
-        w: 9.0,
-        h: 1.8,
-        fontSize: 48,
+        x: 0.75,
+        y: 3.0,
+        w: 11.83,
+        h: 2.5,
+        fontSize: 52,
         fontFace: "Arial",
         bold: true,
         color: IARE_EXACT_COLORS.thankYouText,
@@ -301,107 +293,113 @@ export async function exportToPptx(
       // ======================================================================
       // SLIDES 2 TO 12: EXACT CONTENT SLIDES (slideLayout3.xml CONTENT_MASTER)
       // ======================================================================
-      // Top-Right Logo: pos=(8.5000", 0.0500") size=(1.2000" x 0.7000")
+      // Top-Right Logo: pos=(11.45", 0.08") size=(1.55" x 0.85")
       try {
         slide.addImage({
           data: IARE_CORNER_LOGO_BASE64,
-          x: 8.5,
-          y: 0.05,
-          w: 1.2,
-          h: 0.7,
+          x: 11.45,
+          y: 0.08,
+          w: 1.55,
+          h: 0.85,
         });
       } catch {
         // Fallback
       }
 
-      // Bottom Footer Bar: pos=(0.0000", 5.3438") size=(10.0000" x 0.4000") solidFill clr=#003366
+      // Bottom Footer Bar: pos=(0.0000", 7.12") size=(13.333" x 0.38") solidFill clr=#003366
       slide.addShape(pptx.ShapeType.rect, {
         x: 0,
-        y: 5.3438,
-        w: 10.0,
-        h: 0.4,
+        y: 7.12,
+        w: 13.333,
+        h: 0.38,
         fill: { color: IARE_EXACT_COLORS.footerBar },
         line: { color: IARE_EXACT_COLORS.footerBar, width: 0 },
       });
 
-      // Shape 'Text 0': Side-Heading
-      // pos=(0.5000", 0.8200") size=(8.0000" x 0.5500") font=Calibri, sz=22.0pt, bold=True, clr=#003366, align=l
+      // Side-Heading: pos=(0.75", 0.65") size=(10.5" x 0.65") font=Calibri, sz=23pt bold, clr=#003366
       const sideHeading = (s.title || "CONTENT SLIDE").toUpperCase();
       slide.addText(sideHeading, {
-        x: 0.5,
-        y: 0.82,
-        w: 8.0,
-        h: 0.55,
-        fontSize: 22,
+        x: 0.75,
+        y: 0.65,
+        w: 10.5,
+        h: 0.65,
+        fontSize: 23,
         fontFace: "Calibri",
         bold: true,
         color: IARE_EXACT_COLORS.sideHeading,
         align: "left",
       });
 
-      // Shape 'Text 1': Body Text
-      // pos=(0.5000", 1.5000") size=(9.0000" x 3.6500")
+      // Body Text Rendering
       if (s.layout === "index") {
-        // INDEX SLIDE: 1.  to 8.  in Title Case (sz=16.0pt, bold=False, clr=#000000)
+        // INDEX SLIDE: 1.  to 8.  in Title Case inside x: 0.75", y: 1.48", w: 11.83", h: 5.5"
         const items = s.bulletPoints || [];
         const indexProps: pptxgen.TextProps[] = items.map((item) => ({
           text: `${item}\n`,
           options: {
-            fontSize: 16,
+            fontSize: 15.5,
             fontFace: "Calibri",
-            color: IARE_EXACT_COLORS.bodyText,
+            color: "111827",
             bold: false,
-            lineSpacingMultiple: 1.35,
+            lineSpacingMultiple: 1.32,
             paraSpaceAfter: 6,
           },
         }));
 
         slide.addText(indexProps, {
-          x: 0.5,
-          y: 1.5,
-          w: 9.0,
-          h: 3.65,
+          x: 0.75,
+          y: 1.48,
+          w: 11.83,
+          h: 5.5,
           valign: "top",
         });
       } else if (s.layout === "paragraph") {
-        // INTRODUCTION OR CONCLUSION: One cohesive 4-sentence paragraph (sz=15.0pt, bold=False, clr=#000000)
+        // INTRODUCTION OR CONCLUSION: One cohesive academic paragraph
+        // Box: x: 0.75", y: 1.55", w: 11.83", h: 5.35", 15pt Calibri, auto-scaling to 14pt if > 750 chars
         const paragraphText =
           s.paragraph ||
           s.bulletPoints?.join(" ") ||
           "";
 
+        const pFontSize = paragraphText.length > 750 ? 14 : 15;
+
         slide.addText(paragraphText, {
-          x: 0.5,
-          y: 1.5,
-          w: 9.0,
-          h: 3.65,
-          fontSize: 15,
+          x: 0.75,
+          y: 1.55,
+          w: 11.83,
+          h: 5.35,
+          fontSize: pFontSize,
           fontFace: "Calibri",
-          color: IARE_EXACT_COLORS.bodyText,
+          color: "111827",
           lineSpacingMultiple: 1.4,
           valign: "top",
         });
       } else {
-        // 8 CORE TECHNICAL SLIDES: Exactly 5 single-sentence bullet points (sz=14.0pt, bold=False, clr=#000000)
-        const bullets = (s.bulletPoints || []).slice(0, 5);
+        // 8 CORE TECHNICAL SLIDES: 5 or 6 comprehensive 2-sentence bullets
+        // Box: x: 0.75", y: 1.48", w: 11.83", h: 5.5", 14.5pt Calibri, fit: "shrink", auto-scaling to 13.5pt if > 950 chars
+        const bullets = s.bulletPoints || [];
+        const totalChars = bullets.join("").length;
+        const bulletFontSize = totalChars > 950 ? 13.5 : 14.5;
+
         const bulletProps: pptxgen.TextProps[] = bullets.map((b) => ({
           text: b,
           options: {
             bullet: true,
-            fontSize: 14,
+            fontSize: bulletFontSize,
             fontFace: "Calibri",
-            color: IARE_EXACT_COLORS.bodyText,
-            lineSpacingMultiple: 1.35,
-            paraSpaceAfter: 8,
+            color: "111827",
+            lineSpacingMultiple: 1.26,
+            paraSpaceAfter: 7,
           },
         }));
 
         slide.addText(bulletProps, {
-          x: 0.5,
-          y: 1.5,
-          w: 9.0,
-          h: 3.65,
+          x: 0.75,
+          y: 1.48,
+          w: 11.83,
+          h: 5.5,
           valign: "top",
+          fit: "shrink",
         });
       }
     }
@@ -412,8 +410,35 @@ export async function exportToPptx(
 }
 
 /**
+ * Helper for wrapping text in PDF export
+ */
+function wrapPdfText(
+  text: string,
+  maxWidth: number,
+  font: { widthOfTextAtSize: (t: string, sz: number) => number },
+  fontSize: number
+): string[] {
+  const words = text.split(/\s+/).filter(Boolean);
+  const lines: string[] = [];
+  let currentLine = "";
+
+  for (const word of words) {
+    const testLine = currentLine ? `${currentLine} ${word}` : word;
+    const testWidth = font.widthOfTextAtSize(testLine, fontSize);
+    if (testWidth <= maxWidth) {
+      currentLine = testLine;
+    } else {
+      if (currentLine) lines.push(currentLine);
+      currentLine = word;
+    }
+  }
+  if (currentLine) lines.push(currentLine);
+  return lines;
+}
+
+/**
  * 2. Export 16:9 PDF Slide Deck via pdf-lib
- * Exact 1:1 match with PowerPoint template (960 x 540)
+ * Exact 960 x 540 geometry matching 13.333" x 7.5" PowerPoint template
  */
 export async function exportToPdfDeck(
   presentation: TechTalkPresentation
@@ -457,7 +482,7 @@ export async function exportToPdfDeck(
   const headerBgRgb = hexToPdfRgb("#" + IARE_EXACT_COLORS.headerBannerBg);
   const sideHeadingRgb = hexToPdfRgb("#" + IARE_EXACT_COLORS.sideHeading);
   const footerBarRgb = hexToPdfRgb("#" + IARE_EXACT_COLORS.footerBar);
-  const bodyTextRgb = hexToPdfRgb("#" + IARE_EXACT_COLORS.bodyText);
+  const bodyTextRgb = hexToPdfRgb("#111827");
   const thankYouRgb = hexToPdfRgb("#" + IARE_EXACT_COLORS.thankYouText);
 
   const pageWidth = 960;
@@ -479,7 +504,6 @@ export async function exportToPdfDeck(
       // ======================================================================
       // SLIDE 1: EXACT COVER SLIDE
       // ======================================================================
-      // Header Banner Image across top: y = pageHeight - 144, h = 144
       if (headerBannerImage) {
         page.drawImage(headerBannerImage, {
           x: 0,
@@ -489,39 +513,39 @@ export async function exportToPdfDeck(
         });
       }
 
-      // Shape 'Text 0': AAT - TECH TALK (size=27, bold, align=ctr, clr=#004170)
-      const assessW = fontHelveticaBold.widthOfTextAtSize(assessmentTitle, 27);
+      // Assessment Title: AAT - TECH TALK (size=28, bold, align=ctr, clr=#004170)
+      const assessW = fontHelveticaBold.widthOfTextAtSize(assessmentTitle, 28);
       page.drawText(assessmentTitle, {
         x: (pageWidth - assessW) / 2,
-        y: pageHeight - 173,
-        size: 27,
+        y: pageHeight - 175,
+        size: 28,
         font: fontHelveticaBold,
         color: headerBgRgb,
       });
 
-      // Shape 'Text 1': Topic - [Topic] (size=23, clr=#004170)
+      // Topic Title
       const topicText = s.title.replace(/^Topic\s*-\s*/i, "").trim();
       const topicLine = `Topic - ${topicText}`;
-      page.drawText(topicLine.substring(0, 58), {
-        x: 96,
+      page.drawText(topicLine.substring(0, 65), {
+        x: 72,
         y: pageHeight - 240,
         size: 23,
         font: fontHelveticaBold,
         color: headerBgRgb,
       });
 
-      // Metadata Rows at x=96
+      // Metadata Rows at x=72
       // Name:
       page.drawText("Name: ", {
-        x: 96,
-        y: pageHeight - 336,
+        x: 72,
+        y: pageHeight - 325,
         size: 17,
         font: fontHelveticaBold,
         color: headerBgRgb,
       });
       page.drawText(studentName, {
-        x: 180,
-        y: pageHeight - 336,
+        x: 155,
+        y: pageHeight - 325,
         size: 17,
         font: fontHelvetica,
         color: bodyTextRgb,
@@ -529,15 +553,15 @@ export async function exportToPdfDeck(
 
       // Roll No:
       page.drawText("Roll No: ", {
-        x: 96,
-        y: pageHeight - 384,
+        x: 72,
+        y: pageHeight - 370,
         size: 17,
         font: fontHelveticaBold,
         color: headerBgRgb,
       });
       page.drawText(rollNumber, {
-        x: 195,
-        y: pageHeight - 384,
+        x: 170,
+        y: pageHeight - 370,
         size: 17,
         font: fontHelvetica,
         color: bodyTextRgb,
@@ -545,15 +569,15 @@ export async function exportToPdfDeck(
 
       // Branch:
       page.drawText("Branch: ", {
-        x: 96,
-        y: pageHeight - 432,
+        x: 72,
+        y: pageHeight - 415,
         size: 17,
         font: fontHelveticaBold,
         color: headerBgRgb,
       });
-      page.drawText(branchName.substring(0, 40), {
-        x: 190,
-        y: pageHeight - 432,
+      page.drawText(branchName.substring(0, 48), {
+        x: 165,
+        y: pageHeight - 415,
         size: 17,
         font: fontHelvetica,
         color: bodyTextRgb,
@@ -561,15 +585,15 @@ export async function exportToPdfDeck(
 
       // Subject:
       page.drawText("Subject: ", {
-        x: 96,
-        y: pageHeight - 480,
+        x: 72,
+        y: pageHeight - 460,
         size: 17,
         font: fontHelveticaBold,
         color: headerBgRgb,
       });
-      page.drawText(subjectName.substring(0, 45), {
-        x: 195,
-        y: pageHeight - 480,
+      page.drawText(subjectName.substring(0, 50), {
+        x: 170,
+        y: pageHeight - 460,
         size: 17,
         font: fontHelvetica,
         color: bodyTextRgb,
@@ -588,11 +612,11 @@ export async function exportToPdfDeck(
       }
 
       const thankText = "THANK YOU";
-      const thankW = fontHelveticaBold.widthOfTextAtSize(thankText, 46);
+      const thankW = fontHelveticaBold.widthOfTextAtSize(thankText, 52);
       page.drawText(thankText, {
         x: (pageWidth - thankW) / 2,
-        y: pageHeight - 280,
-        size: 46,
+        y: pageHeight - 275,
+        size: 52,
         font: fontHelveticaBold,
         color: thankYouRgb,
       });
@@ -600,30 +624,30 @@ export async function exportToPdfDeck(
       // ======================================================================
       // SLIDES 2 TO 12: EXACT CONTENT SLIDES
       // ======================================================================
-      // Top-Right Logo: x=816, y=pageHeight - 67.2, w=115.2, h=67.2
+      // Top-Right Logo: pos=(824, pageHeight - 65)
       if (cornerLogoImage) {
         page.drawImage(cornerLogoImage, {
-          x: 816,
-          y: pageHeight - 67,
-          width: 115,
-          height: 67,
+          x: 824,
+          y: pageHeight - 65,
+          width: 112,
+          height: 60,
         });
       }
 
-      // Bottom Footer Bar: x=0, y=0, w=pageWidth, h=38.4, clr=#003366
+      // Bottom Footer Bar: x=0, y=0, w=pageWidth, h=27.5, clr=#003366
       page.drawRectangle({
         x: 0,
         y: 0,
         width: pageWidth,
-        height: 38.4,
+        height: 27.5,
         color: footerBarRgb,
       });
 
       // Side-Heading
       const sideHeading = (s.title || "CONTENT SLIDE").toUpperCase();
-      page.drawText(sideHeading.substring(0, 52), {
-        x: 48,
-        y: pageHeight - 79,
+      page.drawText(sideHeading.substring(0, 60), {
+        x: 54,
+        y: pageHeight - 56,
         size: 21,
         font: fontHelveticaBold,
         color: sideHeadingRgb,
@@ -632,16 +656,16 @@ export async function exportToPdfDeck(
       if (s.layout === "index") {
         // INDEX SLIDE
         const items = s.bulletPoints || [];
-        let curY = pageHeight - 144;
+        let curY = pageHeight - 110;
         items.forEach((item) => {
-          page.drawText(item.substring(0, 56), {
-            x: 48,
+          page.drawText(item.substring(0, 64), {
+            x: 54,
             y: curY,
             size: 15.5,
             font: fontHelvetica,
             color: bodyTextRgb,
           });
-          curY -= 36;
+          curY -= 38;
         });
       } else if (s.layout === "paragraph") {
         // INTRODUCTION OR CONCLUSION
@@ -650,30 +674,62 @@ export async function exportToPdfDeck(
           s.bulletPoints?.join(" ") ||
           "";
 
-        page.drawText(paragraphText, {
-          x: 48,
-          y: pageHeight - 144,
-          size: 14.5,
-          font: fontHelvetica,
-          color: bodyTextRgb,
-          maxWidth: pageWidth - 96,
-          lineHeight: 26,
-        });
-      } else {
-        // 8 CORE TECHNICAL SLIDES
-        const bullets = (s.bulletPoints || []).slice(0, 5);
-        let bY = pageHeight - 144;
-        bullets.forEach((b) => {
-          page.drawText(`•  ${b}`, {
-            x: 48,
-            y: bY,
-            size: 13.5,
+        const pSize = paragraphText.length > 750 ? 13.5 : 14.5;
+        const pLineHeight = pSize * 1.5;
+        const lines = wrapPdfText(paragraphText, 852, fontHelvetica, pSize);
+
+        let curY = pageHeight - 116;
+        for (const line of lines) {
+          if (curY < 40) break;
+          page.drawText(line, {
+            x: 54,
+            y: curY,
+            size: pSize,
             font: fontHelvetica,
             color: bodyTextRgb,
-            maxWidth: pageWidth - 96,
-            lineHeight: 20,
           });
-          bY -= 56;
+          curY -= pLineHeight;
+        }
+      } else {
+        // 8 CORE TECHNICAL SLIDES
+        const bullets = s.bulletPoints || [];
+        const totalChars = bullets.join("").length;
+        const bSize = totalChars > 950 ? 12.0 : 13.0;
+        const bLineHeight = bSize * 1.32;
+
+        let curY = pageHeight - 112;
+        bullets.forEach((bullet) => {
+          const bulletLines = wrapPdfText(bullet, 836, fontHelvetica, bSize);
+          bulletLines.forEach((line, lineIdx) => {
+            if (curY < 38) return;
+            if (lineIdx === 0) {
+              // Draw bullet marker
+              page.drawText("•", {
+                x: 54,
+                y: curY,
+                size: bSize,
+                font: fontHelveticaBold,
+                color: bodyTextRgb,
+              });
+              page.drawText(line, {
+                x: 68,
+                y: curY,
+                size: bSize,
+                font: fontHelvetica,
+                color: bodyTextRgb,
+              });
+            } else {
+              page.drawText(line, {
+                x: 68,
+                y: curY,
+                size: bSize,
+                font: fontHelvetica,
+                color: bodyTextRgb,
+              });
+            }
+            curY -= bLineHeight;
+          });
+          curY -= 6; // Extra space after each bullet
         });
       }
     }
@@ -708,6 +764,9 @@ export function exportToSpeakerCheatSheet(
   );
   lines.push(
     `**Event:** ${presentation.eventName || "AAT - TECH TALK Presentation"}`
+  );
+  lines.push(
+    `**Content Depth:** ${presentation.contentDepth === "extra-deep" ? "Extra Deep Technical (6 Dense Bullets)" : "Detailed Tech Talk (5 Dense Bullets)"}`
   );
   lines.push(
     `**Slide Count:** ${presentation.slides.length} Widescreen 16:9 Slides`
