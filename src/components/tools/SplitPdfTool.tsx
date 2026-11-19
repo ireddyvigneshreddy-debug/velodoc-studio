@@ -179,10 +179,14 @@ export function SplitPdfTool() {
       const endTime = performance.now();
       const durationMs = endTime - startTime;
       const downloadUrl = createTrackedUrl(res.blob);
-      const buf = await res.blob.arrayBuffer();
-      const bytes = new Uint8Array(buf);
 
-      setOutputBytes(bytes);
+      if (res.mimeType === "application/pdf" && res.blob.size <= 50 * 1024 * 1024) {
+        const buf = await res.blob.arrayBuffer();
+        setOutputBytes(new Uint8Array(buf));
+      } else {
+        setOutputBytes(null);
+      }
+
       setOutputMimeType(res.mimeType);
 
       let pageCount = fileItem.pageCount || 1;

@@ -115,9 +115,8 @@ export function MergePdfTool() {
 
       for (const item of files) {
         totalOriginalSize += item.size;
-        const buf = await item.file.arrayBuffer();
         items.push({
-          buffer: buf,
+          file: item.file,
           pageRanges: item.customPageRange,
         });
       }

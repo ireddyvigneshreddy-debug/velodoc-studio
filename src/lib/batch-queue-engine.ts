@@ -1,4 +1,13 @@
-import JSZip from "jszip";
+import {
+  BlobReader,
+  BlobWriter,
+  ZipWriter,
+  configure,
+} from "@zip.js/zip.js";
+
+configure({
+  useWebWorkers: false,
+});
 
 /**
  * Universal Offscreen Canvas Recycler to eliminate RAM bloat across 30+ files
@@ -161,19 +170,21 @@ export async function processBatchQueue<TItem, TResult>(
 }
 
 /**
- * Bundle multiple output files into a master ZIP archive using JSZip
+ * Bundle multiple output files into a master ZIP archive using @zip.js/zip.js streaming
  */
 export async function createBatchZip(
   files: { name: string; blob: Blob }[],
   zipFilename = "velodoc-batch-export.zip",
   onProgress?: (percent: number) => void
 ): Promise<{ zipBlob: Blob; zipFilename: string }> {
-  const zip = new JSZip();
+  const blobWriter = new BlobWriter("application/zip");
+  const zipWriter = new ZipWriter(blobWriter);
 
   // Deduplicate file names in the zip archive
   const nameCounts = new Map<string, number>();
 
-  for (const f of files) {
+  for (let i = 0; i < files.length; i++) {
+    const f = files[i];
     let finalName = f.name || "document.pdf";
     const count = nameCounts.get(finalName) || 0;
     if (count > 0) {
@@ -185,21 +196,26 @@ export async function createBatchZip(
       }
     }
     nameCounts.set(f.name, count + 1);
-    zip.file(finalName, f.blob);
+
+    const ext = finalName.split(".").pop()?.toLowerCase() || "";
+    const isPreCompressed = ["jpg", "jpeg", "png", "webp", "pdf", "zip", "mp4", "mp3"].includes(ext);
+
+    await zipWriter.add(finalName, new BlobReader(f.blob), {
+      level: isPreCompressed ? 0 : 6,
+    });
+
+    onProgress?.(Math.round(((i + 1) / files.length) * 100));
   }
 
-  const zipBlob = await zip.generateAsync(
-    {
-      type: "blob",
-      compression: "DEFLATE",
-      compressionOptions: { level: 6 },
-    },
-    (metadata) => {
-      onProgress?.(Math.round(metadata.percent));
-    }
-  );
-
+  const zipBlob = await zipWriter.close();
   return { zipBlob, zipFilename };
+}
+
+/**
+ * Checks if File System Access API (direct-to-disk streaming) is available in current browser
+ */
+export function canStreamDirectToDisk(): boolean {
+  return typeof window !== "undefined" && "showSaveFilePicker" in window;
 }
 
 /**

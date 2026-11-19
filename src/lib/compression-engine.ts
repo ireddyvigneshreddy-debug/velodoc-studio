@@ -419,7 +419,7 @@ export async function executeExactCompression(
  * Execute 30-document zero-crash batch compression using the controlled concurrency queue
  */
 export async function executeExactCompressionBatch(
-  files: { file: File; buffer: ArrayBuffer }[],
+  files: { file: File; buffer?: ArrayBuffer }[],
   options: ExactCompressionOptions,
   onItemProgress?: (index: number, pct: number, msg?: string) => void,
   onItemComplete?: (index: number, result: CompressionResult) => void,
@@ -432,16 +432,17 @@ export async function executeExactCompressionBatch(
   let totalOriginal = 0;
   let totalProcessed = 0;
 
-  files.forEach((f) => (totalOriginal += f.buffer.byteLength));
+  files.forEach((f) => (totalOriginal += f.buffer ? f.buffer.byteLength : f.file.size));
 
   const results = await processBatchQueue<
-    { file: File; buffer: ArrayBuffer },
+    { file: File; buffer?: ArrayBuffer },
     CompressionResult
   >(
     files,
     async (item, idx, reportProgress, batchSignal) => {
+      const buf = item.buffer || (await item.file.arrayBuffer());
       const res = await executeExactCompression(
-        item.buffer,
+        buf,
         options,
         (msg, pct) => reportProgress(pct, msg),
         batchSignal || signal

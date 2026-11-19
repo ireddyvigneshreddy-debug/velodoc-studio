@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import JSZip from "jszip";
+import { createBatchZip } from "@/lib/batch-queue-engine";
 import { DropZone } from "@/components/common/DropZone";
 import { ResultPreviewStudio } from "@/components/ResultPreviewStudio";
 import { UploadedFileItem, ProcessingMetrics } from "@/types";
@@ -150,17 +150,15 @@ export function PdfToImageTool() {
           targetAccuracy: "High-Res Image Render",
         });
       } else {
-        // Multi-image ZIP bundle
-        const zip = new JSZip();
-        results.forEach((img) => {
-          const pageStr = String(img.pageNumber).padStart(3, "0");
-          zip.file(`${baseName}_page_${pageStr}.${ext}`, img.blob);
-        });
-        const zipBlob = await zip.generateAsync({ type: "blob" });
-        const zipBuf = await zipBlob.arrayBuffer();
+        // Multi-image ZIP bundle using streamed @zip.js/zip.js (STORE mode for pre-compressed images)
+        const filesToZip = results.map((img) => ({
+          name: `${baseName}_page_${String(img.pageNumber).padStart(3, "0")}.${ext}`,
+          blob: img.blob,
+        }));
+        const { zipBlob } = await createBatchZip(filesToZip, `${baseName}_images.zip`);
         const url = URL.createObjectURL(zipBlob);
 
-        setOutputBytes(new Uint8Array(zipBuf));
+        setOutputBytes(null);
         setMetrics({
           originalSize: fileItem.size,
           processedSize: zipBlob.size,

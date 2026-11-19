@@ -60,6 +60,8 @@ export function DropZone({
   const [isGeneratingBatch, setIsGeneratingBatch] = useState(false);
   const [emptyFilesSkipped, setEmptyFilesSkipped] = useState(false);
 
+  const totalStagedBytes = files.reduce((acc, f) => acc + (f.size || 0), 0);
+
   const onDrop = useCallback(
     (accepted: File[]) => {
       const valid = accepted.filter((f) => f.size > 0);
@@ -129,6 +131,15 @@ export function DropZone({
         <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-amber-300 text-xs flex items-center gap-2 animate-in fade-in">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>Skipped 0-byte or unreadable file(s) to protect in-memory pipeline.</span>
+        </div>
+      )}
+
+      {totalStagedBytes > 1.5 * 1024 * 1024 * 1024 && (
+        <div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/25 text-indigo-700 dark:text-indigo-300 text-xs flex items-center gap-2 animate-in fade-in">
+          <Sparkles className="w-4 h-4 shrink-0 text-indigo-500" />
+          <span>
+            <strong>High-Capacity Batch ({formatFileSize(totalStagedBytes)}):</strong> Processed with lazy stream pipeline and zero double-buffering.
+          </span>
         </div>
       )}
 

@@ -135,7 +135,7 @@ export function ResultPreviewStudio({
       // ignore
     }
 
-    if (currentOutputBytes) {
+    if (currentOutputBytes && activeMetrics.processedSize <= 50 * 1024 * 1024) {
       const blob = new Blob([currentOutputBytes as unknown as BlobPart], {
         type: outputMimeType,
       });
@@ -153,12 +153,19 @@ export function ResultPreviewStudio({
     }
   }, [activeMetrics, currentOutputBytes, outputMimeType, title]);
 
-  // Render current page of output PDF onto canvas
+  // Render current page of output PDF onto canvas (skip on ultra-large docs to protect RAM)
   useEffect(() => {
     let isCancelled = false;
 
     async function renderPage() {
-      if (outputMimeType !== "application/pdf" || !currentOutputBytes) return;
+      if (
+        outputMimeType !== "application/pdf" ||
+        !currentOutputBytes ||
+        activeMetrics.processedSize > 100 * 1024 * 1024 ||
+        totalPages > 150
+      ) {
+        return;
+      }
 
       try {
         const canvas = await renderPdfPageToCanvas(
@@ -202,9 +209,20 @@ export function ResultPreviewStudio({
     return () => {
       isCancelled = true;
     };
-  }, [currentPage, zoomLevel, compareMode, currentOutputBytes, currentOriginalBytes, outputMimeType]);
+  }, [currentPage, zoomLevel, compareMode, currentOutputBytes, currentOriginalBytes, outputMimeType, activeMetrics.processedSize, totalPages]);
 
   const handleDownloadSingle = () => {
+    const url = activeItem?.downloadUrl || activeMetrics.downloadUrl;
+    if (url) {
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      return;
+    }
+
     if (!currentOutputBytes && !activeItem?.outputBlob) return;
     const blob =
       activeItem?.outputBlob ||
@@ -529,7 +547,7 @@ export function ResultPreviewStudio({
 
         {/* Main Cinema Canvas Workspace */}
         <div className="p-4 sm:p-8 flex-1 overflow-auto flex items-center justify-center pt-14">
-          {isPdf ? (
+          {isPdf && currentOutputBytes && activeMetrics.processedSize <= 100 * 1024 * 1024 && totalPages <= 150 ? (
             compareMode && currentOriginalBytes ? (
               /* Side-by-Side Split View */
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full max-w-5xl">
@@ -568,6 +586,25 @@ export function ResultPreviewStudio({
                 />
               </div>
             )
+          ) : isPdf ? (
+            /* High-Capacity PDF Output Notice */
+            <div className="p-8 text-center space-y-3 max-w-md mx-auto">
+              <div className="p-4 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 inline-block shadow-lg">
+                <FileText className="w-8 h-8" />
+              </div>
+              <h4 className="text-white font-semibold text-sm">{filename}</h4>
+              <p className="text-xs text-zinc-400">
+                Ultra-capacity document processed successfully ({totalPages} pages, {formatFileSize(activeMetrics.processedSize)}). Heavy canvas rendering is bypassed to protect browser memory.
+              </p>
+              <button
+                type="button"
+                onClick={handleDownloadSingle}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md cursor-pointer transition-colors"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download Document</span>
+              </button>
+            </div>
           ) : isImage && imagePreviewUrl ? (
             /* Visual Image Output Preview */
             <div className="flex flex-col items-center justify-center p-4 max-w-full">

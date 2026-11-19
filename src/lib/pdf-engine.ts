@@ -1,5 +1,5 @@
 import { PDFDocument, PDFImage, rgb, degrees, StandardFonts, PageSizes } from "pdf-lib";
-import JSZip from "jszip";
+import { BlobReader, BlobWriter, ZipWriter } from "@zip.js/zip.js";
 import {
   WatermarkSettings,
   PageNumberSettings,
@@ -314,7 +314,7 @@ export async function renderAllPagesThumbnails(
  * Tool 1: Merge multiple PDFs into one with custom page ranges & interleaving
  */
 export async function mergePdfsPro(
-  items: { buffer: ArrayBuffer; pageRanges?: string }[],
+  items: { buffer?: ArrayBuffer; file?: File; pageRanges?: string }[],
   interleave: boolean = false
 ): Promise<Uint8Array> {
   if (items.length < 2) {
@@ -325,8 +325,12 @@ export async function mergePdfsPro(
 
   if (interleave && items.length === 2) {
     // Interleave front & back pages (e.g. from duplex scan)
-    const docA = await PDFDocument.load(items[0].buffer, { ignoreEncryption: true });
-    const docB = await PDFDocument.load(items[1].buffer, { ignoreEncryption: true });
+    const bufA = items[0].buffer || (items[0].file ? await items[0].file.arrayBuffer() : null);
+    const bufB = items[1].buffer || (items[1].file ? await items[1].file.arrayBuffer() : null);
+    if (!bufA || !bufB) throw new Error("Could not read buffers for interleaved merge.");
+
+    const docA = await PDFDocument.load(bufA, { ignoreEncryption: true });
+    const docB = await PDFDocument.load(bufB, { ignoreEncryption: true });
     const countA = docA.getPageCount();
     const countB = docB.getPageCount();
     const maxPages = Math.max(countA, countB);
@@ -340,13 +344,17 @@ export async function mergePdfsPro(
         const [pageB] = await mergedDoc.copyPages(docB, [i]);
         mergedDoc.addPage(pageB);
       }
+      if (i % 10 === 0) await yieldToMain(2);
     }
     return await mergedDoc.save({ useObjectStreams: true });
   }
 
-  // Standard merge with optional page range filters
+  // Standard merge with optional page range filters - read one at a time to prevent OOM
   for (const item of items) {
-    const srcDoc = await PDFDocument.load(item.buffer, { ignoreEncryption: true });
+    const buf = item.buffer || (item.file ? await item.file.arrayBuffer() : null);
+    if (!buf) continue;
+
+    const srcDoc = await PDFDocument.load(buf, { ignoreEncryption: true });
     const total = srcDoc.getPageCount();
     let indicesToCopy = srcDoc.getPageIndices();
 
@@ -361,6 +369,7 @@ export async function mergePdfsPro(
     for (const page of copiedPages) {
       mergedDoc.addPage(page);
     }
+    await yieldToMain(4);
   }
 
   return await mergedDoc.save({ useObjectStreams: true });
@@ -559,8 +568,9 @@ export async function splitPdfBurst(
     return { blob, filename: "ranges_merged.pdf", mimeType: "application/pdf" };
   }
 
-  // ZIP packaging for burst or range-splits
-  const zip = new JSZip();
+  // Streamed ZIP packaging for burst or range-splits with low RAM overhead
+  const blobWriter = new BlobWriter("application/zip");
+  const zipWriter = new ZipWriter(blobWriter);
 
   if (mode === "burst-all") {
     for (let i = 0; i < totalPages; i++) {
@@ -569,7 +579,12 @@ export async function splitPdfBurst(
       singleDoc.addPage(copied);
       const pdfBytes = await singleDoc.save({ useObjectStreams: true });
       const numStr = String(i + 1).padStart(3, "0");
-      zip.file(`page_${numStr}.pdf`, pdfBytes);
+      await zipWriter.add(
+        `page_${numStr}.pdf`,
+        new BlobReader(new Blob([pdfBytes as unknown as BlobPart], { type: "application/pdf" })),
+        { level: 0 }
+      );
+      if (i % 5 === 0) await yieldToMain(2);
     }
   } else if (mode === "every-n") {
     const n = Math.max(1, options?.nPages || 2);
@@ -583,8 +598,13 @@ export async function splitPdfBurst(
       const copied = await chunkDoc.copyPages(srcDoc, indices);
       copied.forEach((p) => chunkDoc.addPage(p));
       const bytes = await chunkDoc.save({ useObjectStreams: true });
-      zip.file(`part_${String(chunkIndex).padStart(2, "0")}.pdf`, bytes);
+      await zipWriter.add(
+        `part_${String(chunkIndex).padStart(2, "0")}.pdf`,
+        new BlobReader(new Blob([bytes as unknown as BlobPart], { type: "application/pdf" })),
+        { level: 0 }
+      );
       chunkIndex++;
+      await yieldToMain(2);
     }
   } else if (mode === "custom-ranges") {
     const rangeGroups = (options?.customRanges || "1").split(";");
@@ -596,13 +616,18 @@ export async function splitPdfBurst(
         const copied = await partDoc.copyPages(srcDoc, indices);
         copied.forEach((p) => partDoc.addPage(p));
         const bytes = await partDoc.save({ useObjectStreams: true });
-        zip.file(`range_part_${partNum}.pdf`, bytes);
+        await zipWriter.add(
+          `range_part_${partNum}.pdf`,
+          new BlobReader(new Blob([bytes as unknown as BlobPart], { type: "application/pdf" })),
+          { level: 0 }
+        );
         partNum++;
+        await yieldToMain(2);
       }
     }
   }
 
-  const zipBlob = await zip.generateAsync({ type: "blob" });
+  const zipBlob = await zipWriter.close();
   return { blob: zipBlob, filename: "split_documents_bundle.zip", mimeType: "application/zip" };
 }
 
@@ -1431,6 +1456,12 @@ export async function convertPdfToImages(
 
         const dataUrl = URL.createObjectURL(blob);
         results.push({ pageNumber: pageNum, blob, dataUrl });
+      }
+
+      try {
+        await page.cleanup?.();
+      } catch {
+        // ignore
       }
 
       if (onProgress) {

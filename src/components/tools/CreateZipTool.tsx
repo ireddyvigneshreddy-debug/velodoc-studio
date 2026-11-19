@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useMemo } from "react";
+import React, { useState, useRef, useMemo, useEffect, useCallback } from "react";
 import {
   BlobReader,
   BlobWriter,
@@ -11,6 +11,10 @@ import { formatFileSize } from "@/lib/utils";
 import { useObjectUrls } from "@/hooks/useObjectUrls";
 import { ResultPreviewStudio } from "@/components/ResultPreviewStudio";
 import { ProcessingMetrics } from "@/types";
+import {
+  canStreamDirectToDisk,
+  yieldToMain,
+} from "@/lib/batch-queue-engine";
 import {
   Archive,
   FolderOpen,
@@ -28,9 +32,12 @@ import {
   EyeSlash,
   ShieldCheck,
   Check,
+  CheckCircle,
+  HardDrive,
+  Filter,
 } from "@/components/common/icons";
 
-// Configure @zip.js/zip.js for pure client-side in-browser operation with 0 external network calls
+// Configure @zip.js/zip.js for pure client-side in-browser operation with zero external network calls
 configure({
   useWebWorkers: false,
 });
@@ -40,6 +47,11 @@ interface ZipItem {
   file: File;
   relativePath: string;
   size: number;
+}
+
+interface SkippedFile {
+  path: string;
+  reason: string;
 }
 
 // Extensions of already-compressed formats
@@ -60,6 +72,26 @@ export function CreateZipTool() {
   const [compressionLevel, setCompressionLevel] = useState<"store" | "fast" | "balanced" | "max">("balanced");
   const [smartBypass, setSmartBypass] = useState(true);
   const [searchFilter, setSearchFilter] = useState("");
+  const [visibleCount, setVisibleCount] = useState(150);
+
+  // Quick exclusion flags
+  const [excludeNodeModules, setExcludeNodeModules] = useState(true);
+  const [excludeGit, setExcludeGit] = useState(true);
+  const [excludeBuild, setExcludeBuild] = useState(true);
+  const [excludeSystem, setExcludeSystem] = useState(true);
+
+  // Skipped unreadable/symlink files
+  const [skippedFiles, setSkippedFiles] = useState<SkippedFile[]>([]);
+  const [showSkippedModal, setShowSkippedModal] = useState(false);
+
+  // Direct-to-disk streaming
+  const [directToDisk, setDirectToDisk] = useState(false);
+  const [isDirectStreamingAvailable, setIsDirectStreamingAvailable] = useState(false);
+  const [streamedSavedName, setStreamedSavedName] = useState<string | null>(null);
+
+  useEffect(() => {
+    setIsDirectStreamingAvailable(canStreamDirectToDisk());
+  }, []);
 
   // Password Lock state
   const [lockWithPassword, setLockWithPassword] = useState(false);
@@ -74,7 +106,6 @@ export function CreateZipTool() {
   const [progressMsg, setProgressMsg] = useState("");
   const isCancelledRef = useRef(false);
 
-  const [outputBytes, setOutputBytes] = useState<Uint8Array | null>(null);
   const [metrics, setMetrics] = useState<ProcessingMetrics | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -94,47 +125,82 @@ export function CreateZipTool() {
     return { score: 4, label: "Strong", color: "bg-emerald-500", text: "text-emerald-500" };
   }, [password]);
 
-  // Traverse dropped file system entries recursively
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const traverseEntry = async (entry: any, basePath = ""): Promise<ZipItem[]> => {
-    const currentPath = basePath ? `${basePath}/${entry.name}` : entry.name;
-    if (entry.isFile) {
-      const file: File = await new Promise((resolve, reject) =>
-        entry.file(resolve, reject)
-      );
-      return [
-        {
-          id: `${Math.random().toString(36).substring(7)}_${Date.now()}`,
-          file,
-          relativePath: currentPath,
-          size: file.size,
-        },
-      ];
-    } else if (entry.isDirectory) {
-      const dirReader = entry.createReader();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const entries: any[] = [];
-      await new Promise<void>((resolve, reject) => {
-        function readBatch() {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          dirReader.readEntries((batch: any[]) => {
-            if (batch.length === 0) {
-              resolve();
-            } else {
-              entries.push(...batch);
-              readBatch();
-            }
-          }, reject);
-        }
-        readBatch();
-      });
+  // Exclusion check helper
+  const shouldExclude = useCallback((path: string): boolean => {
+    const parts = path.split("/");
+    for (const p of parts) {
+      if (excludeNodeModules && p === "node_modules") return true;
+      if (excludeGit && p === ".git") return true;
+      if (excludeBuild && [".next", "dist", "build", "out", ".cache", ".turbo"].includes(p)) return true;
+      if (excludeSystem && [".DS_Store", "Thumbs.db", "desktop.ini"].includes(p)) return true;
+      if (excludeSystem && p.startsWith("._")) return true;
+    }
+    return false;
+  }, [excludeNodeModules, excludeGit, excludeBuild, excludeSystem]);
 
-      const subPromises = entries.map((sub) => traverseEntry(sub, currentPath));
-      const subResults = await Promise.all(subPromises);
-      return subResults.flat();
+  // Resiliently traverse dropped file system entries recursively
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const traverseEntry = useCallback(async (entry: any, basePath = ""): Promise<ZipItem[]> => {
+    const currentPath = basePath ? `${basePath}/${entry.name}` : entry.name;
+
+    if (shouldExclude(currentPath)) {
+      return [];
+    }
+
+    if (entry.isFile) {
+      try {
+        const file: File = await new Promise((resolve, reject) =>
+          entry.file(resolve, reject)
+        );
+        return [
+          {
+            id: `${Math.random().toString(36).substring(7)}_${Date.now()}`,
+            file,
+            relativePath: currentPath,
+            size: file.size,
+          },
+        ];
+      } catch (fileErr) {
+        const msg = (fileErr as Error)?.message || "Not readable / Broken symlink";
+        setSkippedFiles((prev) => [...prev, { path: currentPath, reason: msg }]);
+        return [];
+      }
+    } else if (entry.isDirectory) {
+      try {
+        const dirReader = entry.createReader();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const entries: any[] = [];
+        await new Promise<void>((resolve) => {
+          function readBatch() {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            dirReader.readEntries((batch: any[]) => {
+              if (!batch || batch.length === 0) {
+                resolve();
+              } else {
+                entries.push(...batch);
+                readBatch();
+              }
+            }, (readErr: unknown) => {
+              console.warn(`Error reading directory ${currentPath}`, readErr);
+              resolve(); // Don't fail the whole archive, resolve what we got
+            });
+          }
+          readBatch();
+        });
+
+        const subResults: ZipItem[][] = [];
+        for (const sub of entries) {
+          const res = await traverseEntry(sub, currentPath);
+          subResults.push(res);
+        }
+        return subResults.flat();
+      } catch (dirErr) {
+        console.warn(`Failed to read folder ${currentPath}:`, dirErr);
+        return [];
+      }
     }
     return [];
-  };
+  }, [shouldExclude]);
 
   const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
@@ -153,16 +219,18 @@ export function CreateZipTool() {
         } else {
           const f = it.getAsFile();
           if (f) {
-            queue.push(
-              Promise.resolve([
-                {
-                  id: `${Math.random().toString(36).substring(7)}_${Date.now()}`,
-                  file: f,
-                  relativePath: f.name,
-                  size: f.size,
-                },
-              ])
-            );
+            if (!shouldExclude(f.name)) {
+              queue.push(
+                Promise.resolve([
+                  {
+                    id: `${Math.random().toString(36).substring(7)}_${Date.now()}`,
+                    file: f,
+                    relativePath: f.name,
+                    size: f.size,
+                  },
+                ])
+              );
+            }
           }
         }
       }
@@ -192,12 +260,14 @@ export function CreateZipTool() {
     for (let i = 0; i < files.length; i++) {
       const f = files[i];
       const path = f.webkitRelativePath || f.name;
-      newItems.push({
-        id: `${Math.random().toString(36).substring(7)}_${Date.now()}_${i}`,
-        file: f,
-        relativePath: path,
-        size: f.size,
-      });
+      if (!shouldExclude(path)) {
+        newItems.push({
+          id: `${Math.random().toString(36).substring(7)}_${Date.now()}_${i}`,
+          file: f,
+          relativePath: path,
+          size: f.size,
+        });
+      }
     }
 
     setItems((prev) => [...prev, ...newItems]);
@@ -217,12 +287,14 @@ export function CreateZipTool() {
     const newItems: ZipItem[] = [];
     for (let i = 0; i < files.length; i++) {
       const f = files[i];
-      newItems.push({
-        id: `${Math.random().toString(36).substring(7)}_${Date.now()}_${i}`,
-        file: f,
-        relativePath: f.name,
-        size: f.size,
-      });
+      if (!shouldExclude(f.name)) {
+        newItems.push({
+          id: `${Math.random().toString(36).substring(7)}_${Date.now()}_${i}`,
+          file: f,
+          relativePath: f.name,
+          size: f.size,
+        });
+      }
     }
     setItems((prev) => [...prev, ...newItems]);
     e.target.value = "";
@@ -239,8 +311,9 @@ export function CreateZipTool() {
   const handleClearAll = () => {
     revokeAll();
     setItems([]);
-    setOutputBytes(null);
     setMetrics(null);
+    setSkippedFiles([]);
+    setStreamedSavedName(null);
     setProgress(0);
     setProgressMsg("");
   };
@@ -251,6 +324,8 @@ export function CreateZipTool() {
     setIsProcessing(false);
     setProgressMsg("Cancelled by user.");
   };
+
+  const totalBytes = useMemo(() => items.reduce((acc, it) => acc + it.size, 0), [items]);
 
   const handleCreateZip = async () => {
     if (items.length === 0) return;
@@ -263,6 +338,40 @@ export function CreateZipTool() {
       if (password !== confirmPassword) {
         setErrorMessage("Passwords do not match. Please verify both password fields.");
         return;
+      }
+    }
+
+    const finalName = zipName.trim()
+      ? (zipName.endsWith(".zip") ? zipName : `${zipName}.zip`)
+      : "archive.zip";
+
+    // Direct-to-disk streaming path via File System Access API
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let fileHandle: any = null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let writableStream: any = null;
+
+    if (directToDisk && isDirectStreamingAvailable) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        fileHandle = await (window as any).showSaveFilePicker({
+          suggestedName: finalName,
+          types: [
+            {
+              description: "ZIP Archive",
+              accept: { "application/zip": [".zip"] },
+            },
+          ],
+        });
+        writableStream = await fileHandle.createWritable();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (pickerErr: any) {
+        if (pickerErr?.name === "AbortError") {
+          return; // User cancelled the save dialog
+        }
+        console.warn("Direct file save picker error, falling back to in-memory:", pickerErr);
+        fileHandle = null;
+        writableStream = null;
       }
     }
 
@@ -283,8 +392,6 @@ export function CreateZipTool() {
         max: 9,
       };
 
-      const blobWriter = new BlobWriter("application/zip");
-
       // Configure writer options
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const writerOptions: any = {
@@ -301,7 +408,10 @@ export function CreateZipTool() {
         }
       }
 
-      const zipWriter = new ZipWriter(blobWriter, writerOptions);
+      // If direct to disk is selected, use the native WritableStream!
+      // Otherwise stream chunks into BlobWriter
+      const targetWriter = writableStream || new BlobWriter("application/zip");
+      const zipWriter = new ZipWriter(targetWriter, writerOptions);
 
       for (let i = 0; i < items.length; i++) {
         if (isCancelledRef.current || abortCtrl.signal.aborted) {
@@ -316,53 +426,80 @@ export function CreateZipTool() {
         const useStore = compressionLevel === "store" || (smartBypass && isPreCompressed);
         const fileLevel = useStore ? 0 : levelMap[compressionLevel];
 
-        await zipWriter.add(item.relativePath, new BlobReader(item.file), {
-          level: fileLevel,
-        });
+        try {
+          await zipWriter.add(item.relativePath, new BlobReader(item.file), {
+            level: fileLevel,
+          });
+        } catch (addErr) {
+          console.warn(`Could not add "${item.relativePath}" to ZIP:`, addErr);
+          setSkippedFiles((prev) => [
+            ...prev,
+            { path: item.relativePath, reason: (addErr as Error)?.message || "Failed to read stream" },
+          ]);
+        }
 
-        const currentPct = Math.round(((i + 1) / items.length) * 88);
+        const currentPct = Math.round(((i + 1) / items.length) * 90);
         setProgress(currentPct);
-        setProgressMsg(`Compressed ${i + 1} of ${items.length} files...`);
+        setProgressMsg(`Streaming ${i + 1} of ${items.length} files...`);
+
+        if (i % 8 === 0) {
+          await yieldToMain(2);
+        }
       }
 
       if (isCancelledRef.current || abortCtrl.signal.aborted) {
         throw new DOMException("Archive creation cancelled by user.", "AbortError");
       }
 
-      setProgress(92);
-      setProgressMsg("Finalizing central directory and security headers...");
+      setProgress(94);
+      setProgressMsg("Finalizing Zip64 central directory and closing stream...");
 
-      const zipBlob = await zipWriter.close();
+      const zipOutput = await zipWriter.close();
 
       if (isCancelledRef.current || abortCtrl.signal.aborted) {
         throw new DOMException("Archive creation cancelled by user.", "AbortError");
       }
 
       const durationMs = performance.now() - startTime;
-      const arrayBuf = await zipBlob.arrayBuffer();
-      const bytes = new Uint8Array(arrayBuf);
-      const downloadUrl = createTrackedUrl(zipBlob);
-
       const totalUncompressed = items.reduce((acc, it) => acc + it.size, 0);
-      const savedBytes = Math.max(0, totalUncompressed - bytes.byteLength);
-      const savedPct = totalUncompressed > 0 ? Math.round((savedBytes / totalUncompressed) * 100) : 0;
 
-      const finalName = zipName.trim() ? (zipName.endsWith(".zip") ? zipName : `${zipName}.zip`) : "archive.zip";
+      if (writableStream) {
+        // Direct to disk succeeded
+        setStreamedSavedName(finalName);
+        setMetrics({
+          originalSize: totalUncompressed,
+          processedSize: totalUncompressed,
+          savedBytes: 0,
+          savedPercentage: 0,
+          durationMs,
+          downloadUrl: "",
+          downloadFilename: finalName,
+          pageCount: items.length,
+          targetAccuracy: lockWithPassword
+            ? `🔒 Streamed Directly to Disk • AES-256 Encrypted (${items.length} Files)`
+            : `Streamed Directly to Disk (${items.length} Files)`,
+        });
+      } else {
+        // BlobWriter output (Zero double-buffering: no Uint8Array in state)
+        const zipBlob = zipOutput as Blob;
+        const downloadUrl = createTrackedUrl(zipBlob);
+        const savedBytes = Math.max(0, totalUncompressed - zipBlob.size);
+        const savedPct = totalUncompressed > 0 ? Math.round((savedBytes / totalUncompressed) * 100) : 0;
 
-      setOutputBytes(bytes);
-      setMetrics({
-        originalSize: totalUncompressed,
-        processedSize: bytes.byteLength,
-        savedBytes,
-        savedPercentage: savedPct,
-        durationMs,
-        downloadUrl,
-        downloadFilename: finalName,
-        pageCount: items.length,
-        targetAccuracy: lockWithPassword
-          ? `🔒 ${encryptionStandard === "aes" ? "AES-256" : "ZipCrypto"} Encrypted (${items.length} Files)`
-          : `Standard ZIP (${items.length} Files)`,
-      });
+        setMetrics({
+          originalSize: totalUncompressed,
+          processedSize: zipBlob.size,
+          savedBytes,
+          savedPercentage: savedPct,
+          durationMs,
+          downloadUrl,
+          downloadFilename: finalName,
+          pageCount: items.length,
+          targetAccuracy: lockWithPassword
+            ? `🔒 ${encryptionStandard === "aes" ? "AES-256" : "ZipCrypto"} Encrypted (${items.length} Files)`
+            : `Standard ZIP (${items.length} Files)`,
+        });
+      }
 
       setProgress(100);
       setProgressMsg("ZIP archive created successfully!");
@@ -378,8 +515,6 @@ export function CreateZipTool() {
       abortControllerRef.current = null;
     }
   };
-
-  const totalBytes = items.reduce((acc, it) => acc + it.size, 0);
 
   // Group paths by top-level directory for structure breakdown
   const directoryCounts = useMemo(() => {
@@ -402,13 +537,17 @@ export function CreateZipTool() {
     return items.filter((it) => it.relativePath.toLowerCase().includes(q));
   }, [items, searchFilter]);
 
+  const displayedItems = useMemo(() => {
+    return filteredItems.slice(0, visibleCount);
+  }, [filteredItems, visibleCount]);
+
   const getItemIcon = (path: string) => {
     const ext = path.split(".").pop()?.toLowerCase();
     if (ext && PRE_COMPRESSED_EXTS.has(ext)) {
       if (["jpg", "jpeg", "png", "webp", "gif"].includes(ext)) return FileImage;
       if (["zip", "gz", "7z", "rar"].includes(ext)) return Archive;
     }
-    if (ext && ["js", "ts", "json", "html", "css", "py", "java", "cpp", "c", "sql"].includes(ext)) return FileCode;
+    if (ext && ["js", "ts", "json", "html", "css", "py", "java", "cpp", "c", "sql", "md"].includes(ext)) return FileCode;
     return FileText;
   };
 
@@ -437,17 +576,40 @@ export function CreateZipTool() {
             </div>
           )}
 
-          <ResultPreviewStudio
-            metrics={metrics}
-            outputBytes={outputBytes || undefined}
-            outputMimeType="application/zip"
-            title={lockWithPassword ? "Encrypted ZIP Archive Packaged!" : "ZIP Archive Packaged Successfully!"}
-            onAdjustSettings={() => {
-              revokeAll();
-              setMetrics(null);
-              setOutputBytes(null);
-            }}
-          />
+          {streamedSavedName ? (
+            <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-3">
+              <div className="p-3 rounded-2xl bg-emerald-500/20 text-emerald-500 inline-block">
+                <CheckCircle className="w-8 h-8" />
+              </div>
+              <h3 className="text-base font-bold text-zinc-950 dark:text-white">
+                Saved Directly to Your Disk!
+              </h3>
+              <p className="text-xs text-zinc-600 dark:text-zinc-400 max-w-md mx-auto font-mono">
+                {streamedSavedName} ({formatFileSize(metrics.originalSize)}) was streamed straight to your local drive with near-zero browser RAM usage.
+              </p>
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleClearAll();
+                  }}
+                  className="px-5 py-2 rounded-xl bg-[#C2410C] text-white text-xs font-semibold cursor-pointer shadow-sm hover:bg-[#A8370A] transition-colors"
+                >
+                  Create Another Archive
+                </button>
+              </div>
+            </div>
+          ) : (
+            <ResultPreviewStudio
+              metrics={metrics}
+              outputMimeType="application/zip"
+              title={lockWithPassword ? "Encrypted ZIP Archive Packaged!" : "ZIP Archive Packaged Successfully!"}
+              onAdjustSettings={() => {
+                revokeAll();
+                setMetrics(null);
+              }}
+            />
+          )}
         </div>
       ) : (
         <>
@@ -465,7 +627,7 @@ export function CreateZipTool() {
               Drag & Drop Entire Folders or Files Here
             </h3>
             <p className="text-xs text-zinc-600 dark:text-zinc-400 max-w-md mx-auto mb-5">
-              Preserves nested relative folder paths (folder/subfolder/file.ext) with optional AES-256 password encryption. 100% in-browser client compression.
+              Preserves nested relative folder paths (folder/subfolder/file.ext) with optional AES-256 password encryption and Direct-to-Disk streaming. 100% in-browser client compression.
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-3">
@@ -505,6 +667,82 @@ export function CreateZipTool() {
               </button>
             </div>
           </div>
+
+          {/* Quick-Exclude Controls Bar */}
+          <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-charcoal-700/40 border border-zinc-200 dark:border-charcoal-border flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2 text-zinc-700 dark:text-zinc-300 font-semibold font-mono text-[11px] uppercase">
+              <Filter className="w-3.5 h-3.5 text-[#C2410C]" />
+              <span>Smart Exclusions:</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-4">
+              <label className="flex items-center gap-1.5 cursor-pointer text-zinc-600 dark:text-zinc-300 select-none">
+                <input
+                  type="checkbox"
+                  checked={excludeNodeModules}
+                  onChange={(e) => setExcludeNodeModules(e.target.checked)}
+                  className="rounded border-zinc-300 text-[#C2410C] focus:ring-0"
+                />
+                <span className="font-mono">node_modules</span>
+              </label>
+              <label className="flex items-center gap-1.5 cursor-pointer text-zinc-600 dark:text-zinc-300 select-none">
+                <input
+                  type="checkbox"
+                  checked={excludeGit}
+                  onChange={(e) => setExcludeGit(e.target.checked)}
+                  className="rounded border-zinc-300 text-[#C2410C] focus:ring-0"
+                />
+                <span className="font-mono">.git</span>
+              </label>
+              <label className="flex items-center gap-1.5 cursor-pointer text-zinc-600 dark:text-zinc-300 select-none">
+                <input
+                  type="checkbox"
+                  checked={excludeBuild}
+                  onChange={(e) => setExcludeBuild(e.target.checked)}
+                  className="rounded border-zinc-300 text-[#C2410C] focus:ring-0"
+                />
+                <span className="font-mono">.next / dist / build</span>
+              </label>
+              <label className="flex items-center gap-1.5 cursor-pointer text-zinc-600 dark:text-zinc-300 select-none">
+                <input
+                  type="checkbox"
+                  checked={excludeSystem}
+                  onChange={(e) => setExcludeSystem(e.target.checked)}
+                  className="rounded border-zinc-300 text-[#C2410C] focus:ring-0"
+                />
+                <span className="font-mono">.DS_Store / Thumbs.db</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Skipped files banner if any were encountered */}
+          {skippedFiles.length > 0 && (
+            <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs flex items-center justify-between gap-3 text-amber-800 dark:text-amber-200">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                <span>
+                  Skipped <strong>{skippedFiles.length}</strong> unreadable or broken files (e.g. broken symlinks or permission locks).
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSkippedModal(!showSkippedModal)}
+                className="text-[11px] font-mono underline hover:text-amber-950 dark:hover:text-amber-100 cursor-pointer shrink-0"
+              >
+                {showSkippedModal ? "Hide details" : "View skipped paths"}
+              </button>
+            </div>
+          )}
+
+          {showSkippedModal && skippedFiles.length > 0 && (
+            <div className="p-4 rounded-xl bg-zinc-900 text-zinc-200 text-xs font-mono max-h-48 overflow-y-auto space-y-1">
+              {skippedFiles.map((f, idx) => (
+                <div key={idx} className="flex items-start justify-between gap-2 border-b border-zinc-800 pb-1">
+                  <span className="truncate">{f.path}</span>
+                  <span className="text-zinc-500 text-[10px] shrink-0">{f.reason}</span>
+                </div>
+              ))}
+            </div>
+          )}
 
           {errorMessage && (
             <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs flex items-center gap-2">
@@ -557,6 +795,40 @@ export function CreateZipTool() {
                 </div>
               </div>
 
+              {/* Direct-to-Disk Streaming Toggle for Large Archives */}
+              {isDirectStreamingAvailable && (
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-orange-500/5 via-amber-500/5 to-transparent border border-orange-200 dark:border-orange-500/20 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-[#C2410C] text-white shrink-0">
+                      <HardDrive className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-zinc-900 dark:text-white">
+                          Direct-to-Disk Stream (Zero RAM Overhead)
+                        </span>
+                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold uppercase">
+                          Multi-GB / 4GB+ Safe
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-zinc-500 dark:text-zinc-400 block">
+                        Streams output directly into a local file handle via the File System Access API without holding data in browser memory.
+                      </span>
+                    </div>
+                  </div>
+
+                  <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={directToDisk}
+                      onChange={(e) => setDirectToDisk(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer dark:bg-charcoal-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#C2410C]"></div>
+                  </label>
+                </div>
+              )}
+
               {/* Password Encryption Panel */}
               <div className="p-5 rounded-2xl bg-white dark:bg-charcoal-800 border border-zinc-200 dark:border-charcoal-border shadow-sm space-y-4">
                 <div className="flex items-center justify-between border-b border-zinc-100 dark:border-charcoal-border pb-3">
@@ -569,7 +841,7 @@ export function CreateZipTool() {
                         Lock ZIP with Password
                       </span>
                       <span className="text-[11px] text-zinc-500">
-                        Encrypt ZIP archive contents natively (compatible with Windows Explorer, macOS Archive Utility, 7-Zip & WinRAR)
+                        Encrypt ZIP archive contents natively (compatible with Windows Explorer, macOS Archive Utility, 7-Zip &amp; WinRAR)
                       </span>
                     </div>
                   </div>
@@ -719,7 +991,7 @@ export function CreateZipTool() {
                     </span>
                   </div>
                   <span className="text-[11px] font-mono text-zinc-500">
-                    Client In-Memory • @zip.js Streams
+                    Chunked Streaming Engine • Zip64 Capable
                   </span>
                 </div>
 
@@ -762,7 +1034,7 @@ export function CreateZipTool() {
                 </label>
               </div>
 
-              {/* Directory Filter & Interactive File Tree */}
+              {/* Directory Filter & Paginated File Tree */}
               <div className="p-5 rounded-2xl bg-white dark:bg-charcoal-800 border border-zinc-200 dark:border-charcoal-border shadow-sm space-y-3">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex flex-wrap items-center gap-2">
@@ -791,15 +1063,18 @@ export function CreateZipTool() {
                   <input
                     type="text"
                     value={searchFilter}
-                    onChange={(e) => setSearchFilter(e.target.value)}
+                    onChange={(e) => {
+                      setSearchFilter(e.target.value);
+                      setVisibleCount(150);
+                    }}
                     placeholder="Filter staged paths..."
                     className="px-3 py-1.5 rounded-xl text-xs bg-zinc-50 dark:bg-charcoal-700 border border-zinc-200 dark:border-charcoal-border text-zinc-900 dark:text-white outline-none w-full sm:w-48"
                   />
                 </div>
 
-                {/* Staged Files List (scrollable) */}
+                {/* Staged Files List (Paginated / Windowed to prevent DOM freeze with 30,000+ files) */}
                 <div className="max-h-80 overflow-y-auto rounded-xl border border-zinc-200 dark:border-charcoal-border divide-y divide-zinc-100 dark:divide-charcoal-border">
-                  {filteredItems.map((item) => {
+                  {displayedItems.map((item) => {
                     const IconComp = getItemIcon(item.relativePath);
                     return (
                       <div
@@ -834,6 +1109,30 @@ export function CreateZipTool() {
                     </div>
                   )}
                 </div>
+
+                {filteredItems.length > visibleCount && (
+                  <div className="flex items-center justify-between pt-2 text-xs">
+                    <span className="text-zinc-500 font-mono text-[11px]">
+                      Showing {displayedItems.length} of {filteredItems.length} files
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setVisibleCount((v) => v + 250)}
+                        className="px-3 py-1 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-zinc-700 dark:text-zinc-300 font-medium text-[11px] transition-colors cursor-pointer"
+                      >
+                        Show More (+250)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setVisibleCount(filteredItems.length)}
+                        className="px-3 py-1 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-charcoal-700 dark:hover:bg-charcoal-600 text-zinc-700 dark:text-zinc-300 font-medium text-[11px] transition-colors cursor-pointer"
+                      >
+                        Show All
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Action Bar */}
@@ -879,10 +1178,15 @@ export function CreateZipTool() {
                       <Loader2 className="w-4 h-4 animate-spin" />
                       <span>Packaging ZIP ({progress}%)...</span>
                     </>
+                  ) : directToDisk ? (
+                    <>
+                      <HardDrive className="w-4 h-4" />
+                      <span>Stream Directly to Disk</span>
+                    </>
                   ) : lockWithPassword ? (
                     <>
                       <Lock className="w-4 h-4" />
-                      <span>Lock & Create Encrypted ZIP</span>
+                      <span>Lock &amp; Create Encrypted ZIP</span>
                     </>
                   ) : (
                     <>

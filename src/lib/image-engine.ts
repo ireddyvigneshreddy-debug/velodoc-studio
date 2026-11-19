@@ -1,5 +1,5 @@
 import imageCompression from "browser-image-compression";
-import JSZip from "jszip";
+import { BlobReader, BlobWriter, ZipWriter } from "@zip.js/zip.js";
 
 export interface ImageProcessingOptions {
   format: "image/jpeg" | "image/png" | "image/webp";
@@ -304,11 +304,14 @@ async function canvasConvertImage(
 export async function packageImagesToZip(
   images: ProcessedImageResult[]
 ): Promise<Blob> {
-  const zip = new JSZip();
+  const blobWriter = new BlobWriter("application/zip");
+  const zipWriter = new ZipWriter(blobWriter);
 
-  images.forEach((img) => {
-    zip.file(img.name, img.processedBlob);
-  });
+  for (const img of images) {
+    await zipWriter.add(img.name, new BlobReader(img.processedBlob), {
+      level: 0,
+    });
+  }
 
-  return await zip.generateAsync({ type: "blob" });
+  return await zipWriter.close();
 }

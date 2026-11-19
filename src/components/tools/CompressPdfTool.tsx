@@ -28,7 +28,6 @@ export function CompressPdfTool() {
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const [files, setFiles] = useState<UploadedFileItem[]>([]);
-  const [buffers, setBuffers] = useState<Map<string, ArrayBuffer>>(new Map());
 
   // Compression modes
   const [mode, setMode] = useState<"exact-size" | "percentage" | "manual">("exact-size");
@@ -77,9 +76,7 @@ export function CompressPdfTool() {
 
     for (const item of newItems) {
       try {
-        const buffer = await item.file.arrayBuffer();
-        setBuffers((prev) => new Map(prev).set(item.id, buffer));
-        const count = await getPdfPageCount(buffer);
+        const count = await getPdfPageCount(await item.file.arrayBuffer());
         setFiles((current) =>
           current.map((f) =>
             f.id === item.id ? { ...f, pageCount: count, status: "ready" } : f
@@ -116,11 +113,6 @@ export function CompressPdfTool() {
 
   const handleRemoveFile = (id: string) => {
     setFiles((prev) => prev.filter((f) => f.id !== id));
-    setBuffers((prev) => {
-      const next = new Map(prev);
-      next.delete(id);
-      return next;
-    });
   };
 
   const handleMoveFile = (index: number, direction: "up" | "down") => {
@@ -162,8 +154,7 @@ export function CompressPdfTool() {
       // SINGLE FILE MODE
       if (files.length === 1) {
         const item = files[0];
-        const buffer = buffers.get(item.id);
-        if (!buffer) throw new Error("File buffer missing.");
+        const buffer = await item.file.arrayBuffer();
 
         const result = await executeExactCompression(
           buffer,
@@ -189,7 +180,7 @@ export function CompressPdfTool() {
           savedPercentage: result.savedPercentage,
           outputBytes: result.pdfBytes,
           outputBlob: blob,
-          originalBytes: buffer,
+          originalBytes: item.size <= 25 * 1024 * 1024 ? buffer : undefined,
           outputMimeType: "application/pdf",
           downloadUrl,
           pageCount: item.pageCount || 1,
@@ -209,12 +200,8 @@ export function CompressPdfTool() {
           targetAccuracy: result.targetAccuracy,
         });
       } else {
-        // MULTI-FILE BATCH MODE (UP TO 30+ FILES)
-        const batchInputs = files.map((f) => {
-          const buf = buffers.get(f.id);
-          if (!buf) throw new Error(`Buffer missing for ${f.name}`);
-          return { file: f.file, buffer: buf };
-        });
+        // MULTI-FILE BATCH MODE (UP TO 30+ FILES) - Lazy buffer loading per file
+        const batchInputs = files.map((f) => ({ file: f.file }));
 
         const { results, summary } = await executeExactCompressionBatch(
           batchInputs,
@@ -256,7 +243,7 @@ export function CompressPdfTool() {
             savedPercentage: res.savedPercentage,
             outputBytes: res.pdfBytes,
             outputBlob: blob,
-            originalBytes: buffers.get(origItem.id),
+            originalBytes: undefined,
             outputMimeType: "application/pdf",
             downloadUrl: url,
             pageCount: origItem.pageCount || 1,
@@ -361,7 +348,7 @@ export function CompressPdfTool() {
         <ResultPreviewStudio
           metrics={metrics}
           outputBytes={outputBytes || undefined}
-          originalBytes={files.length === 1 ? buffers.get(files[0].id) : undefined}
+          originalBytes={files.length === 1 && files[0].size <= 25 * 1024 * 1024 ? batchResults[0]?.originalBytes : undefined}
           title={files.length > 1 ? `Batch Compressed (${files.length} Files)` : "PDF Compressed to Exact Target!"}
           batchItems={batchResults}
           onAdjustSettings={() => {
@@ -380,7 +367,6 @@ export function CompressPdfTool() {
             onClearAll={() => {
               revokeAll();
               setFiles([]);
-              setBuffers(new Map());
             }}
             acceptedFileTypes={{ "application/pdf": [".pdf"] }}
             multiple={true}

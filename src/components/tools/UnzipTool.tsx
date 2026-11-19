@@ -56,6 +56,7 @@ export function UnzipTool() {
   const [showPassword, setShowPassword] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFolder, setSelectedFolder] = useState<string>("all");
+  const [visibleCount, setVisibleCount] = useState(150);
 
   const [isLoading, setIsLoading] = useState(false);
   const [extractingPath, setExtractingPath] = useState<string | null>(null);
@@ -253,6 +254,10 @@ export function UnzipTool() {
       return e.path.toLowerCase().includes(q) || e.name.toLowerCase().includes(q);
     });
   }, [entries, selectedFolder, searchQuery]);
+
+  const displayedEntries = useMemo(() => {
+    return filteredEntries.slice(0, visibleCount);
+  }, [filteredEntries, visibleCount]);
 
   // Aggregate metrics
   const totals = useMemo(() => {
@@ -473,7 +478,10 @@ export function UnzipTool() {
               <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
                 <button
                   type="button"
-                  onClick={() => setSelectedFolder("all")}
+                  onClick={() => {
+                    setSelectedFolder("all");
+                    setVisibleCount(150);
+                  }}
                   className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors shrink-0 cursor-pointer ${
                     selectedFolder === "all"
                       ? "bg-[#C2410C] text-white font-medium"
@@ -484,7 +492,10 @@ export function UnzipTool() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setSelectedFolder("(root)")}
+                  onClick={() => {
+                    setSelectedFolder("(root)");
+                    setVisibleCount(150);
+                  }}
                   className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors shrink-0 cursor-pointer ${
                     selectedFolder === "(root)"
                       ? "bg-[#C2410C] text-white font-medium"
@@ -497,7 +508,10 @@ export function UnzipTool() {
                   <button
                     key={folder}
                     type="button"
-                    onClick={() => setSelectedFolder(folder)}
+                    onClick={() => {
+                      setSelectedFolder(folder);
+                      setVisibleCount(150);
+                    }}
                     className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors shrink-0 flex items-center gap-1 cursor-pointer ${
                       selectedFolder === folder
                         ? "bg-[#C2410C] text-white font-medium"
@@ -516,7 +530,10 @@ export function UnzipTool() {
                 <input
                   type="text"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setVisibleCount(150);
+                  }}
                   placeholder="Filter archive paths..."
                   className="w-full pl-9 pr-3 py-1.5 rounded-xl text-xs bg-zinc-50 dark:bg-charcoal-700 border border-zinc-200 dark:border-charcoal-border text-zinc-950 dark:text-white outline-none focus:border-[#C2410C]"
                 />
@@ -526,7 +543,7 @@ export function UnzipTool() {
             {/* Entries Table */}
             <div className="rounded-xl border border-zinc-200 dark:border-charcoal-border overflow-hidden">
               <div className="max-h-[460px] overflow-y-auto divide-y divide-zinc-100 dark:divide-charcoal-border">
-                {filteredEntries.map((entry) => {
+                {displayedEntries.map((entry) => {
                   const IconComp = getItemIcon(entry.name, entry.isDirectory);
                   const isExtracting = extractingPath === entry.path;
 
@@ -603,6 +620,30 @@ export function UnzipTool() {
                   </div>
                 )}
               </div>
+
+              {filteredEntries.length > visibleCount && (
+                <div className="p-3 bg-zinc-50 dark:bg-charcoal-700/50 border-t border-zinc-200 dark:border-charcoal-border flex items-center justify-between text-xs">
+                  <span className="text-zinc-500 font-mono text-[11px]">
+                    Showing {displayedEntries.length} of {filteredEntries.length} entries
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setVisibleCount((v) => v + 250)}
+                      className="px-3 py-1 rounded-lg bg-zinc-200 hover:bg-zinc-300 dark:bg-charcoal-600 dark:hover:bg-charcoal-500 text-zinc-800 dark:text-zinc-200 font-medium text-[11px] transition-colors cursor-pointer"
+                    >
+                      Show More (+250)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setVisibleCount(filteredEntries.length)}
+                      className="px-3 py-1 rounded-lg bg-zinc-200 hover:bg-zinc-300 dark:bg-charcoal-600 dark:hover:bg-charcoal-500 text-zinc-800 dark:text-zinc-200 font-medium text-[11px] transition-colors cursor-pointer"
+                    >
+                      Show All
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
