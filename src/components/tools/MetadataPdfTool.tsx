@@ -10,6 +10,7 @@ import {
 } from "@/lib/pdf-engine";
 import { sessionHistory } from "@/lib/session-history";
 import { createPdfBlob } from "@/lib/utils";
+import { useObjectUrls } from "@/hooks/useObjectUrls";
 import {
   FileSearch,
   ShieldCheck,
@@ -19,6 +20,7 @@ import {
 } from "@/components/common/icons";
 
 export function MetadataPdfTool() {
+  const { createTrackedUrl, revokeAll } = useObjectUrls();
   const [fileItem, setFileItem] = useState<UploadedFileItem | null>(null);
   const [originalBuffer, setOriginalBuffer] = useState<ArrayBuffer | null>(null);
   const [metadata, setMetadata] = useState<PdfMetadataInfo | null>(null);
@@ -85,7 +87,7 @@ export function MetadataPdfTool() {
       const endTime = performance.now();
 
       const blob = createPdfBlob(updatedBytes);
-      const downloadUrl = URL.createObjectURL(blob);
+      const downloadUrl = createTrackedUrl(blob);
       const durationMs = endTime - startTime;
 
       const baseName =
@@ -124,7 +126,10 @@ export function MetadataPdfTool() {
           outputBytes={outputBytes || undefined}
           originalBytes={originalBuffer || undefined}
           title="Metadata Updated &amp; Inspected!"
-          onAdjustSettings={() => setMetrics(null)}
+          onAdjustSettings={() => {
+            revokeAll();
+            setMetrics(null);
+          }}
         />
       ) : (
         <>

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ToolDefinition } from "@/types";
-import { PDF_TOOLS, IMAGE_TOOLS } from "@/lib/constants";
+import { PDF_TOOLS, IMAGE_TOOLS, FILE_TOOLS } from "@/lib/constants";
 import { ToolIcon } from "@/components/common/ToolIcon";
 import { ToolErrorBoundary } from "@/components/common/ErrorBoundary";
 import {
@@ -15,7 +15,7 @@ import {
   ArrowLeft,
 } from "@/components/common/icons";
 
-// Tool components (All 29 native tools)
+// Tool components
 import { MergePdfTool } from "./MergePdfTool";
 import { RemovePagesTool } from "./RemovePagesTool";
 import { AddPagesTool } from "./AddPagesTool";
@@ -53,6 +53,13 @@ import { TocPdfTool } from "./TocPdfTool";
 import { QrStampPdfTool } from "./QrStampPdfTool";
 import { FillFormPdfTool } from "./FillFormPdfTool";
 import { LinksPdfTool } from "./LinksPdfTool";
+import { CreateZipTool } from "./CreateZipTool";
+import { UnzipTool } from "./UnzipTool";
+import { ProtectPdfTool } from "./ProtectPdfTool";
+import { FileHashTool } from "./FileHashTool";
+import { DataConverterTool } from "./DataConverterTool";
+import { QrStudioTool } from "./QrStudioTool";
+import { TextDiffTool } from "./TextDiffTool";
 
 interface ToolWorkspaceViewProps {
   tool: ToolDefinition;
@@ -138,6 +145,20 @@ export function ToolWorkspaceView({ tool }: ToolWorkspaceViewProps) {
         return <FillFormPdfTool />;
       case "links-pdf":
         return <LinksPdfTool />;
+      case "create-zip":
+        return <CreateZipTool />;
+      case "unzip-files":
+        return <UnzipTool />;
+      case "protect-pdf":
+        return <ProtectPdfTool />;
+      case "file-hash":
+        return <FileHashTool />;
+      case "data-converter":
+        return <DataConverterTool />;
+      case "qr-studio":
+        return <QrStudioTool />;
+      case "text-diff":
+        return <TextDiffTool />;
       default:
         return (
           <div className="p-8 text-center text-zinc-700 dark:text-zinc-400 font-sans">
@@ -257,6 +278,42 @@ export function ToolWorkspaceView({ tool }: ToolWorkspaceViewProps) {
                       })}
                     </div>
                   </div>
+
+                  {/* File & Data Tools Section */}
+                  {FILE_TOOLS.length > 0 && (
+                    <div className="border-t border-zinc-200 dark:border-white/5 pt-2">
+                      <div className="px-3 py-1 text-[10px] font-bold text-zinc-700 dark:text-amber-400 uppercase tracking-wider flex items-center justify-between font-mono">
+                        <span>Archives, Data &amp; Security</span>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-900 dark:bg-amber-500/10 dark:text-amber-300 font-semibold border border-slate-200 dark:border-transparent">
+                          {FILE_TOOLS.length}
+                        </span>
+                      </div>
+                      <div className="space-y-0.5 pt-1">
+                        {FILE_TOOLS.map((t) => {
+                          const isCurrent = t.id === tool.id;
+                          return (
+                            <button
+                              key={t.id}
+                              onClick={() => {
+                                setSwitcherOpen(false);
+                                router.push(t.path);
+                              }}
+                              className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-left text-xs transition-all cursor-pointer ${
+                                isCurrent
+                                  ? "bg-orange-50 text-orange-950 font-semibold border border-orange-200 dark:bg-amber-600/25 dark:text-amber-200 dark:border-amber-500/40"
+                                  : "text-zinc-700 hover:text-zinc-950 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:text-white dark:hover:bg-white/[0.06]"
+                              }`}
+                            >
+                              <div className="p-1 rounded-lg bg-zinc-100 dark:bg-charcoal-700 text-zinc-800 dark:text-white shrink-0 shadow-sm border border-zinc-200 dark:border-transparent">
+                                <ToolIcon name={t.icon} className="w-3 h-3" />
+                              </div>
+                              <span className="truncate">{t.name}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </>
             )}

@@ -33,6 +33,11 @@ import {
   Share2,
   User,
   Globe,
+  Archive,
+  FolderOpen,
+  Lock,
+  Table,
+  FileArchive,
   LucideProps,
 } from "@/components/common/icons";
 
@@ -70,6 +75,11 @@ export const TOOL_ICON_MAP: Record<string, React.ComponentType<LucideProps>> = {
   Share2,
   User,
   Globe,
+  Archive,
+  FolderOpen,
+  Lock,
+  Table,
+  FileArchive,
 };
 
 interface ToolIconProps {

@@ -10,9 +10,11 @@ import {
 } from "@/lib/pdf-engine";
 import { sessionHistory } from "@/lib/session-history";
 import { createPdfBlob } from "@/lib/utils";
+import { useObjectUrls } from "@/hooks/useObjectUrls";
 import { SunMedium, Loader2, AlertCircle, Sparkles } from "@/components/common/icons";
 
 export function GrayscalePdfTool() {
+  const { createTrackedUrl, revokeAll } = useObjectUrls();
   const [fileItem, setFileItem] = useState<UploadedFileItem | null>(null);
   const [originalBuffer, setOriginalBuffer] = useState<ArrayBuffer | null>(null);
 
@@ -80,7 +82,7 @@ export function GrayscalePdfTool() {
       const endTime = performance.now();
 
       const blob = createPdfBlob(enhancedBytes);
-      const downloadUrl = URL.createObjectURL(blob);
+      const downloadUrl = createTrackedUrl(blob);
       const durationMs = endTime - startTime;
 
       const baseName =
@@ -124,7 +126,10 @@ export function GrayscalePdfTool() {
               ? "Clean Scan Mode Generated!"
               : "Converted to True Grayscale!"
           }
-          onAdjustSettings={() => setMetrics(null)}
+          onAdjustSettings={() => {
+            revokeAll();
+            setMetrics(null);
+          }}
         />
       ) : (
         <>

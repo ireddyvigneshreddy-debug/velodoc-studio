@@ -11,6 +11,7 @@ import {
 } from "@/lib/pdf-engine";
 import { sessionHistory } from "@/lib/session-history";
 import { createPdfBlob } from "@/lib/utils";
+import { useObjectUrls } from "@/hooks/useObjectUrls";
 import {
   PenTool,
   Type,
@@ -29,6 +30,7 @@ import {
 } from "@/components/common/icons";
 
 export function SignPdfTool() {
+  const { createTrackedUrl, revokeAll } = useObjectUrls();
   const [fileItem, setFileItem] = useState<UploadedFileItem | null>(null);
   const [originalBuffer, setOriginalBuffer] = useState<ArrayBuffer | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -387,7 +389,7 @@ export function SignPdfTool() {
       const endTime = performance.now();
 
       const blob = createPdfBlob(signedBytes);
-      const downloadUrl = URL.createObjectURL(blob);
+      const downloadUrl = createTrackedUrl(blob);
       const durationMs = endTime - startTime;
 
       const baseName =
@@ -426,7 +428,10 @@ export function SignPdfTool() {
           outputBytes={outputBytes || undefined}
           originalBytes={originalBuffer || undefined}
           title="Signatures &amp; Stamps Applied!"
-          onAdjustSettings={() => setMetrics(null)}
+          onAdjustSettings={() => {
+            revokeAll();
+            setMetrics(null);
+          }}
         />
       ) : (
         <>

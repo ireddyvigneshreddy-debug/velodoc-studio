@@ -1,27 +1,12 @@
-export type ToolCategory =
-  | "All Studio Tools (28)"
-  | "All Studio Tools (27)"
-  | "All Studio Tools (29)"
-  | "All Studio Tools (19)"
-  | "All Studio Tools"
-  | "All Tools"
-  | "Shrink & Exact KB"
-  | "Shrink & Compress"
-  | "Merge & Split"
-  | "Edit & Organize Pages"
-  | "Edit Pages"
-  | "Convert & Camera Scan"
-  | "Convert Formats"
-  | "Sign, Redact & Compare"
-  | "Extreme & Smart Pro";
+export type ToolCategory = string;
 
-export type ToolDomain = "all" | "pdf" | "image";
+export type ToolDomain = "all" | "pdf" | "image" | "file";
 
 export interface ToolDefinition {
   id: string;
   name: string;
   category: ToolCategory;
-  toolType: "pdf" | "image";
+  toolType: "pdf" | "image" | "file";
   description: string;
   shortDesc: string; // Plain-English ~6-word explanation
   inputOutputBadge: string; // e.g. "PDF → Exact KB", "Batch 30x"

@@ -23,6 +23,7 @@ import {
 } from "@/components/common/icons";
 import { sessionHistory } from "@/lib/session-history";
 import { formatFileSize, createPdfBlob, createSafeFile } from "@/lib/utils";
+import { useObjectUrls } from "@/hooks/useObjectUrls";
 
 const STAMP_PRESETS = [
   { label: "CONFIDENTIAL", color: "#EF4444" },
@@ -34,6 +35,7 @@ const STAMP_PRESETS = [
 ];
 
 export function WatermarkPdfTool() {
+  const { createTrackedUrl, revokeAll } = useObjectUrls();
   const [fileItem, setFileItem] = useState<UploadedFileItem | null>(null);
   const [previewThumbnail, setPreviewThumbnail] = useState<PageThumbnail | null>(null);
   const [isLoadingThumbnail, setIsLoadingThumbnail] = useState(false);
@@ -233,7 +235,7 @@ export function WatermarkPdfTool() {
 
       const blob = createPdfBlob(stampedBytes);
       const baseName = fileItem.name.replace(/\.pdf$/i, "");
-      const downloadUrl = URL.createObjectURL(blob);
+      const downloadUrl = createTrackedUrl(blob);
 
       setOutputBytes(stampedBytes);
       setMetrics({
@@ -265,7 +267,10 @@ export function WatermarkPdfTool() {
           outputBytes={outputBytes || undefined}
           originalBytes={originalBytes || undefined}
           title="Watermark & Stamp Applied!"
-          onAdjustSettings={() => setMetrics(null)}
+          onAdjustSettings={() => {
+            revokeAll();
+            setMetrics(null);
+          }}
         />
       ) : !fileItem ? (
         <DropZone

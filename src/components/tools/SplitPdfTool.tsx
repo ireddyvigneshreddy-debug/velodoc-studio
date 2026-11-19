@@ -12,6 +12,7 @@ import {
 } from "@/lib/pdf-engine";
 import { sessionHistory } from "@/lib/session-history";
 import { createPdfBlob } from "@/lib/utils";
+import { useObjectUrls } from "@/hooks/useObjectUrls";
 import {
   Scissors,
   Loader2,
@@ -20,6 +21,7 @@ import {
 } from "@/components/common/icons";
 
 export function SplitPdfTool() {
+  const { createTrackedUrl, revokeAll } = useObjectUrls();
   const [fileItem, setFileItem] = useState<UploadedFileItem | null>(null);
   const [originalBuffer, setOriginalBuffer] = useState<ArrayBuffer | null>(null);
   const [thumbnails, setThumbnails] = useState<PageThumbnail[]>([]);
@@ -176,7 +178,7 @@ export function SplitPdfTool() {
 
       const endTime = performance.now();
       const durationMs = endTime - startTime;
-      const downloadUrl = URL.createObjectURL(res.blob);
+      const downloadUrl = createTrackedUrl(res.blob);
       const buf = await res.blob.arrayBuffer();
       const bytes = new Uint8Array(buf);
 
@@ -227,7 +229,10 @@ export function SplitPdfTool() {
               ? "Pages Extracted to PDF!"
               : "Split Segments Packaged Successfully!"
           }
-          onAdjustSettings={() => setMetrics(null)}
+          onAdjustSettings={() => {
+            revokeAll();
+            setMetrics(null);
+          }}
         />
       ) : (
         <>

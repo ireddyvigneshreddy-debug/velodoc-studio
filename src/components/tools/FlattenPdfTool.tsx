@@ -8,9 +8,11 @@ import { flattenPdf, FlattenOptions } from "@/lib/flatten-engine";
 import { getPdfPageCount } from "@/lib/pdf-engine";
 import { sessionHistory } from "@/lib/session-history";
 import { createPdfBlob } from "@/lib/utils";
+import { useObjectUrls } from "@/hooks/useObjectUrls";
 import { ShieldCheck, Lock, Sparkles, Layers, AlertCircle, Loader2 } from "@/components/common/icons";
 
 export function FlattenPdfTool() {
+  const { createTrackedUrl, revokeAll } = useObjectUrls();
   const [fileItem, setFileItem] = useState<UploadedFileItem | null>(null);
   const [originalBuffer, setOriginalBuffer] = useState<ArrayBuffer | null>(null);
 
@@ -93,7 +95,7 @@ export function FlattenPdfTool() {
       const savedPercentage = Math.round((savedBytes / originalSize) * 100);
 
       const blob = createPdfBlob(flattened);
-      const downloadUrl = URL.createObjectURL(blob);
+      const downloadUrl = createTrackedUrl(blob);
       const downloadFilename = fileItem.name.replace(/\.pdf$/i, "-flattened.pdf");
 
       setMetrics({
@@ -320,6 +322,7 @@ export function FlattenPdfTool() {
           outputMimeType="application/pdf"
           title="PDF Flattening Complete"
           onAdjustSettings={() => {
+            revokeAll();
             setMetrics(null);
           }}
         />

@@ -8,6 +8,7 @@ import { createNUpPdf, NUpOptions } from "@/lib/nup-engine";
 import { getPdfPageCount } from "@/lib/pdf-engine";
 import { sessionHistory } from "@/lib/session-history";
 import { createPdfBlob, createSafeFile } from "@/lib/utils";
+import { useObjectUrls } from "@/hooks/useObjectUrls";
 import { PDFDocument, StandardFonts, rgb, PageSizes } from "pdf-lib";
 import {
   Scissors,
@@ -20,6 +21,7 @@ import {
 } from "@/components/common/icons";
 
 export function NUpPdfTool() {
+  const { createTrackedUrl, revokeAll } = useObjectUrls();
   const [fileItem, setFileItem] = useState<UploadedFileItem | null>(null);
   const [originalBuffer, setOriginalBuffer] = useState<ArrayBuffer | null>(null);
 
@@ -179,7 +181,7 @@ export function NUpPdfTool() {
       const originalSize = fileItem.size;
       const processedSize = processed.byteLength;
       const blob = createPdfBlob(processed);
-      const downloadUrl = URL.createObjectURL(blob);
+      const downloadUrl = createTrackedUrl(blob);
       const downloadFilename = fileItem.name.replace(/\.pdf$/i, `-${options.pagesPerSheet}up.pdf`);
 
       setMetrics({
@@ -216,7 +218,10 @@ export function NUpPdfTool() {
         metrics={metrics}
         outputBytes={outputBytes}
         outputMimeType="application/pdf"
-        onAdjustSettings={() => setOutputBytes(null)}
+        onAdjustSettings={() => {
+          revokeAll();
+          setOutputBytes(null);
+        }}
         title="N-Up Handout Ready"
       />
     );

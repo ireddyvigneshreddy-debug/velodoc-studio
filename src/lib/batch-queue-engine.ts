@@ -77,6 +77,11 @@ export function revokeAllObjectUrls(): void {
   trackedObjectUrls.clear();
 }
 
+export function createSafeObjectUrl(blob: Blob | MediaSource): string {
+  const url = URL.createObjectURL(blob);
+  return trackObjectUrl(url);
+}
+
 /**
  * Event-loop cooperative yield to ensure smooth 60 FPS UI during heavy PDF/image work
  */
@@ -101,7 +106,8 @@ export async function processBatchQueue<TItem, TResult>(
   task: (
     item: TItem,
     index: number,
-    reportProgress: (pct: number, msg?: string) => void
+    reportProgress: (pct: number, msg?: string) => void,
+    signal?: AbortSignal
   ) => Promise<TResult>,
   options: BatchQueueOptions<TResult> = {}
 ): Promise<(TResult | null)[]> {
@@ -116,7 +122,7 @@ export async function processBatchQueue<TItem, TResult>(
   async function worker(): Promise<void> {
     while (currentIndex < items.length) {
       if (options.signal?.aborted) {
-        throw new Error("Batch processing aborted by user.");
+        throw new DOMException("Batch processing aborted by user.", "AbortError");
       }
 
       const itemIdx = currentIndex++;
@@ -129,10 +135,13 @@ export async function processBatchQueue<TItem, TResult>(
         report(5, "Starting processing...");
         await yieldToMain(16);
 
-        const res = await task(item, itemIdx, report);
+        const res = await task(item, itemIdx, report, options.signal);
         results[itemIdx] = res;
         options.onItemComplete?.(itemIdx, res);
       } catch (err: unknown) {
+        if (options.signal?.aborted || (err instanceof DOMException && err.name === "AbortError")) {
+          throw err;
+        }
         const error = err instanceof Error ? err : new Error(String(err));
         console.error(`Error processing batch item #${itemIdx}:`, error);
         options.onItemError?.(itemIdx, error);

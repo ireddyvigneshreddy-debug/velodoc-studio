@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { DropZone } from "@/components/common/DropZone";
 import { ResultPreviewStudio, ProcessedItemOutput } from "@/components/ResultPreviewStudio";
@@ -12,6 +12,7 @@ import {
   ExactCompressionOptions,
 } from "@/lib/compression-engine";
 import { sessionHistory } from "@/lib/session-history";
+import { useObjectUrls } from "@/hooks/useObjectUrls";
 import {
   Minimize2,
   Loader2,
@@ -23,6 +24,9 @@ import {
 import { formatFileSize } from "@/lib/utils";
 
 export function CompressPdfTool() {
+  const { createTrackedUrl, revokeAll } = useObjectUrls();
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   const [files, setFiles] = useState<UploadedFileItem[]>([]);
   const [buffers, setBuffers] = useState<Map<string, ArrayBuffer>>(new Map());
 
@@ -35,7 +39,7 @@ export function CompressPdfTool() {
   const [manualDpi, setManualDpi] = useState<number>(150);
   const [manualQuality, setManualQuality] = useState<number>(0.7);
   const [colorMode, setColorMode] = useState<"full" | "grayscale">("full");
-  const [exactBytePadding, setExactBytePadding] = useState<boolean>(true);
+  const [exactBytePadding, setExactBytePadding] = useState<boolean>(false);
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [progressMsg, setProgressMsg] = useState("");
@@ -46,8 +50,16 @@ export function CompressPdfTool() {
   const [batchResults, setBatchResults] = useState<ProcessedItemOutput[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleFilesAdded = React.useCallback(async (newFiles: File[]) => {
+  const handleCancel = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      setProgressMsg("Cancelling compression...");
+    }
+  }, []);
+
+  const handleFilesAdded = useCallback(async (newFiles: File[]) => {
     if (newFiles.length === 0) return;
+    revokeAll();
     setErrorMessage(null);
     setMetrics(null);
     setOutputBytes(null);
@@ -90,7 +102,7 @@ export function CompressPdfTool() {
       const suggestedKb = Math.max(50, Math.round(newFiles[0].size / 2048));
       setTargetKb(suggestedKb);
     }
-  }, []);
+  }, [revokeAll]);
 
   // Chained file ingestion
   useEffect(() => {
@@ -143,6 +155,9 @@ export function CompressPdfTool() {
       exactBytePadding,
     };
 
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     try {
       // SINGLE FILE MODE
       if (files.length === 1) {
@@ -156,12 +171,13 @@ export function CompressPdfTool() {
           (msg, pct) => {
             setProgressMsg(msg);
             setProgressPct(pct);
-          }
+          },
+          abortController.signal
         );
 
         const durationMs = performance.now() - startTime;
         const blob = new Blob([result.pdfBytes as unknown as BlobPart], { type: "application/pdf" });
-        const downloadUrl = URL.createObjectURL(blob);
+        const downloadUrl = createTrackedUrl(blob);
         const baseName = item.name.substring(0, item.name.lastIndexOf(".")) || item.name;
 
         setOutputBytes(result.pdfBytes);
@@ -219,7 +235,8 @@ export function CompressPdfTool() {
                 i === idx ? { ...f, status: "done", progress: 100 } : f
               )
             );
-          }
+          },
+          abortController.signal
         );
 
         const completedItems: ProcessedItemOutput[] = [];
@@ -229,7 +246,7 @@ export function CompressPdfTool() {
           const origItem = files[idx];
           const baseName = origItem.name.substring(0, origItem.name.lastIndexOf(".")) || origItem.name;
           const blob = new Blob([res.pdfBytes as unknown as BlobPart], { type: "application/pdf" });
-          const url = URL.createObjectURL(blob);
+          const url = createTrackedUrl(blob);
 
           completedItems.push({
             id: origItem.id,
@@ -265,11 +282,16 @@ export function CompressPdfTool() {
         }
       }
     } catch (err: unknown) {
-      console.error("Batch compression error:", err);
-      setErrorMessage(err instanceof Error ? err.message : "Compression failed.");
+      if (err instanceof DOMException && err.name === "AbortError") {
+        setProgressMsg("Compression cancelled by user.");
+        setErrorMessage(null);
+      } else {
+        console.error("Batch compression error:", err);
+        setErrorMessage(err instanceof Error ? err.message : "Compression failed.");
+      }
     } finally {
       setIsProcessing(false);
-      setProgressMsg("");
+      abortControllerRef.current = null;
     }
   };
 
@@ -343,6 +365,7 @@ export function CompressPdfTool() {
           title={files.length > 1 ? `Batch Compressed (${files.length} Files)` : "PDF Compressed to Exact Target!"}
           batchItems={batchResults}
           onAdjustSettings={() => {
+            revokeAll();
             setMetrics(null);
             setBatchResults([]);
           }}
@@ -355,6 +378,7 @@ export function CompressPdfTool() {
             onRemoveFile={handleRemoveFile}
             onMoveFile={handleMoveFile}
             onClearAll={() => {
+              revokeAll();
               setFiles([]);
               setBuffers(new Map());
             }}
@@ -691,16 +715,25 @@ export function CompressPdfTool() {
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-white dark:bg-[#12141D] border border-zinc-200 dark:border-white/10 shadow-sm">
                 <div className="text-xs text-zinc-700 dark:text-slate-400">
                   {isProcessing ? (
-                    <div className="space-y-1">
+                    <div className="space-y-1.5">
                       <div className="flex items-center gap-2 text-[#C2410C] dark:text-cyan-400 font-medium">
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
                         <span>{progressMsg || "Compressing documents..."}</span>
                       </div>
-                      <div className="w-48 h-1.5 rounded-full bg-zinc-200 dark:bg-white/10 overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-orange-500 to-amber-500 transition-all duration-200"
-                          style={{ width: `${progressPct}%` }}
-                        />
+                      <div className="flex items-center gap-3">
+                        <div className="w-48 h-1.5 rounded-full bg-zinc-200 dark:bg-white/10 overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-orange-500 to-amber-500 transition-all duration-200"
+                            style={{ width: `${progressPct}%` }}
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleCancel}
+                          className="px-2.5 py-0.5 rounded-lg border border-rose-300 dark:border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 text-[11px] font-mono transition-colors cursor-pointer"
+                        >
+                          Cancel
+                        </button>
                       </div>
                     </div>
                   ) : (
@@ -708,54 +741,76 @@ export function CompressPdfTool() {
                   )}
                 </div>
 
-                <button
-                  type="button"
-                  onClick={handleCompress}
-                  disabled={isProcessing || files.length === 0}
-                  className="w-full sm:w-auto px-7 py-3 rounded-xl bg-[#C2410C] hover:bg-[#A8370A] disabled:opacity-40 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
-                >
-                  {isProcessing ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Compressing ({progressPct}%)...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Minimize2 className="w-4 h-4" />
-                      <span>
-                        {files.length > 1
-                          ? `Compress All ${files.length} PDFs (Batch 30x)`
-                          : "Compress PDF Now"}
-                      </span>
-                    </>
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  {isProcessing && (
+                    <button
+                      type="button"
+                      onClick={handleCancel}
+                      className="px-4 py-3 rounded-xl border border-rose-300 dark:border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 text-xs font-semibold font-mono transition-colors cursor-pointer"
+                    >
+                      Cancel
+                    </button>
                   )}
-                </button>
+                  <button
+                    type="button"
+                    onClick={handleCompress}
+                    disabled={isProcessing || files.length === 0}
+                    className="w-full sm:w-auto px-7 py-3 rounded-xl bg-[#C2410C] hover:bg-[#A8370A] disabled:opacity-40 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Compressing ({progressPct}%)...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Minimize2 className="w-4 h-4" />
+                        <span>
+                          {files.length > 1
+                            ? `Compress All ${files.length} PDFs (Batch 30x)`
+                            : "Compress PDF Now"}
+                        </span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
 
               {/* Mobile Thumb-Zone Sticky Action Bar */}
               <div className="fixed bottom-0 inset-x-0 z-40 pb-safe md:hidden p-3 bg-white/95 dark:bg-[#05060B]/95 backdrop-blur-2xl border-t border-zinc-200 dark:border-white/15 shadow-lg">
-                <button
-                  type="button"
-                  onClick={handleCompress}
-                  disabled={isProcessing || files.length === 0}
-                  className="w-full py-3.5 rounded-2xl bg-[#C2410C] hover:bg-[#A8370A] disabled:opacity-40 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-all cursor-pointer"
-                >
-                  {isProcessing ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Compressing ({progressPct}%)...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Minimize2 className="w-4 h-4" />
-                      <span>
-                        {files.length > 1
-                          ? `Compress ${files.length} PDFs`
-                          : `Compress PDF (${mode === "exact-size" ? `${targetKb} KB` : `${percentageReduction}%`})`}
-                      </span>
-                    </>
+                <div className="flex items-center gap-2">
+                  {isProcessing && (
+                    <button
+                      type="button"
+                      onClick={handleCancel}
+                      className="py-3.5 px-4 rounded-2xl border border-rose-300 dark:border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 text-xs font-bold font-mono transition-colors cursor-pointer"
+                    >
+                      Cancel
+                    </button>
                   )}
-                </button>
+                  <button
+                    type="button"
+                    onClick={handleCompress}
+                    disabled={isProcessing || files.length === 0}
+                    className="flex-1 py-3.5 rounded-2xl bg-[#C2410C] hover:bg-[#A8370A] disabled:opacity-40 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-all cursor-pointer"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Compressing ({progressPct}%)...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Minimize2 className="w-4 h-4" />
+                        <span>
+                          {files.length > 1
+                            ? `Compress ${files.length} PDFs`
+                            : `Compress PDF (${mode === "exact-size" ? `${targetKb} KB` : `${percentageReduction}%`})`}
+                        </span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           )}

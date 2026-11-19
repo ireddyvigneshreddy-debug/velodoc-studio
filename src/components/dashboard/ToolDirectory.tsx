@@ -18,7 +18,8 @@ function getToolFamilyTheme(tool: ToolDefinition) {
     tool.id === "compress-pdf" ||
     tool.id === "image-studio" ||
     tool.id === "flatten-pdf" ||
-    tool.id === "id-card-studio"
+    tool.id === "id-card-studio" ||
+    tool.id === "data-converter"
   ) {
     return {
       iconBg: "bg-[#EDF5F2] text-[#2E5A44] dark:bg-[#143A2F]/40 dark:text-[#6ee7b7] border border-[#C4DFD5] dark:border-[#143A2F]",
@@ -35,7 +36,8 @@ function getToolFamilyTheme(tool: ToolDefinition) {
     tool.id === "remove-pages" ||
     tool.id === "crop-pdf" ||
     tool.id === "fill-form-pdf" ||
-    tool.id === "links-pdf"
+    tool.id === "links-pdf" ||
+    tool.id === "protect-pdf"
   ) {
     return {
       iconBg: "bg-[#FFF5F0] text-[#C2410C] dark:bg-[#C2410C]/20 dark:text-[#ffedd5] border border-[#FBDCD0] dark:border-[#C2410C]/30",
@@ -52,13 +54,30 @@ function getToolFamilyTheme(tool: ToolDefinition) {
     tool.id === "presentation-pdf" ||
     tool.id === "passport-photo" ||
     tool.id === "code-to-pdf" ||
-    tool.id === "ocr-pdf"
+    tool.id === "ocr-pdf" ||
+    tool.id === "qr-studio" ||
+    tool.id === "qr-barcode-pdf"
   ) {
     return {
       iconBg: "bg-[#FEF3C7] text-[#B45309] dark:bg-[#B45309]/20 dark:text-[#fde68a] border border-[#FDE68A] dark:border-[#B45309]/30",
       badgeColor: "bg-[#FEF3C7] text-[#B45309] dark:bg-[#B45309]/20 dark:text-[#fde68a] border-[#FDE68A] dark:border-[#B45309]/30",
       spotlightColor: "rgba(180, 83, 9, 0.04)",
       borderGlowColor: "rgba(180, 83, 9, 0.25)",
+    };
+  }
+
+  if (
+    tool.id === "create-zip" ||
+    tool.id === "unzip-files" ||
+    tool.id === "file-hash" ||
+    tool.id === "text-diff" ||
+    tool.id === "pdf-diff-text"
+  ) {
+    return {
+      iconBg: "bg-[#F5F3FF] text-[#6D28D9] dark:bg-[#4C1D95]/30 dark:text-[#C4B5FD] border border-[#DDD6FE] dark:border-[#4C1D95]/40",
+      badgeColor: "bg-[#F5F3FF] text-[#6D28D9] dark:bg-[#4C1D95]/20 dark:text-[#C4B5FD] border-[#DDD6FE] dark:border-[#4C1D95]/40",
+      spotlightColor: "rgba(109, 40, 217, 0.04)",
+      borderGlowColor: "rgba(109, 40, 217, 0.25)",
     };
   }
 
@@ -154,6 +173,7 @@ export function ToolDirectory() {
         {TOOL_CATEGORIES.map((category) => {
           const isSelected = selectedCategory === category;
           const count = categoryCounts[category] || 0;
+          const label = category.replace(/\s*\(\d+\)$/, "");
 
           return (
             <button
@@ -165,7 +185,7 @@ export function ToolDirectory() {
                   : "bg-white dark:bg-charcoal-800 text-ink-secondary dark:text-paper-400 border-paper-300 dark:border-charcoal-border hover:border-ink-muted hover:text-ink-primary dark:hover:text-white"
               }`}
             >
-              <span className="whitespace-nowrap">{category}</span>
+              <span className="whitespace-nowrap">{label}</span>
               <span
                 className={`text-[10px] font-mono px-1 rounded tabular-nums ${
                   isSelected

@@ -8,9 +8,11 @@ import { UploadedFileItem, ProcessingMetrics } from "@/types";
 import { mergePdfsPro, getPdfPageCount } from "@/lib/pdf-engine";
 import { sessionHistory } from "@/lib/session-history";
 import { createPdfBlob } from "@/lib/utils";
+import { useObjectUrls } from "@/hooks/useObjectUrls";
 import { Layers, Loader2, Shuffle } from "@/components/common/icons";
 
 export function MergePdfTool() {
+  const { createTrackedUrl, revokeAll } = useObjectUrls();
   const [files, setFiles] = useState<UploadedFileItem[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [interleave, setInterleave] = useState(false);
@@ -124,7 +126,7 @@ export function MergePdfTool() {
       const endTime = performance.now();
 
       const blob = createPdfBlob(mergedBytes);
-      const downloadUrl = URL.createObjectURL(blob);
+      const downloadUrl = createTrackedUrl(blob);
       const durationMs = endTime - startTime;
 
       const pageCount = await getPdfPageCount(mergedBytes);
@@ -166,7 +168,10 @@ export function MergePdfTool() {
           metrics={metrics}
           outputBytes={outputBytes || undefined}
           title="PDFs Merged Successfully!"
-          onAdjustSettings={() => setMetrics(null)}
+          onAdjustSettings={() => {
+            revokeAll();
+            setMetrics(null);
+          }}
         />
       ) : (
         <>
@@ -175,7 +180,10 @@ export function MergePdfTool() {
             onFilesAdded={handleFilesAdded}
             onRemoveFile={handleRemoveFile}
             onMoveFile={handleMoveFile}
-            onClearAll={() => setFiles([])}
+            onClearAll={() => {
+              revokeAll();
+              setFiles([]);
+            }}
             acceptedFileTypes={{ "application/pdf": [".pdf"] }}
             multiple={true}
             title="Drop 2 or more PDF files to merge"

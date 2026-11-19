@@ -2,7 +2,6 @@
 const nextConfig = {
   reactStrictMode: false,
   poweredByHeader: false,
-  generateBuildId: async () => `velodoc-${Date.now()}`,
   headers: async () => [
     {
       source: "/:path*",

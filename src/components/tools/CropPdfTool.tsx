@@ -11,6 +11,7 @@ import {
 } from "@/lib/pdf-engine";
 import { sessionHistory } from "@/lib/session-history";
 import { createPdfBlob } from "@/lib/utils";
+import { useObjectUrls } from "@/hooks/useObjectUrls";
 import {
   Crop,
   Loader2,
@@ -27,6 +28,7 @@ const CROP_PRESETS = [
 ];
 
 export function CropPdfTool() {
+  const { createTrackedUrl, revokeAll } = useObjectUrls();
   const [fileItem, setFileItem] = useState<UploadedFileItem | null>(null);
   const [originalBuffer, setOriginalBuffer] = useState<ArrayBuffer | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -124,7 +126,7 @@ export function CropPdfTool() {
       const endTime = performance.now();
 
       const blob = createPdfBlob(croppedBytes);
-      const downloadUrl = URL.createObjectURL(blob);
+      const downloadUrl = createTrackedUrl(blob);
       const durationMs = endTime - startTime;
 
       const baseName =
@@ -159,7 +161,10 @@ export function CropPdfTool() {
           outputBytes={outputBytes || undefined}
           originalBytes={originalBuffer || undefined}
           title="PDF Margins Cropped &amp; Resized!"
-          onAdjustSettings={() => setMetrics(null)}
+          onAdjustSettings={() => {
+            revokeAll();
+            setMetrics(null);
+          }}
         />
       ) : (
         <>

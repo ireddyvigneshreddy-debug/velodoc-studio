@@ -10,9 +10,11 @@ import {
 } from "@/lib/pdf-engine";
 import { sessionHistory } from "@/lib/session-history";
 import { createPdfBlob } from "@/lib/utils";
+import { useObjectUrls } from "@/hooks/useObjectUrls";
 import { Hash, Loader2, AlertCircle } from "@/components/common/icons";
 
 export function PageNumbersTool() {
+  const { createTrackedUrl, revokeAll } = useObjectUrls();
   const [fileItem, setFileItem] = useState<UploadedFileItem | null>(null);
   const [originalBuffer, setOriginalBuffer] = useState<ArrayBuffer | null>(null);
 
@@ -86,7 +88,7 @@ export function PageNumbersTool() {
       const endTime = performance.now();
 
       const blob = createPdfBlob(resultBytes);
-      const downloadUrl = URL.createObjectURL(blob);
+      const downloadUrl = createTrackedUrl(blob);
       const durationMs = endTime - startTime;
 
       const baseName =
@@ -124,7 +126,10 @@ export function PageNumbersTool() {
           outputBytes={outputBytes || undefined}
           originalBytes={originalBuffer || undefined}
           title="Page Numbers &amp; Bates Stamped!"
-          onAdjustSettings={() => setMetrics(null)}
+          onAdjustSettings={() => {
+            revokeAll();
+            setMetrics(null);
+          }}
         />
       ) : (
         <>

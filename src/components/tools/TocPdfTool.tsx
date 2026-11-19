@@ -13,6 +13,7 @@ import {
 import { getPdfPageCount } from "@/lib/pdf-engine";
 import { createPdfBlob } from "@/lib/utils";
 import { sessionHistory } from "@/lib/session-history";
+import { useObjectUrls } from "@/hooks/useObjectUrls";
 import { ProcessingMetrics, UploadedFileItem } from "@/types";
 import { PDFDocument } from "pdf-lib";
 import {
@@ -33,6 +34,7 @@ interface ChapterItem {
 }
 
 export function TocPdfTool() {
+  const { createTrackedUrl, revokeAll } = useObjectUrls();
   const [mode, setMode] = useState<"batch-files" | "single-multipage">("batch-files");
 
   // Mode A: Multi-File Chapter Bundle (up to 30 files)
@@ -173,7 +175,7 @@ export function TocPdfTool() {
       const endTime = performance.now();
       setOutputBytes(pdfBytes);
       const blob = createPdfBlob(pdfBytes);
-      const downloadUrl = URL.createObjectURL(blob);
+      const downloadUrl = createTrackedUrl(blob);
       const downloadFilename = "document_with_clickable_index.pdf";
 
       setMetrics({
@@ -210,7 +212,10 @@ export function TocPdfTool() {
         metrics={metrics}
         outputBytes={outputBytes}
         outputMimeType="application/pdf"
-        onAdjustSettings={() => setOutputBytes(null)}
+        onAdjustSettings={() => {
+          revokeAll();
+          setOutputBytes(null);
+        }}
         title="Clickable Index PDF Ready"
       />
     );

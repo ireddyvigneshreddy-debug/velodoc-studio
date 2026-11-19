@@ -11,6 +11,7 @@ import {
 } from "@/lib/pdf-engine";
 import { sessionHistory } from "@/lib/session-history";
 import { createPdfBlob } from "@/lib/utils";
+import { useObjectUrls } from "@/hooks/useObjectUrls";
 import {
   Loader2,
   Trash2,
@@ -22,6 +23,7 @@ import {
 } from "@/components/common/icons";
 
 export function RedactPdfTool() {
+  const { createTrackedUrl, revokeAll } = useObjectUrls();
   const [fileItem, setFileItem] = useState<UploadedFileItem | null>(null);
   const [originalBuffer, setOriginalBuffer] = useState<ArrayBuffer | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -181,7 +183,7 @@ export function RedactPdfTool() {
       const endTime = performance.now();
 
       const blob = createPdfBlob(redactedBytes);
-      const downloadUrl = URL.createObjectURL(blob);
+      const downloadUrl = createTrackedUrl(blob);
       const durationMs = endTime - startTime;
 
       const baseName =
@@ -220,7 +222,10 @@ export function RedactPdfTool() {
           outputBytes={outputBytes || undefined}
           originalBytes={originalBuffer || undefined}
           title="PDF Redacted &amp; Flattened!"
-          onAdjustSettings={() => setMetrics(null)}
+          onAdjustSettings={() => {
+            revokeAll();
+            setMetrics(null);
+          }}
         />
       ) : (
         <>
